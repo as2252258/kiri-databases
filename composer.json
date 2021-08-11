@@ -1,0 +1,26 @@
+{
+  "name": "game-worker/db-connection",
+  "description": "db",
+  "authors": [
+    {
+      "name": "XiangLin",
+      "email": "as2252258@163.com"
+    }
+  ],
+  "license": "MIT",
+  "require": {
+    "php": ">=8.0",
+    "ext-json": "*",
+    "ext-pdo": "*",
+    "game-worker/snowflake": "dev-master"
+  },
+  "autoload": {
+    "psr-4": {
+      "Database\\": "src/"
+     }
+  },
+  "require-dev": {
+    "kwn/php-rdkafka-stubs": "^2.0"
+  }
+}
+
