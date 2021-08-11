@@ -12,7 +12,8 @@
     "php": ">=8.0",
     "ext-json": "*",
     "ext-pdo": "*",
-    "game-worker/snowflake": "dev-master"
+    "game-worker/snowflake": "dev-master",
+    "game-worker/validator": "dev-master"
   },
   "autoload": {
     "psr-4": {
@@ -23,4 +24,3 @@
     "kwn/php-rdkafka-stubs": "^2.0"
   }
 }
-
