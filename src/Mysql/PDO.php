@@ -239,6 +239,9 @@ class PDO
 	 */
 	public function _pdo(): \PDO
 	{
+		if ($this->_timer === -1) {
+			$this->heartbeat_check();
+		}
 		if (!($this->pdo instanceof \PDO)) {
 			$this->pdo = $this->newClient();
 		}
