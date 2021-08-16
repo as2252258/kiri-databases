@@ -268,9 +268,7 @@ class ActiveRecord extends BaseActiveRecord
 		if ($resolve instanceof HasBase) {
 			$resolve = $resolve->get();
 		}
-		if ($resolve instanceof Collection) {
-			return $resolve->toArray();
-		} else if ($resolve instanceof ActiveRecord) {
+		if ($resolve instanceof ObjectToArray) {
 			return $resolve->toArray();
 		} else if (is_object($resolve)) {
 			return get_object_vars($resolve);
