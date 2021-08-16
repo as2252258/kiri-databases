@@ -2,6 +2,7 @@
 
 namespace Database\Mysql;
 
+use Annotation\Inject;
 use Exception;
 use HttpServer\Http\Context;
 use Kiri\Events\EventProvider;
@@ -21,6 +22,10 @@ class PDO
 	private int $_transaction = 0;
 
 
+	/**
+	 * @var EventProvider
+	 */
+	#[Inject(EventProvider::class)]
 	private EventProvider $eventProvider;
 
 	private int $_timer = -1;
@@ -34,13 +39,17 @@ class PDO
 	 * @param string $username
 	 * @param string $password
 	 * @param string $chatset
+	 * @throws
 	 */
 	public function __construct(public string $dbname, public string $cds,
 	                            public string $username, public string $password, public string $chatset = 'utf8mb4')
 	{
-		$this->heartbeat_check();
+	}
 
-		$this->eventProvider = di(EventProvider::class);
+
+	public function init()
+	{
+		$this->heartbeat_check();
 		$this->eventProvider->on(OnWorkerExit::class, [$this, 'stopHeartbeatCheck']);
 	}
 
