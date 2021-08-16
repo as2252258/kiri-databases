@@ -2,10 +2,10 @@
 
 namespace Database\Mysql;
 
-use Annotation\Inject;
 use Exception;
 use HttpServer\Http\Context;
 use Kiri\Events\EventProvider;
+use Kiri\Kiri;
 use PDOStatement;
 use Server\Events\OnWorkerExit;
 use Swoole\Timer;
@@ -25,7 +25,6 @@ class PDO
 	/**
 	 * @var EventProvider
 	 */
-	#[Inject(EventProvider::class)]
 	private EventProvider $eventProvider;
 
 	private int $_timer = -1;
@@ -44,6 +43,7 @@ class PDO
 	public function __construct(public string $dbname, public string $cds,
 	                            public string $username, public string $password, public string $chatset = 'utf8mb4')
 	{
+		$this->eventProvider = Kiri::getDi()->get(EventProvider::class);
 	}
 
 
