@@ -4,7 +4,9 @@ namespace Database\Mysql;
 
 use Exception;
 use HttpServer\Http\Context;
+use Kiri\Events\EventProvider;
 use PDOStatement;
+use Server\Events\OnWorkerExit;
 use Swoole\Timer;
 
 class PDO
@@ -18,6 +20,8 @@ class PDO
 
 	private int $_transaction = 0;
 
+
+	private EventProvider $eventProvider;
 
 	private int $_timer = -1;
 
@@ -35,6 +39,9 @@ class PDO
 	                            public string $username, public string $password, public string $chatset = 'utf8mb4')
 	{
 		$this->heartbeat_check();
+
+		$this->eventProvider = di(EventProvider::class);
+		$this->eventProvider->on(OnWorkerExit::class, [$this, 'stopHeartbeatCheck']);
 	}
 
 
@@ -57,9 +64,11 @@ class PDO
 				try {
 					if (time() - $this->_last > 10 * 60) {
 						$this->stopHeartbeatCheck();
+						$this->pdo = null;
 					}
 					if (!$this->_pdo()->getAttribute(\PDO::ATTR_SERVER_INFO)) {
 						$this->stopHeartbeatCheck();
+						$this->pdo = null;
 					}
 				} catch (\Throwable $throwable) {
 					error($throwable);
@@ -70,11 +79,10 @@ class PDO
 
 
 	/**
-	 * 
+	 *
 	 */
 	public function stopHeartbeatCheck(): void
 	{
-		$this->pdo = null;
 		if (Context::inCoroutine()) {
 			Timer::clear($this->_timer);
 		}
