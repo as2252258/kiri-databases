@@ -12,22 +12,21 @@ namespace Database;
 
 
 use Annotation\Inject;
-use Database\Affair\BeginTransaction;
-use Database\Affair\Commit;
-use Database\Affair\Rollback;
 use Database\Mysql\Schema;
 use Exception;
 use JetBrains\PhpStorm\Pure;
-use PDO;
+use Database\Mysql\PDO;
 use ReflectionException;
 use Server\Events\OnWorkerExit;
 use Server\Events\OnWorkerStop;
 use Kiri\Abstracts\Component;
 use Kiri\Abstracts\Config;
-use Kiri\Event;
 use Kiri\Events\EventProvider;
 use Kiri\Exception\NotFindClassException;
 use Kiri\Kiri;
+use Database\Affair\BeginTransaction;
+use Database\Affair\Commit;
+use Database\Affair\Rollback;
 
 /**
  * Class Connection

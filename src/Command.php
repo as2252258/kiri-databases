@@ -11,10 +11,10 @@ namespace Database;
 
 
 use Exception;
-use PDO;
-use PDOStatement;
 use Kiri\Abstracts\Component;
 use Kiri\Core\Json;
+use PDO;
+use PDOStatement;
 
 /**
  * Class Command
@@ -28,8 +28,6 @@ class Command extends Component
 	const EXECUTE = 'EXECUTE';
 	const FETCH_COLUMN = 'FETCH_COLUMN';
 
-	const DB_ERROR_MESSAGE = 'The system is busy, please try again later.';
-
 	/** @var Connection */
 	public Connection $db;
 
@@ -39,11 +37,10 @@ class Command extends Component
 	/** @var array */
 	public array $params = [];
 
-	/** @var string */
-	private string $_modelName;
-
+	/** @var string  */
 	public string $dbname = '';
 
+	/** @var PDOStatement|null  */
 	private ?PDOStatement $prepare = null;
 
 
@@ -144,24 +141,21 @@ class Command extends Component
 
 	/**
 	 * @param $type
-	 * @return mixed
+	 * @return array|int
 	 * @throws Exception
 	 */
-	private function search($type): mixed
+	private function search($type): array|int
 	{
-		if (($prepare = $this->prepare()) == false) {
-			return false;
-		}
+		$pdo = $this->db->getConnect($this->sql);
 		if ($type === static::FETCH_COLUMN) {
-			$data = $prepare->fetchAll(PDO::FETCH_ASSOC);
+			$data = $pdo->fetchColumn($this->sql, $this->params);
 		} else if ($type === static::ROW_COUNT) {
-			$data = $prepare->rowCount();
+			$data = $pdo->count($this->sql, $this->params);
 		} else if ($type === static::FETCH_ALL) {
-			$data = $prepare->fetchAll(PDO::FETCH_ASSOC);
+			$data = $pdo->fetchAll($this->sql, $this->params);
 		} else {
-			$data = $prepare->fetch(PDO::FETCH_ASSOC);
+			$data = $pdo->fetch($this->sql, $this->params);
 		}
-		$prepare->closeCursor();
 		return $data;
 	}
 
@@ -169,104 +163,17 @@ class Command extends Component
 	/**
 	 * @param $isInsert
 	 * @param $hasAutoIncrement
-	 * @return bool|string|int
+	 * @return bool|int
 	 * @throws Exception
 	 */
-	private function insert_or_change($isInsert, $hasAutoIncrement): bool|string|int
+	private function insert_or_change($isInsert, $hasAutoIncrement): bool|int
 	{
-		if (($result = $this->getPdoStatement()) === false) {
-			return $result;
+		$pdo = $this->db->getConnect($this->sql);
+		$result = $pdo->execute($this->sql, $this->params);
+		if (($hasAutoIncrement || !$isInsert) && $result == 0){
+			return false;
 		}
-		if ($isInsert === false || !$hasAutoIncrement) {
-			return true;
-		}
-		if ($result == 0 && $hasAutoIncrement->isAutoIncrement()) {
-			return $this->addError(static::DB_ERROR_MESSAGE, 'mysql');
-		}
-		return $result == 0 ? true : $result;
-	}
-
-
-	/**
-	 * 重新构建
-	 * @throws
-	 */
-	private function getPdoStatement(): bool|int
-	{
-		if (empty($this->sql)) {
-			return $this->addError('no sql.', 'mysql');
-		}
-		if (!(($connect = $this->db->getConnect($this->sql)) instanceof PDO)) {
-			return $this->addError('get client error.', 'mysql');
-		}
-		if (!(($prepare = $connect->prepare($this->sql)) instanceof PDOStatement)) {
-			return $this->addError($this->errorMessage($prepare), 'mysql');
-		}
-		$result = $this->checkResponse($prepare, $connect);
-		$prepare->closeCursor();
 		return $result;
-	}
-
-
-	/**
-	 * @param $prepare
-	 * @return string
-	 */
-	private function errorMessage($prepare): string
-	{
-		return $this->sql . ':' . ($prepare->errorInfo()[2] ?? static::DB_ERROR_MESSAGE);
-	}
-
-
-	/**
-	 * @return bool|\PDOStatement
-	 * @throws \Exception
-	 */
-	private function prepare(): bool|PDOStatement
-	{
-		if (!(($connect = $this->db->getConnect($this->sql)) instanceof PDO)) {
-			return $this->addError('get client error.', 'mysql');
-		}
-		if (!(($prepare = $connect->query($this->sql)) instanceof PDOStatement)) {
-			$error = $prepare->errorInfo()[2] ?? static::DB_ERROR_MESSAGE;
-			return $this->addError($this->sql . ':' . $error, 'mysql');
-		}
-		return $prepare;
-	}
-
-
-	/**
-	 * @param $prepare
-	 * @param $connect
-	 * @return bool|int
-	 * @throws \Exception
-	 */
-	private function checkResponse($prepare, $connect): bool|int
-	{
-		$result = $prepare->execute($this->params);
-		if ($result === false) {
-			return $this->addError($connect->errorInfo()[2], 'mysql');
-		}
-		return (int)$connect->lastInsertId();
-	}
-
-
-	/**
-	 * @param $modelName
-	 * @return $this
-	 */
-	public function setModelName($modelName): static
-	{
-		$this->_modelName = $modelName;
-		return $this;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getModelName(): string
-	{
-		return $this->_modelName;
 	}
 
 	/**
