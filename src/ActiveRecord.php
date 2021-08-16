@@ -13,9 +13,9 @@ namespace Database;
 use Database\Base\BaseActiveRecord;
 use Database\Traits\HasBase;
 use Exception;
-use ReflectionException;
 use Kiri\Exception\NotFindClassException;
 use Kiri\Kiri;
+use ReflectionException;
 
 defined('SAVE_FAIL') or define('SAVE_FAIL', 3227);
 defined('FIND_OR_CREATE_MESSAGE') or define('FIND_OR_CREATE_MESSAGE', 'Create a new model, but the data cannot be empty.');
@@ -240,6 +240,32 @@ class ActiveRecord extends BaseActiveRecord
 		$condition = static::find()->where($condition);
 		return $condition->batchUpdate($attributes);
 	}
+
+
+	/**
+	 * @param $condition
+	 * @return ActiveRecord|null
+	 * @throws NotFindClassException
+	 * @throws ReflectionException
+	 * @throws Exception
+	 */
+	public static function first($condition): ?ActiveRecord
+	{
+		return static::query()->where($condition)->first();
+	}
+
+
+	/**
+	 * @param $condition
+	 * @return array|Collection
+	 * @throws NotFindClassException
+	 * @throws ReflectionException
+	 */
+	public static function get($condition): Collection|array
+	{
+		return static::query()->where($condition)->all();
+	}
+
 
 	/**
 	 * @param       $condition
