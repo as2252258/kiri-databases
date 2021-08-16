@@ -75,10 +75,6 @@ class PDO
 						$this->stopHeartbeatCheck();
 						$this->pdo = null;
 					}
-					if (!$this->_pdo()->getAttribute(\PDO::ATTR_SERVER_INFO)) {
-						$this->stopHeartbeatCheck();
-						$this->pdo = null;
-					}
 				} catch (\Throwable $throwable) {
 					error($throwable);
 				}
