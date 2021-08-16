@@ -58,7 +58,7 @@ class PDO
 					if (time() - $this->_last > 10 * 60) {
 						$this->stopHeartbeatCheck();
 					}
-					if (!$this->pdo->getAttribute(\PDO::ATTR_SERVER_INFO)) {
+					if (!$this->_pdo()->getAttribute(\PDO::ATTR_SERVER_INFO)) {
 						$this->stopHeartbeatCheck();
 					}
 				} catch (\Throwable $throwable) {
@@ -88,7 +88,7 @@ class PDO
 	public function beginTransaction()
 	{
 		if ($this->_transaction == 0) {
-			$this->pdo->beginTransaction();
+			$this->_pdo()->beginTransaction();
 		}
 		$this->_transaction++;
 	}
@@ -100,7 +100,7 @@ class PDO
 	public function commit()
 	{
 		if ($this->_transaction == 0) {
-			$this->pdo->commit();
+			$this->_pdo()->commit();
 		}
 		$this->_transaction--;
 	}
@@ -112,7 +112,7 @@ class PDO
 	public function rollback()
 	{
 		if ($this->_transaction == 0) {
-			$this->pdo->rollBack();
+			$this->_pdo()->rollBack();
 		}
 		$this->_transaction--;
 	}
@@ -175,8 +175,8 @@ class PDO
 	private function queryPrev(string $sql, array $params = []): PDOStatement
 	{
 		$this->_last = time();
-		if (($statement = $this->pdo->query($sql)) === false) {
-			throw new Exception($this->pdo->errorInfo()[1]);
+		if (($statement = $this->_pdo()->query($sql)) === false) {
+			throw new Exception($this->_pdo()->errorInfo()[1]);
 		}
 		return $this->bindValue($statement, $params);
 	}
@@ -206,21 +206,21 @@ class PDO
 	public function execute(string $sql, array $params = []): int
 	{
 		$this->_last = time();
-		if (!(($prepare = $this->pdo->prepare($sql)) instanceof PDOStatement)) {
+		if (!(($prepare = $this->_pdo()->prepare($sql)) instanceof PDOStatement)) {
 			throw new Exception($prepare->errorInfo()[2] ?? static::DB_ERROR_MESSAGE);
 		}
 		defer(fn() => $prepare->closeCursor());
 		if ($prepare->execute($params) === false) {
 			throw new Exception($prepare->errorInfo()[2] ?? static::DB_ERROR_MESSAGE);
 		}
-		return (int)$this->pdo->lastInsertId();
+		return (int)$this->_pdo()->lastInsertId();
 	}
 
 
 	/**
 	 * @return \PDO
 	 */
-	public function getPdo(): \PDO
+	public function _pdo(): \PDO
 	{
 		if (!($this->pdo instanceof \PDO)) {
 			$this->pdo = $this->newClient();
