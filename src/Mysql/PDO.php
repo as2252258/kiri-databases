@@ -3,7 +3,7 @@
 namespace Database\Mysql;
 
 use Exception;
-use HttpServer\Http\Context;
+use Http\Http\Context;
 use Kiri\Events\EventProvider;
 use Kiri\Kiri;
 use PDOStatement;
