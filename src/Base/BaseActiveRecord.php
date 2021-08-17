@@ -1033,7 +1033,7 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 	 */
 	public static function setDatabaseConnect($dbName): Connection
 	{
-		return Kiri::app()->db->get(static::$connection = $dbName);
+		return Kiri::app()->get('db')->get(static::$connection = $dbName);
 	}
 
 
