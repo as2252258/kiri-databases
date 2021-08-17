@@ -13,6 +13,7 @@ namespace Database\Base;
 use Annotation\Event;
 use Annotation\Inject;
 use ArrayAccess;
+use Closure;
 use Database\ActiveQuery;
 use Database\ActiveRecord;
 use Database\Connection;
@@ -26,7 +27,6 @@ use Database\SqlBuilder;
 use Database\Traits\HasBase;
 use Exception;
 use JetBrains\PhpStorm\Pure;
-use ReflectionException;
 use Kiri\Abstracts\Component;
 use Kiri\Abstracts\Config;
 use Kiri\Abstracts\TraitApplication;
@@ -35,6 +35,7 @@ use Kiri\Events\EventDispatch;
 use Kiri\Exception\ConfigException;
 use Kiri\Exception\NotFindClassException;
 use Kiri\Kiri;
+use ReflectionException;
 use validator\Validator;
 
 /**
@@ -116,6 +117,62 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 	#[Pure] protected function getContainer(): Application
 	{
 		return Kiri::app();
+	}
+
+
+	/**
+	 * @param string $name
+	 * @param mixed $value
+	 * @return mixed
+	 * @throws NotFindClassException
+	 * @throws ReflectionException
+	 */
+	private function _setter(string $name, mixed $value): mixed
+	{
+		$method = di(Setter::class)->getSetter(static::class, $name);
+		if (!empty($method)) {
+			$value = $this->{$method}($value);
+		}
+		return $this->_attributes[$name] = $value;
+	}
+
+
+	/**
+	 * @param string $name
+	 * @param $value
+	 * @return mixed
+	 * @throws NotFindClassException
+	 * @throws ReflectionException
+	 */
+	private function _getter(string $name, $value): mixed
+	{
+		$data = di(Getter::class)->getGetter(static::class, $name);
+		if (empty($data)) {
+			return $this->_relater($name, $value);
+		}
+		return $this->{$data}($value);
+	}
+
+
+	/**
+	 * @param string $name
+	 * @param $value
+	 * @return mixed
+	 * @throws NotFindClassException
+	 * @throws ReflectionException
+	 * @throws Exception
+	 */
+	private function _relater(string $name, $value): mixed
+	{
+		$data = di(Relate::class)->getRelate(static::class, $name);
+		if (!empty($data)) {
+			$data = $this->{$data}();
+			if ($data instanceof HasBase) {
+				return $data->get();
+			}
+			return $data;
+		}
+		return $this->_decode($name, $value);
 	}
 
 
@@ -375,7 +432,7 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 	 * @return bool
 	 * @throws Exception
 	 */
-	public static function deleteByCondition($condition = NULL, array $attributes = [], bool $if_condition_is_null = false): bool
+	protected static function deleteByCondition($condition = NULL, array $attributes = [], bool $if_condition_is_null = false): bool
 	{
 		if (empty($condition)) {
 			if (!$if_condition_is_null) {
@@ -706,7 +763,7 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 	 */
 	public function getRelate($name): null|array|string
 	{
-		return Kiri::getAnnotation()->getRelateMethods(static::class, $name);
+		return di(Relate::class)->getRelate(static::class, $name);
 	}
 
 
@@ -795,31 +852,8 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 		if (method_exists($this, 'set' . ucfirst($name))) {
 			$this->{'set' . ucfirst($name)}($value);
 		} else {
-			$method = $this->_get_annotation($name, self::SET);
-			if (!empty($method)) {
-				$value = $this->{$method}($value);
-			}
-			$this->_attributes[$name] = $value;
+			$this->_setter($name, $value);
 		}
-	}
-
-
-	/**
-	 * @param string|null $name
-	 * @param string $method
-	 * @return string|null
-	 * @throws Exception
-	 */
-	protected function _get_annotation(string $name = null, string $method = self::GET): ?string
-	{
-		$annotation = Kiri::app()->getAnnotation();
-		if ($method == static::SET) {
-			return $annotation->getSetMethodName(static::class, $name);
-		}
-		if ($method == static::GET) {
-			return $annotation->getGetMethodName(static::class, $name);
-		}
-		return $annotation->getRelateMethods(static::class, $name);
 	}
 
 
@@ -834,45 +868,9 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 		if (method_exists($this, $method)) {
 			return $this->{$method}();
 		}
-		if (isset($this->_attributes[$name])) {
-			return $this->runGetter($name, $this->_attributes[$name]);
-		} else {
-			return $this->runRelation($name);
-		}
-	}
+		$value = $this->_attributes[$name] ?? null;
 
-
-	/**
-	 * @param $name
-	 * @param $value
-	 * @return void|null
-	 * @throws Exception
-	 */
-	private function runGetter($name, $value)
-	{
-		$relation = $this->_get_annotation($name, static::GET);
-		if (empty($relation)) {
-			return $this->_decode($name, $value);
-		}
-		return $this->{$relation}($value);
-	}
-
-
-	/**
-	 * @param $name
-	 * @return mixed
-	 * @throws Exception
-	 */
-	private function runRelation($name): mixed
-	{
-		$relation = $this->_get_annotation($name, static::RELATE);
-		if (empty($relation)) {
-			return null;
-		}
-		if (($value = $this->{$relation}()) instanceof HasBase) {
-			return $value->get();
-		}
-		return $value;
+		return $this->_getter($name, $value);
 	}
 
 
@@ -1070,6 +1068,19 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 		$model->_oldAttributes = $data;
 		$model->setIsCreate(false);
 		return $model;
+	}
+
+
+	/**
+	 * @param $method
+	 * @param $value
+	 * @return Closure
+	 */
+	protected function dispatcher($method, $value): Closure
+	{
+		return function () use ($method, $value) {
+			return $this->{$method}($value);
+		};
 	}
 
 }

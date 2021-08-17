@@ -11,6 +11,7 @@ namespace Database;
 
 
 use Database\Base\BaseActiveRecord;
+use Database\Base\Getter;
 use Database\Traits\HasBase;
 use Exception;
 use Kiri\Exception\NotFindClassException;
@@ -311,8 +312,7 @@ class ActiveRecord extends BaseActiveRecord
 	public function toArray(): array
 	{
 		$data = $this->_attributes;
-
-		$lists = Kiri::getAnnotation()->getGets(static::class);
+		$lists = di(Getter::class)->getGetter(static::class);
 		foreach ($lists as $key => $item) {
 			$data[$key] = $this->{$item}($data[$key] ?? null);
 		}

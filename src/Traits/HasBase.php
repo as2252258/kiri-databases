@@ -21,7 +21,7 @@ use Exception;
  *
  * @include Query
  */
-abstract class HasBase
+abstract class HasBase implements \Database\Traits\Relation
 {
 
 	/** @var ActiveRecord|Collection */
@@ -67,7 +67,6 @@ abstract class HasBase
 		$this->value = $value;
 	}
 
-	abstract public function get();
 
 	/**
 	 * @param $name
