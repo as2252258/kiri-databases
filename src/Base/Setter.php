@@ -22,9 +22,9 @@ class Setter
 	/**
 	 * @param $class
 	 * @param $name
-	 * @return mixed|null
+	 * @return null|array|string
 	 */
-	public function getSetter($class, $name): ?string
+	public function getSetter($class, $name): null|array|string
 	{
 		return $this->_classMapping[$class][$name] ?? null;
 	}

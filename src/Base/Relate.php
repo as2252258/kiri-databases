@@ -22,9 +22,9 @@ class Relate
 	/**
 	 * @param $class
 	 * @param $name
-	 * @return mixed|null
+	 * @return null|array|string
 	 */
-	public function getRelate($class, $name = null): ?string
+	public function getRelate($class, $name = null): null|array|string
 	{
 		if (!empty($name)) {
 			return $this->_classMapping[$class][$name] ?? null;

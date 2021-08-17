@@ -21,10 +21,10 @@ class Getter
 
 	/**
 	 * @param $class
-	 * @param $name
-	 * @return mixed|null
+	 * @param null $name
+	 * @return array|string|null
 	 */
-	public function getGetter($class, $name = null): ?string
+	public function getGetter($class, $name = null): null|array|string
 	{
 		if (!empty($name)) {
 			return $this->_classMapping[$class][$name] ?? null;
