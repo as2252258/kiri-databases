@@ -98,7 +98,7 @@ class PDO implements StopHeartbeatCheck
 	 */
 	public function stopHeartbeatCheck(): void
 	{
-		if (Context::inCoroutine()) {
+		if ($this->_timer > -1) {
 			Timer::clear($this->_timer);
 		}
 		$this->_timer = -1;
