@@ -6,11 +6,15 @@ use Exception;
 use Http\Context\Context;
 use Kiri\Events\EventProvider;
 use Kiri\Kiri;
+use Kiri\Pool\StopHeartbeatCheck;
 use PDOStatement;
 use Server\Events\OnWorkerExit;
 use Swoole\Timer;
 
-class PDO
+/**
+ *
+ */
+class PDO implements StopHeartbeatCheck
 {
 
 	const DB_ERROR_MESSAGE = 'The system is busy, please try again later.';
@@ -76,7 +80,6 @@ class PDO
 				try {
 					if (env('state') == 'exit') {
 						echo 'timer end.' . PHP_EOL;
-						$this->stopHeartbeatCheck();
 					}
 					if (time() - $this->_last > 10 * 60) {
 						$this->stopHeartbeatCheck();
