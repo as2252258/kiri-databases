@@ -75,6 +75,7 @@ class PDO
 			$this->_timer = Timer::tick(1000, function () {
 				try {
 					if (env('state') == 'exit') {
+						echo 'timer end.' . PHP_EOL;
 						$this->stopHeartbeatCheck();
 					}
 					if (time() - $this->_last > 10 * 60) {
