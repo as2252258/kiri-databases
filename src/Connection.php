@@ -80,6 +80,7 @@ class Connection extends Component
 
 	/**
 	 * execute by __construct
+	 * @throws Exception
 	 */
 	public function init()
 	{
@@ -322,8 +323,8 @@ class Connection extends Component
 	{
 		$connections = $this->connections();
 
-		$connections->disconnect($this->cds, true);
-		$connections->disconnect($this->slaveConfig['cds'], false);
+		$connections->connection_clear($this->cds, true);
+		$connections->connection_clear($this->slaveConfig['cds'], false);
 	}
 
 
