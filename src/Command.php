@@ -13,7 +13,6 @@ namespace Database;
 use Exception;
 use Kiri\Abstracts\Component;
 use Kiri\Core\Json;
-use PDO;
 use PDOStatement;
 
 /**
@@ -37,10 +36,10 @@ class Command extends Component
 	/** @var array */
 	public array $params = [];
 
-	/** @var string  */
+	/** @var string */
 	public string $dbname = '';
 
-	/** @var PDOStatement|null  */
+	/** @var PDOStatement|null */
 	private ?PDOStatement $prepare = null;
 
 
@@ -129,7 +128,6 @@ class Command extends Component
 			if (microtime(true) - $time >= 0.02) {
 				$this->warning('Mysql:' . Json::encode([$this->sql, $this->params]) . (microtime(true) - $time));
 			}
-			$this->prepare?->closeCursor();
 		} catch (\Throwable $exception) {
 			$result = $this->addError($this->sql . '. error: ' . $exception->getMessage(), 'mysql');
 		} finally {
@@ -169,8 +167,8 @@ class Command extends Component
 	private function insert_or_change($isInsert, $hasAutoIncrement): bool|int
 	{
 		$pdo = $this->db->getConnect($this->sql);
-		$result = $pdo->execute($this->sql, $this->params);
-		if (($hasAutoIncrement || !$isInsert) && $result == 0){
+		$result = $pdo->execute($this->sql, $isInsert, $this->params);
+		if ($hasAutoIncrement && $result == 0) {
 			return false;
 		}
 		return $result;
