@@ -149,7 +149,11 @@ class PDO implements StopHeartbeatCheck
 	 */
 	public function fetchAll(string $sql, array $params = []): array
 	{
-		return $this->queryPrev($sql, $params)->fetchAll(\PDO::FETCH_ASSOC);
+		$pdo = $this->queryPrev($sql, $params);
+
+		defer(fn() => $pdo->closeCursor());
+
+		return $pdo->fetchAll(\PDO::FETCH_ASSOC);
 	}
 
 
@@ -161,7 +165,11 @@ class PDO implements StopHeartbeatCheck
 	 */
 	public function fetch(string $sql, array $params = []): array
 	{
-		return $this->queryPrev($sql, $params)->fetch(\PDO::FETCH_ASSOC);
+		$pdo = $this->queryPrev($sql, $params);
+
+		defer(fn() => $pdo->closeCursor());
+
+		return $pdo->fetch(\PDO::FETCH_ASSOC);
 	}
 
 
@@ -173,7 +181,11 @@ class PDO implements StopHeartbeatCheck
 	 */
 	public function fetchColumn(string $sql, array $params = []): array
 	{
-		return $this->queryPrev($sql, $params)->fetchColumn(\PDO::FETCH_ASSOC);
+		$pdo = $this->queryPrev($sql, $params);
+
+		defer(fn() => $pdo->closeCursor());
+
+		return $pdo->fetchColumn(\PDO::FETCH_ASSOC);
 	}
 
 
@@ -185,7 +197,11 @@ class PDO implements StopHeartbeatCheck
 	 */
 	public function count(string $sql, array $params = []): int
 	{
-		return $this->queryPrev($sql, $params)->rowCount();
+		$pdo = $this->queryPrev($sql, $params);
+
+		defer(fn() => $pdo->closeCursor());
+
+		return $pdo->rowCount();
 	}
 
 
