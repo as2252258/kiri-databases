@@ -43,7 +43,6 @@ class ActiveQuery extends Component implements ISqlBuilder
 	public array $attributes = [];
 
 
-
 	/**
 	 * Comply constructor.
 	 * @param $model
@@ -270,7 +269,7 @@ class ActiveQuery extends Component implements ISqlBuilder
 		[$sql, $params] = $this->builder->insert($data, true);
 
 
-		return $this->execute($sql, $params)->exec();
+		return $this->execute($sql, $params)->exec(null, true);
 	}
 
 	/**
