@@ -17,9 +17,9 @@ use Database\Condition\MathematicsCondition;
 use Database\Query;
 use Database\SqlBuilder;
 use Exception;
-use ReflectionException;
 use Kiri\Exception\NotFindClassException;
 use Kiri\Kiri;
+use ReflectionException;
 
 /**
  * Trait QueryTrait
@@ -89,6 +89,9 @@ trait QueryTrait
 	 */
 	public function whereRaw(string $whereRaw): static
 	{
+		if (empty($whereRaw)) {
+			return $this;
+		}
 		$this->where[] = $whereRaw;
 		return $this;
 	}
@@ -530,7 +533,7 @@ trait QueryTrait
 	 */
 	public function whereLike(string $columns, string $value): static
 	{
-		if (empty($columns) || empty($value)) {
+		if (empty($columns) || (empty($value) && $value != 0)) {
 			return $this;
 		}
 
@@ -551,7 +554,7 @@ trait QueryTrait
 	 */
 	public function whereLeftLike(string $columns, string $value): static
 	{
-		if (empty($columns) || empty($value)) {
+		if (empty($columns) || (empty($value) && $value != 0)) {
 			return $this;
 		}
 
@@ -572,7 +575,7 @@ trait QueryTrait
 	 */
 	public function whereRightLike(string $columns, string $value): static
 	{
-		if (empty($columns) || empty($value)) {
+		if (empty($columns) || (empty($value) && $value != 0)) {
 			return $this;
 		}
 
@@ -594,7 +597,7 @@ trait QueryTrait
 	 */
 	public function whereNotLike(string $columns, string $value): static
 	{
-		if (empty($columns) || empty($value)) {
+		if (empty($columns) || (empty($value) && $value != 0)) {
 			return $this;
 		}
 
