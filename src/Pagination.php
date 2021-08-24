@@ -177,8 +177,6 @@ class Pagination extends Component
 			call_user_func($this->_callback, $data, $param);
 		} catch (\Throwable $exception) {
 			$this->addError($exception, 'throwable');
-		} finally {
-			logger()->insert();
 		}
 	}
 
