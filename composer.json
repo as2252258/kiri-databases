@@ -12,8 +12,8 @@
     "php": ">=8.0",
     "ext-json": "*",
     "ext-pdo": "*",
-    "game-worker/validator": "v1.0",
-    "game-worker/kiri-event": "v1.0"
+    "game-worker/validator": "^v1.1",
+    "game-worker/kiri-event": "^v1.0"
   },
   "autoload": {
     "psr-4": {
