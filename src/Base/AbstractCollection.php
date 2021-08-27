@@ -13,18 +13,17 @@ namespace Database\Base;
 use ArrayIterator;
 use Database\ActiveQuery;
 use Database\ActiveRecord;
-use Database\ObjectToArray;
+use Kiri\ToArray;
 use Exception;
 use JetBrains\PhpStorm\Pure;
 use Kiri\Abstracts\Component;
-use Kiri\Kiri;
 use Traversable;
 
 /**
  * Class AbstractCollection
  * @package Database\Base
  */
-abstract class AbstractCollection extends Component implements \IteratorAggregate, \ArrayAccess, ObjectToArray
+abstract class AbstractCollection extends Component implements \IteratorAggregate, \ArrayAccess, ToArray
 {
 
     /**

@@ -16,6 +16,7 @@ use Database\Traits\HasBase;
 use Exception;
 use Kiri\Exception\NotFindClassException;
 use Kiri\Kiri;
+use Kiri\ToArray;
 use ReflectionException;
 
 defined('SAVE_FAIL') or define('SAVE_FAIL', 3227);
@@ -295,7 +296,7 @@ class ActiveRecord extends BaseActiveRecord
 		if ($resolve instanceof HasBase) {
 			$resolve = $resolve->get();
 		}
-		if ($resolve instanceof ObjectToArray) {
+		if ($resolve instanceof ToArray) {
 			return $resolve->toArray();
 		} else if (is_object($resolve)) {
 			return get_object_vars($resolve);

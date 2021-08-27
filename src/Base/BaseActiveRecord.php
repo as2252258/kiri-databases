@@ -21,9 +21,9 @@ use Database\HasMany;
 use Database\HasOne;
 use Database\IOrm;
 use Database\Mysql\Columns;
-use Database\ObjectToArray;
 use Database\Relation;
 use Database\SqlBuilder;
+use Kiri\ToArray;
 use Database\Traits\HasBase;
 use Exception;
 use JetBrains\PhpStorm\Pure;
@@ -49,7 +49,7 @@ use validator\Validator;
  * @property Application $container
  * @property EventDispatch $eventDispatch
  */
-abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, ObjectToArray
+abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, ToArray
 {
 
 
