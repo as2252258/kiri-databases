@@ -16,20 +16,22 @@ use Exception;
 	 * Set constructor.
 	 * @param string $name
 	 */
-	public function __construct(public string $name)
+	public function __construct(string $name)
 	{
 	}
 
 
     /**
+     * @param static $params
      * @param mixed $class
      * @param mixed|null $method
      * @return bool
-     * @throws Exception
+     * @throws \Kiri\Exception\NotFindClassException
+     * @throws \ReflectionException
      */
-    public function execute(mixed $class, mixed $method = null): bool
+    public static function execute(mixed $params, mixed $class, mixed $method = null): bool
 	{
-		di(Setter::class)->addSetter($this->name, $class, $method);
+		di(Setter::class)->addSetter($params->name, $class, $method);
 		return true;
 	}
 

@@ -26,15 +26,17 @@ use Exception;
 	}
 
 
-	/**
-	 * @param mixed $class
-	 * @param mixed|null $method
-	 * @return bool
-	 * @throws Exception
-	 */
-	public function execute(mixed $class, mixed $method = null): bool
+    /**
+     * @param static $params
+     * @param mixed $class
+     * @param mixed|null $method
+     * @return bool
+     * @throws \Kiri\Exception\NotFindClassException
+     * @throws \ReflectionException
+     */
+    public static function execute(mixed $params, mixed $class, mixed $method = null): bool
 	{
-		di(Getter::class)->addGetter($this->name, $class, $method);
+		di(Getter::class)->addGetter($params->name, $class, $method);
 		return true;
 	}
 
