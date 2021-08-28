@@ -34,9 +34,9 @@ use Exception;
      * @throws \Kiri\Exception\NotFindClassException
      * @throws \ReflectionException
      */
-    public static function execute(mixed $params, mixed $class, mixed $method = null): bool
+    public function execute(mixed $class, mixed $method = null): bool
 	{
-		di(Getter::class)->addGetter($params->name, $class, $method);
+		di(Getter::class)->addGetter($this->name, $class, $method);
 		return true;
 	}
 

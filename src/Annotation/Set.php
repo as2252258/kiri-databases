@@ -16,7 +16,7 @@ use Exception;
 	 * Set constructor.
 	 * @param string $name
 	 */
-	public function __construct(string $name)
+	public function __construct(public string $name)
 	{
 	}
 
@@ -29,9 +29,9 @@ use Exception;
      * @throws \Kiri\Exception\NotFindClassException
      * @throws \ReflectionException
      */
-    public static function execute(mixed $params, mixed $class, mixed $method = null): bool
+    public function execute(mixed $class, mixed $method = null): bool
 	{
-		di(Setter::class)->addSetter($params->name, $class, $method);
+		di(Setter::class)->addSetter($this->name, $class, $method);
 		return true;
 	}
 

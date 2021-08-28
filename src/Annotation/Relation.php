@@ -24,7 +24,7 @@ use Kiri\Kiri;
      * Relation constructor.
      * @param string $name
      */
-    public function __construct(string $name)
+    public function __construct(public string $name)
     {
     }
 
@@ -36,9 +36,9 @@ use Kiri\Kiri;
      * @return bool
      * @throws Exception
      */
-    public static function execute(mixed $params, mixed $class, mixed $method = null): bool
+    public function execute(mixed $class, mixed $method = null): bool
     {
-        di(Relate::class)->addRelate($class, $params->name, $method);
+        di(Relate::class)->addRelate($class, $this->name, $method);
         return true;
     }
 
