@@ -808,7 +808,6 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 	 * @return bool
 	 * @throws Exception
 	 */
-	#[Event(self::AFTER_SAVE)]
 	public function afterSave($attributes, $changeAttributes): bool
 	{
 		return true;
@@ -819,7 +818,6 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 	 * @param $model
 	 * @return bool
 	 */
-	#[Event(self::BEFORE_SAVE)]
 	public function beforeSave($model): bool
 	{
 		return true;
