@@ -23,7 +23,6 @@ use Database\IOrm;
 use Database\Mysql\Columns;
 use Database\Relation;
 use Database\SqlBuilder;
-use Kiri\ToArray;
 use Database\Traits\HasBase;
 use Exception;
 use JetBrains\PhpStorm\Pure;
@@ -35,6 +34,7 @@ use Kiri\Events\EventDispatch;
 use Kiri\Exception\ConfigException;
 use Kiri\Exception\NotFindClassException;
 use Kiri\Kiri;
+use Kiri\ToArray;
 use ReflectionException;
 use validator\Validator;
 
@@ -95,7 +95,13 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 
 
 	/** @var string */
-	private static string $connection = 'db';
+	private static string $_connection = 'db';
+
+
+	protected string $table = '';
+
+
+	protected string $connection = 'db';
 
 
 	/**
@@ -178,7 +184,6 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 
 	/**
 	 * @return EventDispatch
-	 * @throws NotFindClassException
 	 * @throws ReflectionException
 	 */
 	protected function getEventDispatch(): EventDispatch
@@ -268,11 +273,11 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 	}
 
 	/**
-	 * @return mixed
+	 * @return string
 	 * @throws Exception
 	 * get last exception or other error
 	 */
-	public function getLastError(): mixed
+	public function getLastError(): string
 	{
 		return Kiri::app()->getLogger()->getLastError('mysql');
 	}
@@ -420,7 +425,7 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 	 */
 	protected function getConnection()
 	{
-		return Config::get('connections.' . static::$connection, null, true);
+		return Config::get('databases.connections.' . $this->connections, null, true);
 	}
 
 
@@ -793,7 +798,7 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 		if (!empty($tablePrefix) && !str_starts_with($table, $tablePrefix)) {
 			$table = $tablePrefix . $table;
 		}
-		return '`' . static::getDbName() . '`.' . $table;
+		return '`' . static::getDatabase() . '`.' . $table;
 	}
 
 
@@ -1031,7 +1036,7 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 	 */
 	public static function setDatabaseConnect($dbName): Connection
 	{
-		return Kiri::app()->get('db')->get(static::$connection = $dbName);
+		return Kiri::app()->get('db')->get(static::$_connection = $dbName);
 	}
 
 
@@ -1039,9 +1044,9 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 	 * @return string
 	 * @throws ConfigException
 	 */
-	public static function getDbName(): string
+	public static function getDatabase(): string
 	{
-		return Config::get('databases.connections.' . static::$connection . '.database');
+		return Config::get('databases.connections.' . static::$_connection . '.database');
 	}
 
 
