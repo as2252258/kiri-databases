@@ -823,8 +823,12 @@ trait QueryTrait
 			$this->where[] = $this->makeClosureFunction($column);
 			return $this;
 		}
-		[$column, $opera, $value] = $this->opera(...func_get_args());
-		$this->where[] = "$column $opera $value";
+		if (is_string($column)) {
+			$this->where[] = $column;
+		} else {
+			[$column, $opera, $value] = $this->opera(...func_get_args());
+			$this->where[] = "$column $opera $value";
+		}
 		return $this;
 	}
 
