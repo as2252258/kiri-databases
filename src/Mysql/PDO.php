@@ -80,6 +80,7 @@ class PDO implements StopHeartbeatCheck
 				try {
 					if (env('state') == 'exit') {
 						echo 'timer end.' . PHP_EOL;
+						$this->stopHeartbeatCheck();
 					}
 					if (time() - $this->_last > 10 * 60) {
 						$this->stopHeartbeatCheck();
