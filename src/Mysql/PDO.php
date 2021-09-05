@@ -4,6 +4,7 @@ namespace Database\Mysql;
 
 use Exception;
 use Http\Context\Context;
+use Kiri\Abstracts\Logger;
 use Kiri\Events\EventProvider;
 use Kiri\Kiri;
 use Kiri\Pool\StopHeartbeatCheck;
@@ -79,7 +80,7 @@ class PDO implements StopHeartbeatCheck
 			$this->_timer = Timer::tick(1000, function () {
 				try {
 					if (env('state','start') == 'exit') {
-						echo 'timer end.' . PHP_EOL;
+                        Kiri::getDi()->get(Logger::class)->critical('timer end');
 						$this->stopHeartbeatCheck();
 					}
 					if (time() - $this->_last > 10 * 60) {
