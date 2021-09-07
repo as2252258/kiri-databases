@@ -73,14 +73,14 @@ class PDO implements StopHeartbeatCheck
 	 */
 	public function heartbeat_check(): void
 	{
-		if (env('state','start') == 'exit') {
+		if (env('state', 'start') == 'exit') {
 			return;
 		}
 		if ($this->_timer === -1 && Context::inCoroutine()) {
 			$this->_timer = Timer::tick(1000, function () {
 				try {
-					if (env('state','start') == 'exit') {
-                        Kiri::getDi()->get(Logger::class)->critical('timer end');
+					if (env('state', 'start') == 'exit') {
+						Kiri::getDi()->get(Logger::class)->critical('timer end');
 						$this->stopHeartbeatCheck();
 					}
 					if (time() - $this->_last > 10 * 60) {
@@ -153,9 +153,9 @@ class PDO implements StopHeartbeatCheck
 	{
 		$pdo = $this->queryPrev($sql, $params);
 
-		defer(fn() => $pdo->closeCursor());
-
-		return $pdo->fetchAll(\PDO::FETCH_ASSOC);
+		$result = $pdo->fetchAll(\PDO::FETCH_ASSOC);
+		$pdo->closeCursor();
+		return $result;
 	}
 
 
@@ -169,9 +169,9 @@ class PDO implements StopHeartbeatCheck
 	{
 		$pdo = $this->queryPrev($sql, $params);
 
-		defer(fn() => $pdo->closeCursor());
-
-		return $pdo->fetch(\PDO::FETCH_ASSOC);
+		$result = $pdo->fetch(\PDO::FETCH_ASSOC);
+		$pdo->closeCursor();
+		return $result;
 	}
 
 
@@ -185,9 +185,9 @@ class PDO implements StopHeartbeatCheck
 	{
 		$pdo = $this->queryPrev($sql, $params);
 
-		defer(fn() => $pdo->closeCursor());
-
-		return $pdo->fetchColumn(\PDO::FETCH_ASSOC);
+		$result = $pdo->fetchColumn(\PDO::FETCH_ASSOC);
+		$pdo->closeCursor();
+		return $result;
 	}
 
 
@@ -201,9 +201,9 @@ class PDO implements StopHeartbeatCheck
 	{
 		$pdo = $this->queryPrev($sql, $params);
 
-		defer(fn() => $pdo->closeCursor());
-
-		return $pdo->rowCount();
+		$result = $pdo->rowCount();
+		$pdo->closeCursor();
+		return $result;
 	}
 
 
@@ -251,14 +251,15 @@ class PDO implements StopHeartbeatCheck
 		if (!(($prepare = $this->_pdo()->prepare($sql)) instanceof PDOStatement)) {
 			throw new Exception($prepare->errorInfo()[2] ?? static::DB_ERROR_MESSAGE);
 		}
-		defer(fn() => $prepare->closeCursor());
 		if ($prepare->execute($params) === false) {
 			throw new Exception($prepare->errorInfo()[2] ?? static::DB_ERROR_MESSAGE);
 		}
+		$result = 1;
 		if ($isInsert) {
-			return (int)$this->_pdo()->lastInsertId();
+			$result = (int)$this->_pdo()->lastInsertId();
 		}
-		return 1;
+		$prepare->closeCursor();
+		return $result;
 	}
 
 
