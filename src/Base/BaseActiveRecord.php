@@ -425,7 +425,7 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 	 */
 	protected function getConnection()
 	{
-		return Config::get('databases.connections.' . $this->connections, null, true);
+		return Config::get('databases.connections.' . $this->connection, null, true);
 	}
 
 
