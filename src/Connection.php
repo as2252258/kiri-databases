@@ -138,11 +138,12 @@ class Connection extends Component
 		}
 	}
 
-	/**
-	 * @return mixed
-	 * @throws ReflectionException
-	 * @throws NotFindClassException
-	 */
+    /**
+     * @return mixed
+     * @throws ReflectionException
+     * @throws NotFindClassException
+     * @throws \Exception
+     */
 	public function getSchema(): Schema
 	{
 		if ($this->_schema === null) {
@@ -158,7 +159,7 @@ class Connection extends Component
 	 * @param $sql
 	 * @return bool
 	 */
-	#[Pure] public function isWrite($sql): bool
+	public function isWrite($sql): bool
 	{
 		if (empty($sql)) return false;
 		if (str_starts_with(strtolower($sql), 'select')) {
