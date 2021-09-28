@@ -9,9 +9,8 @@ declare(strict_types=1);
 
 namespace Database\Traits;
 
-use Database\ActiveRecord;
+use Database\ModelInterface;
 use Database\Collection;
-use Database\IOrm;
 use Database\Relation;
 use Exception;
 
@@ -24,11 +23,11 @@ use Exception;
 abstract class HasBase implements \Database\Traits\Relation
 {
 
-	/** @var ActiveRecord|Collection */
-	protected Collection|ActiveRecord $data;
+	/** @var ModelInterface|Collection */
+	protected Collection|ModelInterface $data;
 
 	/**
-	 * @var IOrm|ActiveRecord
+	 * @var ModelInterface
 	 */
 	protected mixed $model;
 
@@ -40,7 +39,7 @@ abstract class HasBase implements \Database\Traits\Relation
 
     /**
      * HasBase constructor.
-     * @param IOrm $model
+     * @param ModelInterface $model
      * @param $primaryId
      * @param $value
      * @param Relation $relation
@@ -49,16 +48,16 @@ abstract class HasBase implements \Database\Traits\Relation
 	public function __construct(mixed $model, $primaryId, $value, Relation $relation)
 	{
 		if (!class_exists($model)) {
-			throw new Exception('Model must implement ' . ActiveRecord::class);
+			throw new Exception('Model must implement ' . $model);
 		}
-		if (!in_array(IOrm::class, class_implements($model))) {
-			throw new Exception('Model must implement ' . ActiveRecord::class);
+		if (!in_array(ModelInterface::class, class_implements($model))) {
+			throw new Exception('Model must implement ' . $model);
 		}
 		if (is_array($value)) {
 			if (empty($value)) $value = [];
-			$_model = $model::find()->whereIn($primaryId, $value);
+			$_model = $model::query()->whereIn($primaryId, $value);
 		} else {
-			$_model = $model::find()->where(['t1.' . $primaryId => $value]);
+			$_model = $model::query()->where(['t1.' . $primaryId => $value]);
 		}
 
 		$this->_relation = $relation->bindIdentification($model, $_model);

@@ -34,10 +34,10 @@ class HasMany extends HasBase
 	}
 
 	/**
-	 * @return array|null|ActiveRecord
+	 * @return array|null|ModelInterface
 	 * @throws Exception
 	 */
-	public function get(): array|ActiveRecord|null
+	public function get(): array|ModelInterface|null
 	{
 		return $this->_relation->get($this->model::className(), $this->value);
 	}

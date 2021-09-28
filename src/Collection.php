@@ -44,7 +44,7 @@ class Collection extends AbstractCollection
 		$_tmp = [];
 		$data = $this->toArray();
 		foreach ($data as $val) {
-			/** @var ActiveRecord $val */
+			/** @var ModelInterface $val */
 			$_tmp[] = $val[$field];
 		}
 		return $_tmp;
@@ -93,7 +93,7 @@ class Collection extends AbstractCollection
 	}
 
 	/**
-	 * @param        $field
+	 * @param string $field
 	 * @param string $setKey
 	 *
 	 * @return array|null
@@ -126,9 +126,9 @@ class Collection extends AbstractCollection
 	}
 
 	/**
-	 * @return ActiveRecord|array
+	 * @return ModelInterface|array
 	 */
-	#[Pure] public function current(): ActiveRecord|array
+	#[Pure] public function current(): ModelInterface|array
 	{
 		return current($this->_item);
 	}
@@ -173,7 +173,7 @@ class Collection extends AbstractCollection
 				$ids[] = $id;
 			}
 		}
-		return $model::find()->whereIn($model->getPrimary(), $ids)->delete();
+		return $model::query()->whereIn($model->getPrimary(), $ids)->delete();
 	}
 
 	/**
@@ -206,7 +206,7 @@ class Collection extends AbstractCollection
 	private function filterCheck($value, $condition): bool
 	{
 		$_value = $value;
-		if ($_value instanceof ActiveRecord) {
+		if ($_value instanceof ModelInterface) {
 			$_value = $_value->toArray();
 		}
 		$_tmp = array_intersect_key($_value, $condition);

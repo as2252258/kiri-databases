@@ -5,11 +5,8 @@ namespace Database\Annotation;
 
 
 use Annotation\Attribute;
-use Database\ActiveRecord;
 use Database\Base\Relate;
 use Exception;
-use JetBrains\PhpStorm\Pure;
-use Kiri\Kiri;
 
 
 /**

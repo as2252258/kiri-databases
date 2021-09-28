@@ -9,17 +9,20 @@ declare(strict_types=1);
 
 namespace Database\Base;
 
+defined('SAVE_FAIL') or define('SAVE_FAIL', 3227);
+defined('FIND_OR_CREATE_MESSAGE') or define('FIND_OR_CREATE_MESSAGE', 'Create a new model, but the data cannot be empty.');
 
-use Annotation\Event;
+
 use Annotation\Inject;
 use ArrayAccess;
 use Closure;
 use Database\ActiveQuery;
-use Database\ActiveRecord;
+use Database\Collection;
 use Database\Connection;
+use Database\HasCount;
 use Database\HasMany;
 use Database\HasOne;
-use Database\IOrm;
+use Database\ModelInterface;
 use Database\Mysql\Columns;
 use Database\Relation;
 use Database\SqlBuilder;
@@ -27,11 +30,8 @@ use Database\Traits\HasBase;
 use Exception;
 use JetBrains\PhpStorm\Pure;
 use Kiri\Abstracts\Component;
-use Kiri\Abstracts\Config;
-use Kiri\Abstracts\TraitApplication;
 use Kiri\Application;
 use Kiri\Events\EventDispatch;
-use Kiri\Exception\ConfigException;
 use Kiri\Exception\NotFindClassException;
 use Kiri\Kiri;
 use Kiri\ToArray;
@@ -44,25 +44,16 @@ use validator\Validator;
  * @package Kiri\Abstracts
  *
  * @property bool $isCreate
- * @method rules()
- * @method static tableName()
  * @property Application $container
  * @property EventDispatch $eventDispatch
  */
-abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, ToArray
+abstract class Model extends Component implements ModelInterface, ArrayAccess, ToArray
 {
 
-
-	use TraitApplication;
-
-
-	const AFTER_SAVE = 'after::save';
-	const BEFORE_SAVE = 'before::save';
-
-
 	const GET = 'get';
+
+
 	const SET = 'set';
-	const RELATE = 'RELATE';
 
 	/** @var array */
 	protected array $_attributes = [];
@@ -94,13 +85,15 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 	protected array $actions = [];
 
 
-	/** @var string */
-	private static string $_connection = 'db';
-
-
+	/**
+	 * @var string
+	 */
 	protected string $table = '';
 
 
+	/**
+	 * @var string
+	 */
 	protected string $connection = 'db';
 
 
@@ -129,17 +122,14 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 	/**
 	 * @param string $name
 	 * @param mixed $value
-	 * @return mixed
-	 * @throws NotFindClassException
-	 * @throws ReflectionException
 	 */
-	private function _setter(string $name, mixed $value): mixed
+	private function _setter(string $name, mixed $value): void
 	{
 		$method = di(Setter::class)->getSetter(static::class, $name);
 		if (!empty($method)) {
 			$value = $this->{$method}($value);
 		}
-		return $this->_attributes[$name] = $value;
+		$this->_attributes[$name] = $value;
 	}
 
 
@@ -184,7 +174,6 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 
 	/**
 	 * @return EventDispatch
-	 * @throws ReflectionException
 	 */
 	protected function getEventDispatch(): EventDispatch
 	{
@@ -194,7 +183,7 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 
 	/**
 	 * @param $data
-	 * @return ActiveRecord
+	 * @return ModelInterface
 	 */
 	public function setWith($data): static
 	{
@@ -292,7 +281,7 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 		if ($this->primary !== NULL) {
 			return true;
 		}
-		$primary = static::getColumns()->getPrimaryKeys();
+		$primary = $this->getColumns()->getPrimaryKeys();
 		if (!empty($primary)) {
 			return $this->primary = is_array($primary) ? current($primary) : $primary;
 		}
@@ -313,7 +302,7 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 	 */
 	public function getAutoIncrement(): int|string|null
 	{
-		return static::getColumns()->getAutoIncrement();
+		return $this->getColumns()->getAutoIncrement();
 	}
 
 	/**
@@ -343,7 +332,7 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 	/**
 	 * @param $param
 	 * @param null $db
-	 * @return BaseActiveRecord|null
+	 * @return Model|null
 	 * @throws NotFindClassException
 	 * @throws ReflectionException
 	 * @throws Exception
@@ -356,7 +345,7 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 		if (is_numeric($param)) {
 			$param = static::getPrimaryCondition($param);
 		}
-		return static::find()->where($param)->first();
+		return static::query()->where($param)->first();
 	}
 
 
@@ -367,7 +356,7 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 	 */
 	private static function getPrimaryCondition($param): array
 	{
-		$primary = static::getColumns()->getPrimaryKeys();
+		$primary = static::makeNewInstance()->getColumns()->getPrimaryKeys();
 		if (empty($primary)) {
 			throw new Exception('Primary key cannot be empty.');
 		}
@@ -380,13 +369,13 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 
 	/**
 	 * @param null $field
-	 * @return ActiveRecord|null
+	 * @return ModelInterface|null
 	 * @throws Exception
 	 * @throws Exception
 	 */
-	public static function max($field = null): ?ActiveRecord
+	public static function max($field = null): ?ModelInterface
 	{
-		$columns = static::getColumns();
+		$columns = static::makeNewInstance()->getColumns();
 		if (empty($field)) {
 			$field = $columns->getFirstPrimary();
 		}
@@ -394,7 +383,7 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 		if (!isset($columns[$field])) {
 			return null;
 		}
-		$first = static::find()->max($field)->first();
+		$first = static::query()->max($field)->first();
 		if (empty($first)) {
 			return null;
 		}
@@ -403,11 +392,41 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 
 
 	/**
-	 * @return ActiveQuery
+	 * @param string|int $param
+	 * @return Model|null
+	 * @throws NotFindClassException
+	 * @throws ReflectionException
+	 * @throws Exception
 	 */
-	public static function find(): ActiveQuery
+	public static function find(string|int $param): ?static
 	{
-		return static::query();
+		$columns = duplicate(static::class)->getPrimary();
+		if (empty($columns)) {
+			$columns = static::makeNewInstance()->getColumns()->getFirstPrimary();
+		}
+		return static::query()->where([$columns => $param])->first();
+	}
+
+
+	/**
+	 * @return static
+	 */
+	private static function makeNewInstance(): static
+	{
+		return duplicate(static::class);
+	}
+
+
+	/**
+	 * @param $condition
+	 * @return static|null
+	 * @throws NotFindClassException
+	 * @throws ReflectionException
+	 * @throws Exception
+	 */
+	public static function first($condition): ?static
+	{
+		return static::query()->where($condition)->first();
 	}
 
 
@@ -416,16 +435,16 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 	 */
 	public static function query(): ActiveQuery
 	{
-		return new ActiveQuery(get_called_class());
+		return new ActiveQuery(new static());
 	}
 
 
 	/**
-	 * @throws ConfigException
+	 * @return Connection
 	 */
-	protected function getConnection()
+	public function getConnection(): Connection
 	{
-		return Config::get('databases.connections.' . $this->connection, null, true);
+		return Kiri::app()->get('db')->get($this->connection);
 	}
 
 
@@ -443,9 +462,9 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 			if (!$if_condition_is_null) {
 				return false;
 			}
-			return static::find()->delete();
+			return static::query()->delete();
 		}
-		$model = static::find()->ifNotWhere($if_condition_is_null)->where($condition);
+		$model = static::query()->ifNotWhere($if_condition_is_null)->where($condition);
 		if (!empty($attributes)) {
 			$model->bindParams($attributes);
 		}
@@ -527,8 +546,8 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 	 */
 	private function insert($param, $attributes): bool|static
 	{
-		[$sql, $param] = SqlBuilder::builder(static::find())->insert($param);
-		$dbConnection = static::getDb()->createCommand($sql, $param);
+		[$sql, $param] = SqlBuilder::builder(static::query())->insert($param);
+		$dbConnection = $this->getConnection()->createCommand($sql, $param);
 		if (!($lastId = (int)$dbConnection->save(true, $this))) {
 			throw new Exception('保存失败.');
 		}
@@ -580,11 +599,11 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 		if ($this->hasPrimary()) {
 			$condition = [$this->getPrimary() => $this->getPrimaryValue()];
 		}
-		$generate = SqlBuilder::builder(static::find()->where($condition))->update($param);
+		$generate = SqlBuilder::builder(static::query()->where($condition))->update($param);
 		if (is_bool($generate)) {
 			return $generate;
 		}
-		$command = static::getDb()->createCommand($generate[0], $generate[1]);
+		$command = $this->getConnection()->createCommand($generate[0], $generate[1]);
 		if ($command->save(false, $this)) {
 			return $this->refresh()->afterSave($fields, $param);
 		}
@@ -779,26 +798,26 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 	 */
 	public function has($attribute): bool
 	{
-		return static::getColumns()->hasField($attribute);
+		return static::makeNewInstance()->getColumns()->hasField($attribute);
 	}
 
 	/**ƒ
 	 * @return string
 	 * @throws Exception
 	 */
-	public static function getTable(): string
+	public function getTable(): string
 	{
-		$tablePrefix = static::getDb()->tablePrefix;
+		$connection = static::getConnection();
 
-		$table = static::tableName();
-		if (empty($table)) {
+		$tablePrefix = $connection->tablePrefix;
+		if (empty($this->table)) {
 			throw new Exception('You need add static method `tableName` and return table name.');
 		}
-		$table = trim($table, '{{%}}');
-		if (!empty($tablePrefix) && !str_starts_with($table, $tablePrefix)) {
-			$table = $tablePrefix . $table;
+		$table = trim($this->table, '{{%}}');
+		if (!empty($tablePrefix) && !str_starts_with($this->table, $tablePrefix)) {
+			$table = $tablePrefix . $this->table;
 		}
-		return '`' . static::getDatabase() . '`.' . $table;
+		return '`' . $connection->database . '`.' . $table;
 	}
 
 
@@ -824,17 +843,403 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 	}
 
 
-	private static string $ab_name = '';
+	/**
+	 * @return array
+	 */
+	public function rules(): array
+	{
+		return [];
+	}
+
+	/**
+	 * @param string $column
+	 * @param int $value
+	 * @return ModelInterface|false
+	 * @throws Exception
+	 */
+	public function increment(string $column, int $value): bool|ModelInterface
+	{
+		if (!$this->mathematics([$column => $value], '+')) {
+			return false;
+		}
+		$this->{$column} += $value;
+		return $this->refresh();
+	}
 
 
 	/**
-	 * @return Connection
+	 * @param string $column
+	 * @param int $value
+	 * @return ModelInterface|false
 	 * @throws Exception
 	 */
-	public static function getDb(): Connection
+	public function decrement(string $column, int $value): bool|ModelInterface
 	{
-		return static::setDatabaseConnect('db');
+		if (!$this->mathematics([$column => $value], '-')) {
+			return false;
+		}
+		$this->{$column} -= $value;
+		return $this->refresh();
 	}
+
+
+	/**
+	 * @param array $columns
+	 * @return ModelInterface|false
+	 * @throws Exception
+	 */
+	public function increments(array $columns): bool|static
+	{
+		if (!$this->mathematics($columns, '+')) {
+			return false;
+		}
+		foreach ($columns as $key => $attribute) {
+			$this->$key += $attribute;
+		}
+		return $this;
+	}
+
+
+	/**
+	 * @param array $columns
+	 * @return ModelInterface|false
+	 * @throws Exception
+	 */
+	public function decrements(array $columns): bool|static
+	{
+		if (!$this->mathematics($columns, '-')) {
+			return false;
+		}
+		foreach ($columns as $key => $attribute) {
+			$this->$key -= $attribute;
+		}
+		return $this;
+	}
+
+	/**
+	 * @param array $condition
+	 * @param array $attributes
+	 * @return bool|ModelInterface
+	 * @throws ReflectionException
+	 * @throws NotFindClassException
+	 * @throws Exception
+	 */
+	public static function findOrCreate(array $condition, array $attributes = []): bool|static
+	{
+		$logger = Kiri::app()->getLogger();
+
+		/** @var static $select */
+		$select = static::query()->where($condition)->first();
+		if (!empty($select)) {
+			return $select;
+		}
+		if (empty($attributes)) {
+			return $logger->addError(FIND_OR_CREATE_MESSAGE, 'mysql');
+		}
+		$select = duplicate(static::class);
+		$select->attributes = $attributes;
+		if (!$select->save()) {
+			return $logger->addError($select->getLastError(), 'mysql');
+		}
+		return $select;
+	}
+
+
+	/**
+	 * @param array $condition
+	 * @param array $attributes
+	 * @return bool|static
+	 * @throws Exception
+	 */
+	public static function createOrUpdate(array $condition, array $attributes = []): bool|static
+	{
+		$logger = Kiri::app()->getLogger();
+		if (empty($attributes)) {
+			return $logger->addError(FIND_OR_CREATE_MESSAGE, 'mysql');
+		}
+		/** @var static $select */
+		$select = static::query()->where($condition)->first();
+		if (empty($select)) {
+			$select = duplicate(static::class);
+		}
+		$select->attributes = $attributes;
+		if (!$select->save()) {
+			return $logger->addError($select->getLastError(), 'mysql');
+		}
+		return $select;
+	}
+
+
+	/**
+	 * @param $action
+	 * @param $columns
+	 * @param null|array $condition
+	 * @return array|bool|int|string|null
+	 * @throws Exception
+	 */
+	private function mathematics($columns, $action, ?array $condition = null): int|bool|array|string|null
+	{
+		if (empty($condition)) {
+			$condition = [$this->getPrimary() => $this->getPrimaryValue()];
+		}
+
+		$activeQuery = static::query()->where($condition);
+		$create = SqlBuilder::builder($activeQuery)->mathematics($columns, $action);
+		if (is_bool($create)) {
+			return false;
+		}
+		return $this->getConnection()->createCommand($create[0], $create[1])->exec();
+	}
+
+
+	/**
+	 * @param array $fields
+	 * @return ModelInterface|bool
+	 * @throws Exception
+	 */
+	public function update(array $fields): static|bool
+	{
+		return $this->save($fields);
+	}
+
+
+	/**
+	 * @param array $data
+	 * @return bool
+	 * @throws Exception
+	 */
+	public static function inserts(array $data): bool
+	{
+		$result = false;
+		if (empty($data)) {
+			error('Insert data empty.', 'mysql');
+		} else {
+			$result = static::query()->batchInsert($data);
+		}
+		return $result;
+	}
+
+	/**
+	 * @return bool
+	 * @throws Exception
+	 */
+	public function delete(): bool
+	{
+		$conditions = $this->_oldAttributes;
+		if (empty($conditions)) {
+			return $this->addError("Delete condition do not empty.", 'mysql');
+		}
+		$primary = $this->getPrimary();
+
+		if (!empty($primary)) {
+			$conditions = [$primary => $this->getAttribute($primary)];
+		}
+		return static::deleteByCondition($conditions);
+	}
+
+
+	/**
+	 * @param mixed $condition
+	 * @param array $attributes
+	 *
+	 * @return bool
+	 * @throws NotFindClassException
+	 * @throws ReflectionException
+	 * @throws Exception
+	 */
+	public static function updateAll(mixed $condition, array $attributes = []): bool
+	{
+		$condition = static::query()->where($condition);
+		return $condition->batchUpdate($attributes);
+	}
+
+
+	/**
+	 * @param $condition
+	 * @return array|Collection
+	 * @throws NotFindClassException
+	 * @throws ReflectionException
+	 */
+	public static function get($condition): Collection|array
+	{
+		return static::query()->where($condition)->all();
+	}
+
+
+	/**
+	 * @param       $condition
+	 * @param array $attributes
+	 *
+	 * @return array|Collection
+	 * @throws Exception
+	 */
+	public static function findAll($condition, array $attributes = []): array|Collection
+	{
+		$query = static::query()->where($condition);
+		if (!empty($attributes)) {
+			$query->bindParams($attributes);
+		}
+		return $query->all();
+	}
+
+	/**
+	 * @param $method
+	 * @return mixed
+	 * @throws Exception
+	 */
+	private function resolveObject($method): mixed
+	{
+		$resolve = $this->{$this->getRelate($method)}();
+		if ($resolve instanceof HasBase) {
+			$resolve = $resolve->get();
+		}
+		if ($resolve instanceof ToArray) {
+			return $resolve->toArray();
+		} else if (is_object($resolve)) {
+			return get_object_vars($resolve);
+		} else {
+			return $resolve;
+		}
+	}
+
+
+	/**
+	 * @return array
+	 * @throws Exception
+	 */
+	public function toArray(): array
+	{
+		$data = $this->_attributes;
+		$lists = di(Getter::class)->getGetter(static::class);
+		foreach ($lists as $key => $item) {
+			$data[$key] = $this->{$item}($data[$key] ?? null);
+		}
+		return array_merge($data, $this->runRelate());
+	}
+
+	/**
+	 * @return array
+	 * @throws Exception
+	 */
+	private function runRelate(): array
+	{
+		$relates = [];
+		if (empty($with = $this->getWith())) {
+			return $relates;
+		}
+		foreach ($with as $val) {
+			$relates[$val] = $this->resolveObject($val);
+		}
+		return $relates;
+	}
+
+
+	/**
+	 * @param string $modelName
+	 * @param $foreignKey
+	 * @param $localKey
+	 * @return HasOne|ActiveQuery
+	 * @throws Exception
+	 */
+	public function hasOne(string $modelName, $foreignKey, $localKey): HasOne|ActiveQuery
+	{
+		if (($value = $this->getAttribute($localKey)) === null) {
+			throw new Exception("Need join table primary key.");
+		}
+
+		$relation = $this->getRelation();
+
+		return new HasOne($modelName, $foreignKey, $value, $relation);
+	}
+
+
+	/**
+	 * @param $modelName
+	 * @param $foreignKey
+	 * @param $localKey
+	 * @return ActiveQuery|HasCount
+	 * @throws Exception
+	 */
+	public function hasCount($modelName, $foreignKey, $localKey): ActiveQuery|HasCount
+	{
+		if (($value = $this->getAttribute($localKey)) === null) {
+			throw new Exception("Need join table primary key.");
+		}
+
+		$relation = $this->getRelation();
+
+		return new HasCount($modelName, $foreignKey, $value, $relation);
+	}
+
+
+	/**
+	 * @param $modelName
+	 * @param $foreignKey
+	 * @param $localKey
+	 * @return ActiveQuery|HasMany
+	 * @throws Exception
+	 */
+	public function hasMany($modelName, $foreignKey, $localKey): ActiveQuery|HasMany
+	{
+		if (($value = $this->getAttribute($localKey)) === null) {
+			throw new Exception("Need join table primary key.");
+		}
+
+		$relation = $this->getRelation();
+
+		return new HasMany($modelName, $foreignKey, $value, $relation);
+	}
+
+	/**
+	 * @param $modelName
+	 * @param $foreignKey
+	 * @param $localKey
+	 * @return ActiveQuery|HasMany
+	 * @throws Exception
+	 */
+	public function hasIn($modelName, $foreignKey, $localKey): ActiveQuery|HasMany
+	{
+		if (($value = $this->getAttribute($localKey)) === null) {
+			throw new Exception("Need join table primary key.");
+		}
+
+		$relation = $this->getRelation();
+
+		return new HasMany($modelName, $foreignKey, $value, $relation);
+	}
+
+	/**
+	 * @return bool
+	 * @throws Exception
+	 */
+	public function afterDelete(): bool
+	{
+		if (!$this->hasPrimary()) {
+			return TRUE;
+		}
+		$value = $this->getPrimaryValue();
+		if (empty($value)) {
+			return TRUE;
+		}
+		return TRUE;
+	}
+
+	/**
+	 * @return bool
+	 * @throws Exception
+	 */
+	public function beforeDelete(): bool
+	{
+		if (!$this->hasPrimary()) {
+			return TRUE;
+		}
+		$value = $this->getPrimaryValue();
+		if (empty($value)) {
+			return TRUE;
+		}
+		return TRUE;
+	}
+
 
 	/**
 	 * @return static
@@ -885,7 +1290,7 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 	 */
 	private function _decode($name, $value): mixed
 	{
-		return static::getColumns()->_decode($name, $value);
+		return $this->getColumns()->_decode($name, $value);
 	}
 
 
@@ -1028,35 +1433,13 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 
 
 	/**
-	 * @param $dbName
-	 * @return mixed
-	 * @throws Exception
-	 */
-	public static function setDatabaseConnect($dbName): Connection
-	{
-		return Kiri::app()->get('db')->get(static::$_connection = $dbName);
-	}
-
-
-	/**
-	 * @return string
-	 * @throws ConfigException
-	 */
-	public static function getDatabase(): string
-	{
-		return Config::get('databases.connections.' . static::$_connection . '.database');
-	}
-
-
-	/**
 	 * @return Columns
 	 * @throws Exception
 	 */
-	public static function getColumns(): Columns
+	public function getColumns(): Columns
 	{
-		return static::getDb()->getSchema()
-			->getColumns()
-			->table(static::getTable());
+		return $this->getConnection()->getSchema()->getColumns()
+			->table($this->getTable());
 	}
 
 	/**
@@ -1084,6 +1467,17 @@ abstract class BaseActiveRecord extends Component implements IOrm, ArrayAccess, 
 		return function () use ($method, $value) {
 			return $this->{$method}($value);
 		};
+	}
+
+
+	/**
+	 * @param string $name
+	 * @param array $arguments
+	 * @return mixed
+	 */
+	public static function __callStatic(string $name, array $arguments)
+	{
+		return (new static())->{$name}(...$arguments);
 	}
 
 }

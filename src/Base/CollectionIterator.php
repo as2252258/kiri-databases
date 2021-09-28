@@ -6,7 +6,7 @@ namespace Database\Base;
 
 
 use Database\ActiveQuery;
-use Database\ActiveRecord;
+use Database\ModelInterface;
 use Exception;
 
 
@@ -17,14 +17,14 @@ use Exception;
 class CollectionIterator extends \ArrayIterator
 {
 
-	private ActiveRecord|string $model;
+	private ModelInterface|string $model;
 
 
 	/** @var ActiveQuery */
 	private ActiveQuery $query;
 
 
-	private ?ActiveRecord $_clone = null;
+	private ?ModelInterface $_clone = null;
 
 
 	public function clean()
@@ -51,10 +51,10 @@ class CollectionIterator extends \ArrayIterator
 
 	/**
 	 * @param $current
-	 * @return ActiveRecord
+	 * @return ModelInterface
 	 * @throws Exception
 	 */
-	protected function newModel($current): ActiveRecord
+	protected function newModel($current): ModelInterface
 	{
 		return $this->model->setAttributes($current);
 	}
@@ -63,7 +63,7 @@ class CollectionIterator extends \ArrayIterator
 	/**
 	 * @throws Exception
 	 */
-	public function current(): ActiveRecord
+	public function current(): ModelInterface
 	{
 		if (is_array($current = parent::current())) {
 			$current = $this->newModel($current);

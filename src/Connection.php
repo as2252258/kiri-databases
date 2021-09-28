@@ -12,21 +12,20 @@ namespace Database;
 
 
 use Annotation\Inject;
+use Database\Affair\BeginTransaction;
+use Database\Affair\Commit;
+use Database\Affair\Rollback;
+use Database\Mysql\PDO;
 use Database\Mysql\Schema;
 use Exception;
-use JetBrains\PhpStorm\Pure;
-use Database\Mysql\PDO;
-use ReflectionException;
-use Server\Events\OnWorkerExit;
-use Server\Events\OnWorkerStop;
 use Kiri\Abstracts\Component;
 use Kiri\Abstracts\Config;
 use Kiri\Events\EventProvider;
 use Kiri\Exception\NotFindClassException;
 use Kiri\Kiri;
-use Database\Affair\BeginTransaction;
-use Database\Affair\Commit;
-use Database\Affair\Rollback;
+use ReflectionException;
+use Server\Events\OnWorkerExit;
+use Server\Events\OnWorkerStop;
 
 /**
  * Class Connection
@@ -91,8 +90,8 @@ class Connection extends Component
 		$this->eventProvider->on(Commit::class, [$this, 'commit'], 0);
 
 		if (Db::transactionsActive()) {
-		    $this->beginTransaction();
-        }
+			$this->beginTransaction();
+		}
 
 		$this->_schema->db = $this;
 	}
@@ -138,12 +137,12 @@ class Connection extends Component
 		}
 	}
 
-    /**
-     * @return mixed
-     * @throws ReflectionException
-     * @throws NotFindClassException
-     * @throws \Exception
-     */
+	/**
+	 * @return mixed
+	 * @throws ReflectionException
+	 * @throws NotFindClassException
+	 * @throws \Exception
+	 */
 	public function getSchema(): Schema
 	{
 		if ($this->_schema === null) {

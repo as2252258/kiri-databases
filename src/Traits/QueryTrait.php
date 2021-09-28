@@ -12,8 +12,8 @@ namespace Database\Traits;
 
 use Closure;
 use Database\ActiveQuery;
-use Database\ActiveRecord;
 use Database\Condition\MathematicsCondition;
+use Database\ModelInterface;
 use Database\Query;
 use Database\SqlBuilder;
 use Exception;
@@ -44,9 +44,9 @@ trait QueryTrait
 	private SqlBuilder $builder;
 
 	/**
-	 * @var ActiveRecord|string|null
+	 * @var ModelInterface|string|null
 	 */
-	public ActiveRecord|string|null $modelClass;
+	public ModelInterface|string|null $modelClass;
 
 	/**
 	 * clear
@@ -140,7 +140,7 @@ trait QueryTrait
 	 */
 	public function getTable(): string
 	{
-		return $this->modelClass::getTable();
+		return $this->modelClass->getTable();
 	}
 
 
@@ -306,10 +306,11 @@ trait QueryTrait
 	public function leftJoin(string $tableName, string $alias, $onCondition, $param = NULL): static
 	{
 		if (class_exists($tableName)) {
-			if (!in_array(ActiveRecord::class, class_implements($tableName))) {
-				throw new Exception('Model must implement ' . $tableName);
+			$model = Kiri::getDi()->get($tableName);
+			if (!($model instanceof ModelInterface)) {
+				throw new Exception('Model must implement ' . ModelInterface::class);
 			}
-			$tableName = $tableName::getTable();
+			$tableName = $model->getTable();
 		}
 		return $this->join(...["LEFT JOIN " . $tableName, $alias, $onCondition, $param]);
 	}
@@ -325,10 +326,11 @@ trait QueryTrait
 	public function rightJoin($tableName, $alias, $onCondition, $param = NULL): static
 	{
 		if (class_exists($tableName)) {
-			if (!in_array(ActiveRecord::class, class_implements($tableName))) {
-				throw new Exception('Model must implement ' . $tableName);
+			$model = Kiri::getDi()->get($tableName);
+			if (!($model instanceof ModelInterface)) {
+				throw new Exception('Model must implement ' . ModelInterface::class);
 			}
-			$tableName = $tableName::getTable();
+			$tableName = $model->getTable();
 		}
 		return $this->join(...["RIGHT JOIN " . $tableName, $alias, $onCondition, $param]);
 	}
@@ -344,10 +346,11 @@ trait QueryTrait
 	public function innerJoin($tableName, $alias, $onCondition, $param = NULL): static
 	{
 		if (class_exists($tableName)) {
-			if (!in_array(ActiveRecord::class, class_implements($tableName))) {
-				throw new Exception('Model must implement ' . $tableName);
+			$model = Kiri::getDi()->get($tableName);
+			if (!($model instanceof ModelInterface)) {
+				throw new Exception('Model must implement ' . ModelInterface::class);
 			}
-			$tableName = $tableName::getTable();
+			$tableName = $model->getTable();
 		}
 		return $this->join(...["INNER JOIN " . $tableName, $alias, $onCondition, $param]);
 	}
@@ -727,7 +730,7 @@ trait QueryTrait
 		$activeQuery = new ActiveQuery($this->modelClass);
 		call_user_func($value, $activeQuery);
 		if (empty($activeQuery->from)) {
-			$activeQuery->from($activeQuery->modelClass::getTable());
+			$activeQuery->from($activeQuery->modelClass->getTable());
 		}
 		return $activeQuery;
 	}

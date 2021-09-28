@@ -12,7 +12,7 @@ namespace Database\Base;
 
 use ArrayIterator;
 use Database\ActiveQuery;
-use Database\ActiveRecord;
+use Database\ModelInterface;
 use Kiri\ToArray;
 use Exception;
 use JetBrains\PhpStorm\Pure;
@@ -27,11 +27,11 @@ abstract class AbstractCollection extends Component implements \IteratorAggregat
 {
 
     /**
-     * @var ActiveRecord[]
+     * @var ModelInterface[]
      */
     protected array $_item = [];
 
-    protected ActiveRecord|string|null $model;
+    protected ModelInterface|string|null $model;
 
     protected ActiveQuery $query;
 
@@ -42,19 +42,19 @@ abstract class AbstractCollection extends Component implements \IteratorAggregat
     }
 
 
-    /**
-     * Collection constructor.
-     *
-     * @param $query
-     * @param array $array
-     * @param string|ActiveRecord|null $model
-     * @throws Exception
-     */
-    public function __construct($query, array $array = [], string|ActiveRecord $model = null)
+	/**
+	 * Collection constructor.
+	 *
+	 * @param $query
+	 * @param array $array
+	 * @param ModelInterface|null $model
+	 * @throws Exception
+	 */
+    public function __construct($query, array $array = [], ModelInterface $model = null)
     {
         $this->_item = $array;
         $this->query = $query;
-        $this->model = duplicate($model);
+        $this->model = $model;
 
         parent::__construct([]);
     }
@@ -108,7 +108,7 @@ abstract class AbstractCollection extends Component implements \IteratorAggregat
      * @return mixed
      * @throws Exception
      */
-    public function getModel(): ActiveRecord
+    public function getModel(): ModelInterface
     {
         return $this->model;
     }
@@ -125,15 +125,15 @@ abstract class AbstractCollection extends Component implements \IteratorAggregat
 
     /**
      * @param mixed $offset
-     * @return ActiveRecord|null
+     * @return ModelInterface|null
      * @throws Exception
      */
-    public function offsetGet(mixed $offset): ?ActiveRecord
+    public function offsetGet(mixed $offset): ?ModelInterface
     {
         if (!$this->offsetExists($offset)) {
             return NULL;
         }
-        if (!($this->_item[$offset] instanceof ActiveRecord)) {
+        if (!($this->_item[$offset] instanceof ModelInterface)) {
             return $this->model->setAttributes($this->_item[$offset]);
         }
         return $this->_item[$offset];

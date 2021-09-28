@@ -35,10 +35,10 @@ class HasOne extends HasBase
 	}
 
 	/**
-	 * @return array|null|ActiveRecord
+	 * @return array|null|ModelInterface
 	 * @throws Exception
 	 */
-	public function get(): array|ActiveRecord|null
+	public function get(): array|ModelInterface|null
 	{
 		return $this->_relation->first($this->model::className(), $this->value);
 	}

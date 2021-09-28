@@ -167,9 +167,7 @@ trait Builder
 	 * @param $condition
 	 * @param $array
 	 * @return string
-	 * @throws NotFindClassException
-	 * @throws ReflectionException
-	 * @throws ReflectionException
+	 * @throws Exception
 	 */
 	private function _arrayMap($condition, $array): string
 	{

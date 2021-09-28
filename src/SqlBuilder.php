@@ -140,7 +140,7 @@ class SqlBuilder extends Component
 	 */
 	public function delete(): string
 	{
-		$delete = sprintf('DELETE FROM %s ', $this->query->modelClass::getTable());
+		$delete = sprintf('DELETE FROM %s ', $this->query->modelClass->getTable());
 
 		$this->query->from = null;
 
@@ -361,7 +361,7 @@ class SqlBuilder extends Component
 			$this->query->from = sprintf('%s', SqlBuilder::builder($this->query->from)->get($this->query->from));
 		}
 		if (empty($this->query->from)) {
-			return $this->query->modelClass::getTable();
+			return $this->query->modelClass->getTable();
 		}
 		return $this->query->from;
 	}

@@ -118,15 +118,15 @@ class ActiveQuery extends Component implements ISqlBuilder
 	 */
 	public function execute($sql, array $params = []): Command
 	{
-		return $this->modelClass::getDb()->createCommand($sql, $params);
+		return $this->modelClass->getConnection()->createCommand($sql, $params);
 	}
 
 
 	/**
-	 * @return ActiveRecord|null
+	 * @return ModelInterface|null
 	 * @throws Exception
 	 */
-	public function first(): ActiveRecord|null
+	public function first(): ModelInterface|null
 	{
 		$data = $this->execute($this->builder->one())->one();
 		if (empty($data)) {
@@ -207,22 +207,22 @@ class ActiveQuery extends Component implements ISqlBuilder
 	}
 
 	/**
-	 * @param ActiveRecord $model
+	 * @param ModelInterface $model
 	 * @param $data
-	 * @return ActiveRecord
+	 * @return ModelInterface
 	 * @throws Exception
 	 */
-	public function populate(ActiveRecord $model, $data): ActiveRecord
+	public function populate(ModelInterface $model, $data): ModelInterface
 	{
 		return $this->getWith($model::populate($data));
 	}
 
 
 	/**
-	 * @param ActiveRecord $model
-	 * @return ActiveRecord
+	 * @param ModelInterface $model
+	 * @return ModelInterface
 	 */
-	public function getWith(ActiveRecord $model): ActiveRecord
+	public function getWith(ModelInterface $model): ModelInterface
 	{
 		if (empty($this->with) || !is_array($this->with)) {
 			return $model;
