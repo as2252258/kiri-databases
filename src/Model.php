@@ -37,6 +37,8 @@ use validator\Validator;
  * @property bool $isCreate
  * @property Application $container
  * @property EventDispatch $eventDispatch
+ * @property array $attributes
+ * @property array $oldAttributes
  */
 abstract class Model extends Component implements ModelInterface, ArrayAccess, ToArray
 {
