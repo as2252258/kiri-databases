@@ -7,7 +7,7 @@
  */
 declare(strict_types=1);
 
-namespace Database\Base;
+namespace Database;
 
 defined('SAVE_FAIL') or define('SAVE_FAIL', 3227);
 defined('FIND_OR_CREATE_MESSAGE') or define('FIND_OR_CREATE_MESSAGE', 'Create a new model, but the data cannot be empty.');
@@ -16,16 +16,7 @@ defined('FIND_OR_CREATE_MESSAGE') or define('FIND_OR_CREATE_MESSAGE', 'Create a 
 use Annotation\Inject;
 use ArrayAccess;
 use Closure;
-use Database\ActiveQuery;
-use Database\Collection;
-use Database\Connection;
-use Database\HasCount;
-use Database\HasMany;
-use Database\HasOne;
-use Database\ModelInterface;
 use Database\Mysql\Columns;
-use Database\Relation;
-use Database\SqlBuilder;
 use Database\Traits\HasBase;
 use Exception;
 use JetBrains\PhpStorm\Pure;
@@ -937,7 +928,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 			return $logger->addError(FIND_OR_CREATE_MESSAGE, 'mysql');
 		}
 		$select = duplicate(static::class);
-		$select->attributes = $attributes;
+		$select->_attributes = $attributes;
 		if (!$select->save()) {
 			return $logger->addError($select->getLastError(), 'mysql');
 		}
@@ -962,7 +953,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		if (empty($select)) {
 			$select = duplicate(static::class);
 		}
-		$select->attributes = $attributes;
+		$select->_attributes = $attributes;
 		if (!$select->save()) {
 			return $logger->addError($select->getLastError(), 'mysql');
 		}
