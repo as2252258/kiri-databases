@@ -3,7 +3,7 @@
 namespace Database;
 
 
-use Database\Base\Model;
+use Database\Model;
 
 /**
  *
