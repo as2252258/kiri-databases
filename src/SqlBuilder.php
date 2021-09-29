@@ -116,7 +116,7 @@ class SqlBuilder extends Component
 	 */
 	public function insert(array $attributes, bool $isBatch = false): array
 	{
-		$update = sprintf('INSERT INTO %s', $this->tableName());
+		$update = 'INSERT INTO ' . $this->tableName();
 		if ($isBatch === false) {
 			$attributes = [$attributes];
 		}
