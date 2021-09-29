@@ -33,14 +33,6 @@ class Model extends Base\Model
 
 
 	/**
-	 * @return array
-	 */
-	public function rules(): array
-	{
-		return [];
-	}
-
-	/**
 	 * @param string $column
 	 * @param int $value
 	 * @return ModelInterface|false

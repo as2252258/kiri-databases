@@ -24,6 +24,7 @@ use Database\HasOne;
 use Database\ModelInterface;
 use Database\Mysql\Columns;
 use Database\Relation;
+use Database\SqlBuilder;
 use Database\Traits\HasBase;
 use Exception;
 use JetBrains\PhpStorm\Pure;
@@ -95,6 +96,12 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 * @var string
 	 */
 	protected string $connection = 'db';
+
+
+	/**
+	 * @var array
+	 */
+	protected array $rules = [];
 
 
 	/**
@@ -183,7 +190,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 
 	/**
 	 * @param $data
-	 * @return ModelInterface
+	 * @return Model
 	 */
 	public function setWith($data): static
 	{
@@ -620,7 +627,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		if (!is_null($data)) {
 			$this->_attributes = merge($this->_attributes, $data);
 		}
-		if (!$this->validator($this->rules()) || !$this->beforeSave($this)) {
+		if (!$this->validator($this->rules) || !$this->beforeSave($this)) {
 			return false;
 		}
 		[$change, $condition, $fields] = $this->separation();
@@ -632,11 +639,11 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 
 
 	/**
-	 * @param array $rule
+	 * @param array|null $rule
 	 * @return bool
 	 * @throws Exception
 	 */
-	public function validator(array $rule): bool
+	public function validator(?array $rule): bool
 	{
 		if (empty($rule)) return true;
 		$validate = $this->resolve($rule);
