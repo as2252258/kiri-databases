@@ -38,6 +38,9 @@ trait QueryTrait
 	public string $alias = 't1';
 	public array $filter = [];
 
+
+	public bool $lock = false;
+
 	public bool $ifNotWhere = false;
 
 
@@ -79,6 +82,17 @@ trait QueryTrait
 
 		$this->where[] = $caseWhen->end();
 
+		return $this;
+	}
+
+
+	/**
+	 * @param bool $lock
+	 * @return $this
+	 */
+	public function lock(bool $lock): static
+	{
+		$this->lock = $lock;
 		return $this;
 	}
 

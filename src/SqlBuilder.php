@@ -276,7 +276,11 @@ class SqlBuilder extends Component
 		if ($hasOrder === true && !empty($this->query->order)) {
 			$select .= $this->builderOrder($this->query->order);
 		}
-		return $select . $this->builderLimit($this->query);
+		$sql = $select . $this->builderLimit($this->query);
+		if ($this->query->lock) {
+			$sql .= ' FOR UPDATE';
+		}
+		return $sql;
 	}
 
 

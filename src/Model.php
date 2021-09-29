@@ -105,23 +105,24 @@ class Model extends Base\Model
 	 * @throws NotFindClassException
 	 * @throws Exception
 	 */
-	public static function findOrCreate(array $condition, array $attributes = []): bool|static
+	public static function findOrCreate(array $condition, array $attributes): bool|static
 	{
 		$logger = Kiri::app()->getLogger();
-
-		/** @var static $select */
-		$select = static::query()->where($condition)->first();
-		if (!empty($select)) {
-			return $select;
-		}
 		if (empty($attributes)) {
 			return $logger->addError(FIND_OR_CREATE_MESSAGE, 'mysql');
 		}
-		$select = duplicate(static::class);
-		$select->attributes = $attributes;
-		if (!$select->save()) {
-			return $logger->addError($select->getLastError(), 'mysql');
+		Db::beginTransaction();
+		/** @var static $select */
+		$select = static::query()->where($condition)->first();
+		if (empty($select)) {
+			$select = duplicate(static::class);
+			$select->attributes = $attributes;
+			if (!$select->save()) {
+				Db::rollback();
+				return $logger->addError($select->getLastError(), 'mysql');
+			}
 		}
+		Db::commit();
 		return $select;
 	}
 
@@ -138,6 +139,8 @@ class Model extends Base\Model
 		if (empty($attributes)) {
 			return $logger->addError(FIND_OR_CREATE_MESSAGE, 'mysql');
 		}
+
+		Db::beginTransaction();
 		/** @var static $select */
 		$select = static::query()->where($condition)->first();
 		if (empty($select)) {
@@ -145,7 +148,10 @@ class Model extends Base\Model
 		}
 		$select->attributes = $attributes;
 		if (!$select->save()) {
-			return $logger->addError($select->getLastError(), 'mysql');
+			Db::rollback();
+			$select = $logger->addError($select->getLastError(), 'mysql');
+		} else {
+			Db::commit();
 		}
 		return $select;
 	}
