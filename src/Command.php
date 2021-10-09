@@ -139,10 +139,10 @@ class Command extends Component
 
 	/**
 	 * @param $type
-	 * @return array|int
+	 * @return array|int|bool|null
 	 * @throws Exception
 	 */
-	private function search($type): array|int
+	private function search($type): array|int|bool|null
 	{
 		$pdo = $this->db->getConnect($this->sql);
 		if ($type === static::FETCH_COLUMN) {
