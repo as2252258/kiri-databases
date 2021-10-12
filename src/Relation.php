@@ -31,7 +31,7 @@ class Relation extends Component
 	}
 
 	/**
-	 * @param $name
+	 * @param string $name
 	 * @return ActiveQuery|null
 	 */
 	public function getQuery(string $name): ?ActiveQuery
