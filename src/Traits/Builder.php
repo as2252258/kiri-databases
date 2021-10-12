@@ -9,12 +9,11 @@ use Database\Base\ConditionClassMap;
 use Database\Condition\HashCondition;
 use Database\Condition\OrCondition;
 use Database\Query;
-use Database\SqlBuilder;
 use Exception;
 use JetBrains\PhpStorm\Pure;
-use ReflectionException;
 use Kiri\Exception\NotFindClassException;
 use Kiri\Kiri;
+use ReflectionException;
 
 
 /**
@@ -148,7 +147,7 @@ trait Builder
 	 * @param $_tmp
 	 * @return string
 	 * @throws NotFindClassException
-	 * @throws ReflectionException
+	 * @throws ReflectionException|Exception
 	 */
 	private function resolveCondition($field, $condition, $_tmp): string
 	{
@@ -179,13 +178,22 @@ trait Builder
 			if (!is_string($condition[2])) {
 				$condition[2] = $this->_hashMap($condition[2]);
 			}
-			$builder = Kiri::createObject(['class' => OrCondition::class, 'value' => $condition[2], 'column' => $condition[1], 'oldParams' => $array]);
+			$builder = Kiri::getDi()->get(OrCondition::class);
+			$builder->setValue($condition[2]);
+			$builder->setColumn($condition[1]);
+			$builder->oldParams = $array;
 		} else if (isset(ConditionClassMap::$conditionMap[$stroppier])) {
 			$defaultConfig = ConditionClassMap::$conditionMap[$stroppier];
-			$create = array_merge($defaultConfig, ['column' => $condition[1], 'value' => $condition[2]]);
-			$builder = Kiri::createObject($create);
+
+			$class = $defaultConfig['class'];
+			unset($defaultConfig['class']);
+
+			$builder = Kiri::getDi()->get($class, [], $defaultConfig);
+			$builder->setValue($condition[2]);
+			$builder->setColumn($condition[1]);
 		} else {
-			$builder = Kiri::createObject(['class' => HashCondition::class, 'value' => $condition]);
+			$builder = Kiri::getDi()->get(HashCondition::class);
+			$builder->setValue($condition);
 		}
 
 		$array[] = $builder->builder();
