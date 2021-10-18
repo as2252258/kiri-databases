@@ -143,12 +143,12 @@ class PDO implements StopHeartbeatCheck
     }
 
 
-    /**
-     * @param string $sql
-     * @param array $params
-     * @return array
-     * @throws Exception
-     */
+	/**
+	 * @param string $sql
+	 * @param array $params
+	 * @return bool|array|null
+	 * @throws Exception
+	 */
     public function fetchAll(string $sql, array $params = []): bool|null|array
     {
         $pdo = $this->queryPrev($sql, $params);
@@ -159,12 +159,12 @@ class PDO implements StopHeartbeatCheck
     }
 
 
-    /**
-     * @param string $sql
-     * @param array $params
-     * @return array
-     * @throws Exception
-     */
+	/**
+	 * @param string $sql
+	 * @param array $params
+	 * @return bool|array|null
+	 * @throws Exception
+	 */
     public function fetch(string $sql, array $params = []): bool|null|array
     {
         $pdo = $this->queryPrev($sql, $params);
