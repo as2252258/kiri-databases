@@ -311,12 +311,10 @@ class Model extends Base\Model
 	private function runRelate(): array
 	{
 		$relates = [];
-
-		var_dump($this->getWith());
-
 		if (empty($with = $this->getWith())) {
 			return $relates;
 		}
+		var_dump($with);
 		foreach ($with as $val) {
 			$relates[$val] = $this->resolveObject($val);
 		}
