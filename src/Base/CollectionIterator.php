@@ -68,7 +68,6 @@ class CollectionIterator extends \ArrayIterator
 		if (is_array($current = parent::current())) {
 			$current = $this->newModel($current);
 		}
-		var_dump($current);
 		return $this->query->getWith($current);
 	}
 
