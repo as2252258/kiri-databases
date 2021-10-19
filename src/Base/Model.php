@@ -105,13 +105,6 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 
 
 	/**
-	 * @var Relation|null
-	 */
-	#[Inject(Relation::class)]
-	protected ?Relation $_relation;
-
-
-	/**
 	 * @var array
 	 */
 	private array $_with = [];
@@ -222,24 +215,12 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 
 
 	/**
-	 * @param Relation $relation
-	 */
-	public function setRelation(Relation $relation)
-	{
-		$this->_relation = $relation;
-	}
-
-
-	/**
 	 * @throws Exception
 	 */
 	public function init()
 	{
 		$an = Kiri::app()->getAnnotation();
 		$an->injectProperty($this);
-
-
-		var_dump($this->_relation);
 	}
 
 
@@ -786,7 +767,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function getRelation(): ?Relation
 	{
-		return $this->_relation;
+		return Kiri::getDi()->get(Relation::class);
 	}
 
 
