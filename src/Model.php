@@ -311,6 +311,9 @@ class Model extends Base\Model
 	private function runRelate(): array
 	{
 		$relates = [];
+
+		var_dump($this->getWith());
+
 		if (empty($with = $this->getWith())) {
 			return $relates;
 		}
