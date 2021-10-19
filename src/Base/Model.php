@@ -237,6 +237,9 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		$an = Kiri::app()->getAnnotation();
 		$an->injectProperty($this);
+
+
+		var_dump($this->_relation);
 	}
 
 
