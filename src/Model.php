@@ -274,10 +274,13 @@ class Model extends Base\Model
 	 * @return mixed
 	 * @throws Exception
 	 */
-	private function resolveObject($method): mixed
+	private function withRelation($method): mixed
 	{
-		var_dump($this->getRelate($method));
-		$resolve = $this->{$this->getRelate($method)}();
+		$method = $this->getRelate($method);
+		if (empty($method)) {
+			return null;
+		}
+		$resolve = $this->{$method}();
 		if ($resolve instanceof HasBase) {
 			$resolve = $resolve->get();
 		}
@@ -302,21 +305,21 @@ class Model extends Base\Model
 		foreach ($lists as $key => $item) {
 			$data[$key] = $this->{$item}($data[$key] ?? null);
 		}
-		return array_merge($data, $this->runRelate());
+		return $this->withRelates($data);
 	}
 
 	/**
+	 * @param $relates
 	 * @return array
 	 * @throws Exception
 	 */
-	private function runRelate(): array
+	private function withRelates($relates): array
 	{
-		$relates = [];
 		if (empty($with = $this->getWith())) {
 			return $relates;
 		}
 		foreach ($with as $val) {
-			$relates[$val] = $this->resolveObject($val);
+			$relates[$val] = $this->withRelation($val);
 		}
 		return $relates;
 	}

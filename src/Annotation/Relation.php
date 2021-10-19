@@ -17,26 +17,25 @@ use Exception;
 {
 
 
-    /**
-     * Relation constructor.
-     * @param string $name
-     */
-    public function __construct(public string $name)
-    {
-    }
+	/**
+	 * Relation constructor.
+	 * @param string $name
+	 */
+	public function __construct(public string $name)
+	{
+	}
 
 
-    /**
-     * @param static $params
-     * @param mixed $class
-     * @param mixed|null $method
-     * @return bool
-     * @throws Exception
-     */
-    public function execute(mixed $class, mixed $method = null): bool
-    {
-        di(Relate::class)->addRelate($class, $this->name, $method);
-        return true;
-    }
+	/**
+	 * @param mixed $class
+	 * @param mixed|null $method
+	 * @return bool
+	 * @throws Exception
+	 */
+	public function execute(mixed $class, mixed $method = null): bool
+	{
+		di(Relate::class)->addRelate($this->name, $class, $method);
+		return true;
+	}
 
 }
