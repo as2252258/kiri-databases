@@ -132,7 +132,7 @@ class ActiveQuery extends Component implements ISqlBuilder
 		if (empty($data)) {
 			return NULL;
 		}
-		return $this->modelClass::populate($data);
+		return $this->populate($data);
 	}
 
 
@@ -207,14 +207,13 @@ class ActiveQuery extends Component implements ISqlBuilder
 	}
 
 	/**
-	 * @param ModelInterface $model
 	 * @param $data
 	 * @return ModelInterface
 	 * @throws Exception
 	 */
-	public function populate(ModelInterface $model, $data): ModelInterface
+	public function populate($data): ModelInterface
 	{
-		return $this->getWith($model::populate($data));
+		return $this->getWith($this->modelClass::populate($data));
 	}
 
 
