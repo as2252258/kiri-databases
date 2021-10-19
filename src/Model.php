@@ -276,6 +276,7 @@ class Model extends Base\Model
 	 */
 	private function resolveObject($method): mixed
 	{
+		var_dump($this->getRelate($method));
 		$resolve = $this->{$this->getRelate($method)}();
 		if ($resolve instanceof HasBase) {
 			$resolve = $resolve->get();
@@ -314,7 +315,6 @@ class Model extends Base\Model
 		if (empty($with = $this->getWith())) {
 			return $relates;
 		}
-		var_dump($with);
 		foreach ($with as $val) {
 			$relates[$val] = $this->resolveObject($val);
 		}
