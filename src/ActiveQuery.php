@@ -199,7 +199,7 @@ class ActiveQuery extends Component implements ISqlBuilder
 	{
 		$data = $this->execute($this->builder->all())->all();
 		if (!empty($this->with)){
-			$this->modelClass->setWith($this->with);
+			$this->getWith($this->modelClass);
 		}
 		$collect = new Collection($this, $data, $this->modelClass);
 		if ($this->asArray) {
