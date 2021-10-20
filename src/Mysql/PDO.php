@@ -27,11 +27,6 @@ class PDO implements StopHeartbeatCheck
     private int $_transaction = 0;
 
 
-    /**
-     * @var EventProvider
-     */
-    private EventProvider $eventProvider;
-
     private int $_timer = -1;
 
     private int $_last = 0;
@@ -55,7 +50,6 @@ class PDO implements StopHeartbeatCheck
     public function init()
     {
         $this->heartbeat_check();
-        $this->eventProvider->on(OnWorkerExit::class, [$this, 'stopHeartbeatCheck']);
     }
 
 
