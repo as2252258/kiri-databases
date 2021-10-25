@@ -43,7 +43,6 @@ class PDO implements StopHeartbeatCheck
     public function __construct(public string $dbname, public string $cds,
                                 public string $username, public string $password, public string $chatset = 'utf8mb4')
     {
-        $this->eventProvider = Kiri::getDi()->get(EventProvider::class);
     }
 
 
