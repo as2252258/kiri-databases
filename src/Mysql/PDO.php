@@ -3,13 +3,11 @@
 namespace Database\Mysql;
 
 use Exception;
-use Http\Handler\Context;
+use Server\Context;
 use Kiri\Abstracts\Logger;
-use Kiri\Events\EventProvider;
 use Kiri\Kiri;
 use Kiri\Pool\StopHeartbeatCheck;
 use PDOStatement;
-use Server\Events\OnWorkerExit;
 use Swoole\Timer;
 
 /**
