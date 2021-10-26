@@ -3,7 +3,7 @@
 namespace Database\Mysql;
 
 use Exception;
-use Server\Context;
+use Kiri\Context;
 use Kiri\Abstracts\Logger;
 use Kiri\Kiri;
 use Kiri\Pool\StopHeartbeatCheck;
