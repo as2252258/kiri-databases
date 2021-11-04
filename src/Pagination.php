@@ -128,7 +128,7 @@ class Pagination extends Component
 	 * @return void
 	 * @throws Exception
 	 */
-	public function plunk($param = [])
+	public function plunk(array $param = [])
 	{
 		$this->loop($param);
 	}
@@ -191,8 +191,14 @@ class Pagination extends Component
 		}
 		$data = $this->activeQuery->limit($this->_offset, $this->_limit)->get();
 		$this->_offset += $this->_limit;
-		$this->_length += $data->size();
-		return [$data->size(), $data];
+
+		if (is_array($data)) {
+			$size = count($data);
+		} else {
+			$size = $data->size();
+		}
+		$this->_length += $size;
+		return [$size, $data];
 	}
 
 }
