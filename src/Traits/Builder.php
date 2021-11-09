@@ -212,6 +212,8 @@ trait Builder
 	{
 		$_array = [];
 		foreach ($condition as $key => $value) {
+			if (is_null($value)) continue;
+
 			$value = is_numeric($value) ? $value : '\'' . $value . '\'';
 			if (!is_numeric($key)) {
 				$_array[] = sprintf('%s = %s', $key, $value);
