@@ -540,7 +540,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		[$sql, $param] = SqlBuilder::builder(static::query())->insert($param);
 		$dbConnection = $this->getConnection()->createCommand($sql, $param);
-		if (!($lastId = (int)$dbConnection->save(true, $this))) {
+		if (!($lastId = (int)$dbConnection->save(true, $this->getAutoIncrement()))) {
 			throw new Exception('保存失败.');
 		}
 		$lastId = $this->setPrimary($lastId, $param);
