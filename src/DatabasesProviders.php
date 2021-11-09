@@ -57,6 +57,7 @@ class DatabasesProviders extends Providers
 		if (!$application->has('databases.' . $name)) {
 			$application->set('databases.' . $name, $this->_settings($this->getConfig($name)));
 		}
+		var_dump($this->_settings($this->getConfig($name)));
 		return $application->get('databases.' . $name);
 	}
 
