@@ -240,7 +240,7 @@ class SqlBuilder extends Component
 		if (empty($this->query->from) && !empty($this->query->modelClass)) {
 			$this->query->from($this->query->getTable());
 		}
-		return $this->_prefix();
+		return $this->_prefix(false, true);
 	}
 
 
@@ -256,14 +256,15 @@ class SqlBuilder extends Component
 
 	/**
 	 * @param bool $hasOrder
+	 * @param bool $isCount
 	 * @return string
 	 * @throws Exception
 	 */
-	private function _prefix(bool $hasOrder = false): string
+	private function _prefix(bool $hasOrder = false, bool $isCount = false): string
 	{
 		$select = '';
 		if (!empty($this->query->from)) {
-			$select = $this->_selectPrefix();
+			$select = $this->_selectPrefix($isCount);
 		}
 		$select = $this->_wherePrefix($select);
 		if (!empty($this->query->attributes) && is_array($this->query->attributes)) {
@@ -302,12 +303,13 @@ class SqlBuilder extends Component
 
 
 	/**
+	 * @param bool $isCount
 	 * @return string
 	 * @throws Exception
 	 */
-	private function _selectPrefix(): string
+	private function _selectPrefix(bool $isCount): string
 	{
-		$select = $this->builderSelect($this->query->select) . ' FROM ' . $this->tableName();
+		$select = $this->builderSelect($this->query->select, $isCount) . ' FROM ' . $this->tableName();
 		if (!empty($this->query->alias)) {
 			$select .= $this->builderAlias($this->query->alias);
 		}

@@ -61,10 +61,14 @@ trait Builder
 
 	/**
 	 * @param null $select
+	 * @param bool $isCount
 	 * @return string
 	 */
-	#[Pure] private function builderSelect($select = NULL): string
+	#[Pure] private function builderSelect($select = NULL, bool $isCount = false): string
 	{
+		if ($isCount) {
+			return "SELECT COUNT(*)";
+		}
 		if (empty($select)) {
 			return "SELECT *";
 		}
