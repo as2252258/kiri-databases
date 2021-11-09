@@ -75,7 +75,9 @@ class DatabasesProviders extends Providers
 		foreach ($databases as $name => $database) {
 			/** @var Connection $connection */
 			$application->set('databases.' . $name, $this->_settings($database));
-			$application->get('databases.' . $name)->fill();
+			$database = $application->get('databases.' . $name);
+			var_dump($database);
+			$database->fill();
 		}
 	}
 
