@@ -109,6 +109,17 @@ class Connection extends Component
 
 
 	/**
+	 * @param $config
+	 * @return $this
+	 */
+	public function configure($config): static
+	{
+		Kiri::configure($this, $config);
+		return $this;
+	}
+
+
+	/**
 	 * @throws Exception
 	 */
 	public function fill()
@@ -141,7 +152,7 @@ class Connection extends Component
 	 * @return mixed
 	 * @throws ReflectionException
 	 * @throws NotFindClassException
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	public function getSchema(): Schema
 	{

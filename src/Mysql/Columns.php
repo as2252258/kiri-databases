@@ -317,7 +317,7 @@ class Columns extends Component
 
 
 	/**
-	 * @param $column
+	 * @param array $column
 	 * @param $table
 	 * @return array
 	 */

@@ -6,13 +6,13 @@ namespace Database;
 
 use Annotation\Inject;
 use Exception;
-use Server\Events\OnWorkerStart;
 use Kiri\Abstracts\Config;
 use Kiri\Abstracts\Providers;
 use Kiri\Application;
 use Kiri\Events\EventProvider;
 use Kiri\Exception\ConfigException;
 use Kiri\Kiri;
+use Server\Events\OnWorkerStart;
 
 /**
  * Class DatabasesProviders
@@ -53,11 +53,9 @@ class DatabasesProviders extends Providers
 	 */
 	public function get($name): Connection
 	{
-		$application = Kiri::app();
-		if (!$application->has('databases.' . $name)) {
-			$application->set('databases.' . $name, $this->_settings($this->getConfig($name)));
-		}
-		return $application->get('databases.' . $name);
+		$config = $this->_settings($this->getConfig($name));
+
+		return Kiri::getDi()->get(Connection::class)->configure($config);
 	}
 
 
@@ -71,12 +69,10 @@ class DatabasesProviders extends Providers
 		if (empty($databases)) {
 			return;
 		}
-		$application = Kiri::app();
-		foreach ($databases as $name => $database) {
+		$connection = Kiri::getDi()->get(Connection::class);
+		foreach ($databases as $database) {
 			/** @var Connection $connection */
-			$application->set('databases.' . $name, $this->_settings($database));
-			$database = $application->get('databases.' . $name);
-			$database->fill();
+			$connection->configure($database)->fill();
 		}
 	}
 
