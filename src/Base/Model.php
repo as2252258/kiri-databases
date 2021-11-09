@@ -13,12 +13,10 @@ defined('SAVE_FAIL') or define('SAVE_FAIL', 3227);
 defined('FIND_OR_CREATE_MESSAGE') or define('FIND_OR_CREATE_MESSAGE', 'Create a new model, but the data cannot be empty.');
 
 
-use Annotation\Inject;
 use ArrayAccess;
 use Closure;
 use Database\ActiveQuery;
 use Database\Connection;
-use Database\HasCount;
 use Database\HasMany;
 use Database\HasOne;
 use Database\ModelInterface;
@@ -101,12 +99,6 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	/**
 	 * @var array
 	 */
-	protected array $rules = [];
-
-
-	/**
-	 * @var array
-	 */
 	private array $_with = [];
 
 
@@ -116,6 +108,15 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	#[Pure] protected function getContainer(): Application
 	{
 		return Kiri::app();
+	}
+
+
+	/**
+	 * @return array
+	 */
+	public function rules(): array
+	{
+		return [];
 	}
 
 
@@ -611,7 +612,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		if (!is_null($data)) {
 			$this->_attributes = merge($this->_attributes, $data);
 		}
-		if (!$this->validator($this->rules) || !$this->beforeSave($this)) {
+		if (!$this->validator($this->rules()) || !$this->beforeSave($this)) {
 			return false;
 		}
 		[$change, $condition, $fields] = $this->separation();
