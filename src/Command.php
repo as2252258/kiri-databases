@@ -60,7 +60,7 @@ class Command extends Component
 	 */
 	public function save(bool $isInsert = TRUE, mixed $hasAutoIncrement = null): int|bool|array|string|null
 	{
-		return $this->execute(static::EXECUTE, $isInsert, $hasAutoIncrement);
+		return $this->execute(static::EXECUTE);
 	}
 
 
@@ -111,17 +111,15 @@ class Command extends Component
 
 	/**
 	 * @param $type
-	 * @param null $isInsert
-	 * @param bool|null $hasAutoIncrement
 	 * @return int|bool|array|string|null
 	 * @throws Exception
 	 */
-	private function execute($type, $isInsert = null, mixed $hasAutoIncrement = null): int|bool|array|string|null
+	private function execute($type): int|bool|array|string|null
 	{
 		try {
 			$time = microtime(true);
 			if ($type === static::EXECUTE) {
-				$result = $this->insert_or_change($isInsert, $hasAutoIncrement);
+				$result = $this->insert_or_change();
 			} else {
 				$result = $this->search($type);
 			}
@@ -159,19 +157,13 @@ class Command extends Component
 
 
 	/**
-	 * @param $isInsert
-	 * @param $hasAutoIncrement
 	 * @return bool|int
 	 * @throws Exception
 	 */
-	private function insert_or_change($isInsert, $hasAutoIncrement): bool|int
+	private function insert_or_change(): bool|int
 	{
 		$pdo = $this->db->getConnect($this->sql);
-		$result = $pdo->execute($this->sql, $isInsert, $this->params);
-		if (!is_null($hasAutoIncrement) && $result == 0) {
-			return false;
-		}
-		return $result;
+		return $pdo->execute($this->sql,$this->params);
 	}
 
 	/**
@@ -184,14 +176,12 @@ class Command extends Component
 	}
 
 	/**
-	 * @param null $scope
-	 * @param bool $insert
 	 * @return int|bool|array|string|null
 	 * @throws Exception
 	 */
-	public function exec($scope = null, bool $insert = false): int|bool|array|string|null
+	public function exec(): int|bool|array|string|null
 	{
-		return $this->execute(static::EXECUTE, $insert, $scope);
+		return $this->execute(static::EXECUTE);
 	}
 
 	/**

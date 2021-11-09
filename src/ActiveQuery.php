@@ -269,7 +269,7 @@ class ActiveQuery extends Component implements ISqlBuilder
 		[$sql, $params] = $this->builder->insert($data, true);
 
 
-		return $this->execute($sql, $params)->exec(null, true);
+		return $this->execute($sql, $params)->exec();
 	}
 
 	/**
