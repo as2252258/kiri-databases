@@ -129,6 +129,8 @@ trait Builder
 		if (empty($where)) return '';
 		if (is_string($where)) return $where;
 		foreach ($where as $key => $value) {
+			if (is_null($value)) continue;
+
 			$_value = $this->resolveCondition($key, $value, $_tmp);
 
 			if (empty($_value)) continue;

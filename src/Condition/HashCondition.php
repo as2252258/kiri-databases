@@ -20,9 +20,8 @@ class HashCondition extends Condition
 			return '';
 		}
 		foreach ($this->value as $key => $value) {
-			if ($value === null) {
-				continue;
-			}
+			if (is_null($value)) continue;
+
 			$array[] = sprintf("%s = '%s'", $key, addslashes($value));
 		}
 		return implode(' AND ', $array);
