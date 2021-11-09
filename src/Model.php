@@ -334,7 +334,7 @@ class Model extends Base\Model
 	 */
 	public function hasOne(string $modelName, $foreignKey, $localKey): HasOne|ActiveQuery
 	{
-		if (($value = $this->getAttribute($localKey)) === null) {
+		if (($value = $this->{$localKey}) === null) {
 			throw new Exception("Need join table primary key.");
 		}
 
@@ -353,7 +353,7 @@ class Model extends Base\Model
 	 */
 	public function hasCount($modelName, $foreignKey, $localKey): ActiveQuery|HasCount
 	{
-		if (($value = $this->getAttribute($localKey)) === null) {
+		if (($value = $this->{$localKey}) === null) {
 			throw new Exception("Need join table primary key.");
 		}
 
@@ -372,7 +372,7 @@ class Model extends Base\Model
 	 */
 	public function hasMany($modelName, $foreignKey, $localKey): ActiveQuery|HasMany
 	{
-		if (($value = $this->getAttribute($localKey)) === null) {
+		if (($value = $this->{$localKey}) === null) {
 			throw new Exception("Need join table primary key.");
 		}
 
@@ -390,7 +390,7 @@ class Model extends Base\Model
 	 */
 	public function hasIn($modelName, $foreignKey, $localKey): ActiveQuery|HasMany
 	{
-		if (($value = $this->getAttribute($localKey)) === null) {
+		if (($value = $this->{$localKey}) === null) {
 			throw new Exception("Need join table primary key.");
 		}
 
