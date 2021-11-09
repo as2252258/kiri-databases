@@ -923,6 +923,7 @@ trait QueryTrait
 	private function addArray(array $array): static
 	{
 		foreach ($array as $key => $value) {
+			if (is_null($value)) continue;
 			if (is_numeric($key)) {
 				[$column, $opera, $value] = $this->opera(...$value);
 
