@@ -250,7 +250,8 @@ class PDO implements StopHeartbeatCheck
     public function execute(string $sql, $isInsert, array $params = []): int
     {
         $this->_last = time();
-        if (!(($prepare = $this->_pdo()->prepare($sql)) instanceof PDOStatement)) {
+        $pdo = $this->_pdo();
+        if (!(($prepare = $pdo->prepare($sql)) instanceof PDOStatement)) {
             throw new Exception($prepare->errorInfo()[2] ?? static::DB_ERROR_MESSAGE);
         }
         if ($prepare->execute($params) === false) {
@@ -258,7 +259,7 @@ class PDO implements StopHeartbeatCheck
         }
         $result = 1;
         if ($isInsert) {
-            $result = (int)$this->_pdo()->lastInsertId();
+            $result = (int)$pdo->lastInsertId();
         }
         $prepare->closeCursor();
         return $result;
