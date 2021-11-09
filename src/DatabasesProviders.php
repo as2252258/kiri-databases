@@ -76,7 +76,6 @@ class DatabasesProviders extends Providers
 			/** @var Connection $connection */
 			$application->set('databases.' . $name, $this->_settings($database));
 			$database = $application->get('databases.' . $name);
-			var_dump($database);
 			$database->fill();
 		}
 	}
