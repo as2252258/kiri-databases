@@ -169,7 +169,6 @@ class Command extends Component
 		$pdo = $this->db->getConnect($this->sql);
 		$result = $pdo->execute($this->sql, $isInsert, $this->params);
 		if ($hasAutoIncrement && $result == 0) {
-            var_dump($hasAutoIncrement, $result);
 			return false;
 		}
 		return $result;
