@@ -56,7 +56,7 @@ class CollectionIterator extends \ArrayIterator
 	 */
 	protected function newModel($current): ModelInterface
 	{
-		return $this->model::populate($current);
+		return $this->model->populates($current);
 	}
 
 

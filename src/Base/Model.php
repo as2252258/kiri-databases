@@ -612,7 +612,6 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function save($data = NULL): static|bool
 	{
-        var_dump($this->_attributes);
         if (!is_null($data)) {
 			$this->_attributes = merge($this->_attributes, $data);
 		}
@@ -621,11 +620,23 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		}
 		[$change, $condition, $fields] = $this->separation();
 		if (!$this->isNewExample) {
-            var_dump($fields, $condition, $change);
 			return $this->updateInternal($fields, $condition, $change);
 		}
 		return $this->insert($change, $fields);
 	}
+
+
+    /**
+     * @param $value
+     * @return $this
+     */
+    public function populates($value): static
+    {
+        $this->_attributes = $value;
+        $this->_oldAttributes = $value;
+        $this->setIsCreate(FALSE);
+        return $this;
+    }
 
 
 	/**
@@ -846,7 +857,6 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	public function refresh(): static
 	{
 		$this->_oldAttributes = $this->_attributes;
-        var_dump($this->_attributes);
 		return $this;
 	}
 
