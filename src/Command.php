@@ -129,7 +129,6 @@ class Command extends Component
 		} catch (\Throwable $exception) {
 			$result = $this->addError($this->sql . '. error: ' . $exception->getMessage(), 'mysql');
 		} finally {
-			var_dump($result);
 			$this->db->release();
 			return $result;
 		}
