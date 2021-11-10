@@ -129,7 +129,9 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		$method = di(Setter::class)->getSetter(static::class, $name);
 		if (!empty($method)) {
+            var_dump($value);
 			$value = $this->{$method}($value);
+            var_dump($value);
 		}
 		return $value;
 	}
