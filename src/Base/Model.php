@@ -129,9 +129,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		$method = di(Setter::class)->getSetter(static::class, $name);
 		if (!empty($method)) {
-            var_dump($value);
 			$value = $this->{$method}($value);
-            var_dump($value);
 		}
 		return $value;
 	}
@@ -514,10 +512,9 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		if (empty($param)) {
 			return $this;
 		}
-        foreach ($this->_attributes as $key => $attribute) {
-            $this->_attributes[$key] = $this->_setter($key, $attribute);
+        foreach ($param as $key => $attribute) {
+            $this->setAttribute($key, $attribute);
         }
-        var_dump($this->_attributes);
 		return $this;
 	}
 
