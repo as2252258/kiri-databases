@@ -119,7 +119,7 @@ class Command extends Component
 		try {
 			$time = microtime(true);
 			if ($type === static::EXECUTE) {
-				$result = $this->insert_or_change();
+				$result = $this->db->getConnect($this->sql)->execute($this->sql,$this->params);
 			} else {
 				$result = $this->search($type);
 			}
@@ -155,16 +155,6 @@ class Command extends Component
 		return $data;
 	}
 
-
-	/**
-	 * @return bool|int
-	 * @throws Exception
-	 */
-	private function insert_or_change(): bool|int
-	{
-		$pdo = $this->db->getConnect($this->sql);
-		return $pdo->execute($this->sql,$this->params);
-	}
 
 	/**
 	 * @return int|bool|array|string|null
