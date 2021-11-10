@@ -488,7 +488,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function setAttribute($name, $value): mixed
 	{
-		return $this->_attributes[$name] = $value;
+		$this->_setter($name, $value);
+		return $this->_attributes[$name];
 	}
 
 	/**
