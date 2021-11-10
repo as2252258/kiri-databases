@@ -445,10 +445,10 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 * @param array $attributes
 	 *
 	 * @param bool $if_condition_is_null
-	 * @return bool
+	 * @return bool|int
 	 * @throws Exception
 	 */
-	protected static function deleteByCondition($condition = NULL, array $attributes = [], bool $if_condition_is_null = false): bool
+	protected static function deleteByCondition($condition = NULL, array $attributes = [], bool $if_condition_is_null = false): bool|int
 	{
 		if (empty($condition)) {
 			if (!$if_condition_is_null) {
