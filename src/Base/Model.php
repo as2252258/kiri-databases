@@ -612,7 +612,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function save($data = NULL): static|bool
 	{
-		if (!is_null($data)) {
+        var_dump($this->_attributes);
+        if (!is_null($data)) {
 			$this->_attributes = merge($this->_attributes, $data);
 		}
 		if (!$this->validator($this->rules()) || !$this->beforeSave($this)) {
