@@ -515,6 +515,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
         foreach ($this->_attributes as $key => $attribute) {
             $this->_attributes[$key] = $this->_setter($key, $attribute);
         }
+        var_dump($this->_attributes);
 		return $this;
 	}
 
