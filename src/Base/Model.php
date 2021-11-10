@@ -527,8 +527,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		if (empty($param) || !is_array($param)) {
 			return $this;
 		}
-        foreach ($this->_oldAttributes as $key => $attribute) {
-            $this->_oldAttributes[$key] = $this->_setter($key, $attribute);
+        foreach ($param as $key => $attribute) {
+            $this->setOldAttribute($key, $attribute);
         }
         return $this;
 	}
