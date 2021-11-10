@@ -124,13 +124,13 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 * @param string $name
 	 * @param mixed $value
 	 */
-	private function _setter(string $name, mixed $value): void
+	private function _setter(string $name, mixed $value): mixed
 	{
 		$method = di(Setter::class)->getSetter(static::class, $name);
 		if (!empty($method)) {
 			$value = $this->{$method}($value);
 		}
-		$this->_attributes[$name] = $value;
+		return $value;
 	}
 
 
@@ -488,8 +488,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function setAttribute($name, $value): mixed
 	{
-		$this->_setter($name, $value);
-		return $this->_attributes[$name];
+		return $this->_attributes[$name] = $this->_setter($name, $value);
 	}
 
 	/**
@@ -499,7 +498,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function setOldAttribute($name, $value): mixed
 	{
-		return $this->_oldAttributes[$name] = $value;
+		return $this->_oldAttributes[$name] = $this->_setter($name, $value);
 	}
 
 	/**
@@ -513,7 +512,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 			return $this;
 		}
 		foreach ($param as $key => $value) {
-			$this->_setter($key, $value);
+			$this->_attributes[$key] = $this->_setter($key, $value);
 		}
 		return $this;
 	}
@@ -857,7 +856,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		if (method_exists($this, 'set' . ucfirst($name))) {
 			$this->{'set' . ucfirst($name)}($value);
 		} else {
-			$this->_setter($name, $value);
+			$this->_attributes[$name] = $this->_setter($name, $value);
 		}
 	}
 
