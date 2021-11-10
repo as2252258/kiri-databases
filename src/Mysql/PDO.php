@@ -250,7 +250,6 @@ class PDO implements StopHeartbeatCheck
 	{
 		$this->_last = time();
 		$pdo = $this->_pdo();
-		var_dump($sql, $params);
 		if (!(($prepare = $pdo->prepare($sql)) instanceof PDOStatement)) {
 			throw new Exception($prepare->errorInfo()[2] ?? static::DB_ERROR_MESSAGE);
 		}
