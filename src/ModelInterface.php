@@ -32,10 +32,11 @@ interface ModelInterface
 	public static function find(string|int $param): mixed;
 
 
-	/**
-	 * @return string
-	 */
-	public static function className(): string;
+    /**
+     * @param array $data
+     * @return static
+     */
+    public static function populate(array $data): static;
 
 
 	/**
