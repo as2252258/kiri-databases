@@ -17,7 +17,7 @@ use Exception;
 class CollectionIterator extends \ArrayIterator
 {
 
-	private ModelInterface|string $model;
+	private \Database\Model|string $model;
 
 
 	/** @var ActiveQuery */
@@ -56,7 +56,7 @@ class CollectionIterator extends \ArrayIterator
 	 */
 	protected function newModel($current): ModelInterface
 	{
-		return $this->model->setAttributes($current);
+		return $this->model::populate($current);
 	}
 
 

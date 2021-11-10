@@ -134,7 +134,7 @@ abstract class AbstractCollection extends Component implements \IteratorAggregat
             return NULL;
         }
         if (!($this->_item[$offset] instanceof ModelInterface)) {
-            return $this->model->setAttributes($this->_item[$offset]);
+            return $this->model::populate($this->_item[$offset]);
         }
         return $this->_item[$offset];
     }

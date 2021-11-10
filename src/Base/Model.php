@@ -646,7 +646,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	private function resolve($rule): Validator
 	{
 		$validate = Validator::getInstance();
-		$validate->setParams($this->_attributes);
+		$validate->setParams($this->getAttributes());
 		$validate->setModel($this);
 		foreach ($rule as $val) {
 			$field = array_shift($val);
