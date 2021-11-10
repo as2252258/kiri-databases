@@ -120,7 +120,6 @@ class Command extends Component
 			$time = microtime(true);
 			if ($type === static::EXECUTE) {
 				$result = $this->db->getConnect($this->sql)->execute($this->sql,$this->params);
-				var_dump($this->sql,$this->params);
 			} else {
 				$result = $this->search($type);
 			}
