@@ -448,19 +448,19 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 * @return bool|int
 	 * @throws Exception
 	 */
-	protected static function deleteByCondition($condition = NULL, array $attributes = [], bool $if_condition_is_null = false): bool|int
+	protected static function deleteByCondition($condition = NULL, array $attributes = [], bool $if_condition_is_null = false): bool
 	{
 		if (empty($condition)) {
 			if (!$if_condition_is_null) {
 				return false;
 			}
-			return static::query()->delete();
+			return (bool)static::query()->delete();
 		}
 		$model = static::query()->ifNotWhere($if_condition_is_null)->where($condition);
 		if (!empty($attributes)) {
 			$model->bindParams($attributes);
 		}
-		return $model->delete();
+		return (bool)$model->delete();
 	}
 
 
