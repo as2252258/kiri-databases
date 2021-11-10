@@ -212,14 +212,12 @@ class PDO implements StopHeartbeatCheck
 				throw new Exception($this->_pdo()->errorInfo()[1]);
 			}
 			return $this->bindValue($statement, $params);
-		} catch (\Throwable $throwable) {
-
+		} catch (\PDOException | \Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
 				$this->pdo = null;
 
 				return $this->queryPrev($sql, $params);
 			}
-
 			throw new Exception($throwable->getMessage());
 		}
 	}
