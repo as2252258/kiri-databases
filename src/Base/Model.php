@@ -612,7 +612,6 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function save($data = NULL): static|bool
 	{
-        var_dump($this->_attributes);
 		if (!is_null($data)) {
 			$this->_attributes = merge($this->_attributes, $data);
 		}
@@ -652,7 +651,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	private function resolve($rule): Validator
 	{
 		$validate = Validator::getInstance();
-		$validate->setParams($this->getAttributes());
+		$validate->setParams($this->_attributes);
 		$validate->setModel($this);
 		foreach ($rule as $val) {
 			$field = array_shift($val);
