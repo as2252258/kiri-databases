@@ -489,7 +489,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function setAttribute($name, $value): mixed
 	{
-		return $this->_attributes[$name] = $value;
+		return $this->_attributes[$name] = $this->_setter($name, $value);
 	}
 
 	/**
@@ -499,7 +499,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function setOldAttribute($name, $value): mixed
 	{
-		return $this->_oldAttributes[$name] = $value;
+		return $this->_oldAttributes[$name] = $this->_setter($name, $value);
 	}
 
 	/**
@@ -575,7 +575,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		if (!isset($param[$primary]) || empty($param[$primary])) {
 			$this->setAttribute($primary, (int)$lastId);
 		}
-		return $this->setAttributes($param);
+		return $this;
 	}
 
 
