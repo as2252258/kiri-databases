@@ -511,7 +511,9 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		if (empty($param)) {
 			return $this;
 		}
-		$this->_attributes = array_merge($this->_attributes, $param);
+		foreach ($param as $key => $value) {
+			$this->_setter($key, $value);
+		}
 		return $this;
 	}
 
@@ -541,7 +543,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		[$sql, $param] = SqlBuilder::builder(static::query())->insert($param);
 		$dbConnection = $this->getConnection()->createCommand($sql, $param);
 
-        $lastId = $dbConnection->save(true);
+		$lastId = $dbConnection->save(true);
 
 		$lastId = $this->setPrimary((int)$lastId, $param);
 
