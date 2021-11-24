@@ -865,7 +865,7 @@ trait QueryTrait
 		} else {
 			$generate->where($closure);
 		}
-		return $generate->getSql();
+		return '(' . $generate->getSql() . ')';
 	}
 
 
