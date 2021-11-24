@@ -522,7 +522,7 @@ trait QueryTrait
 			$conditionArray = $this->sprintf($conditionArray, $value, $opera);
 		}
 
-		$this->where = ['(' . implode(' AND ', $this->where) . ') OR (' . $conditionArray . ')'];
+		$this->where = ['((' . implode(' AND ', $this->where) . ') OR (' . $conditionArray . '))'];
 		return $this;
 	}
 
@@ -865,7 +865,7 @@ trait QueryTrait
 		} else {
 			$generate->where($closure);
 		}
-		return '(' . $generate->getSql() . ')';
+		return $generate->getSql();
 	}
 
 
