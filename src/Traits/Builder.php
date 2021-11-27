@@ -194,7 +194,7 @@ trait Builder
 			$class = $defaultConfig['class'];
 			unset($defaultConfig['class']);
 
-			$builder = Kiri::getDi()->get($class, [], $defaultConfig);
+			$builder = Kiri::getDi()->make($class, [], $defaultConfig);
 			$builder->setValue($condition[2]);
 			$builder->setColumn($condition[1]);
 		} else {
