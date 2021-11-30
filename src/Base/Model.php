@@ -221,7 +221,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function init()
 	{
-		$an = Kiri::app()->getAnnotation();
+		$an = Kiri::app()->getNote();
 		$an->injectProperty($this);
 	}
 
@@ -682,8 +682,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function getAttribute(string $name)
 	{
-		if ($this->hasAnnotation($name)) {
-			return $this->runAnnotation($name, $this->_attributes[$name]);
+		if ($this->hasNote($name)) {
+			return $this->runNote($name, $this->_attributes[$name]);
 		}
 		return $this->_attributes[$name] ?? null;
 	}
@@ -695,7 +695,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 * @param string $type
 	 * @return mixed
 	 */
-	protected function runAnnotation(string $name, mixed $value, string $type = self::GET): mixed
+	protected function runNote(string $name, mixed $value, string $type = self::GET): mixed
 	{
 		return call_user_func($this->_annotations[$type][$name], $value);
 	}
@@ -922,7 +922,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 * @param string $type
 	 * @return array
 	 */
-	protected function getAnnotation(string $type = self::GET): array
+	protected function getNote(string $type = self::GET): array
 	{
 		return $this->_annotations[$type] ?? [];
 	}
@@ -933,7 +933,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 * @param string $type
 	 * @return bool
 	 */
-	protected function hasAnnotation($name, string $type = self::GET): bool
+	protected function hasNote($name, string $type = self::GET): bool
 	{
 		if (!isset($this->_annotations[$type])) {
 			return false;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Database;
 
 
-use Annotation\Inject;
+use Note\Inject;
 use Exception;
 use Kiri\Abstracts\Config;
 use Kiri\Abstracts\Providers;

@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Database;
 
 
-use Annotation\Inject;
+use Note\Inject;
 use Database\Affair\BeginTransaction;
 use Database\Affair\Commit;
 use Database\Affair\Rollback;
