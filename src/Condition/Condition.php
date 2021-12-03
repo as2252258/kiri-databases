@@ -5,14 +5,13 @@ namespace Database\Condition;
 
 
 use JetBrains\PhpStorm\Pure;
-use Kiri\Abstracts\BaseObject;
-use Kiri\Core\Str;
+use Kiri\Abstracts\Component;
 
 /**
  * Class Condition
  * @package Database\Condition
  */
-abstract class Condition extends BaseObject
+abstract class Condition extends Component
 {
 
 	protected string $column = '';
