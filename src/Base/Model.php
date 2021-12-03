@@ -111,11 +111,12 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	}
 
 
-    /**
-     * @param string $name
-     * @param mixed $value
-     * @return mixed
-     */
+	/**
+	 * @param string $name
+	 * @param mixed $value
+	 * @return mixed
+	 * @throws ReflectionException
+	 */
 	private function _setter(string $name, mixed $value): mixed
 	{
 		$method = di(Setter::class)->getSetter(static::class, $name);
@@ -130,7 +131,6 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 * @param string $name
 	 * @param $value
 	 * @return mixed
-	 * @throws NotFindClassException
 	 * @throws ReflectionException
 	 */
 	private function _getter(string $name, $value): mixed
@@ -147,7 +147,6 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 * @param string $name
 	 * @param $value
 	 * @return mixed
-	 * @throws NotFindClassException
 	 * @throws ReflectionException
 	 * @throws Exception
 	 */
@@ -167,6 +166,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 
 	/**
 	 * @return EventDispatch
+	 * @throws ReflectionException
 	 */
 	protected function getEventDispatch(): EventDispatch
 	{
@@ -394,6 +394,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 
 	/**
 	 * @return static
+	 * @throws ReflectionException
 	 */
 	private static function makeNewInstance(): static
 	{
@@ -477,6 +478,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 * @param $name
 	 * @param $value
 	 * @return mixed
+	 * @throws ReflectionException
 	 */
 	public function setAttribute($name, $value): mixed
 	{
@@ -487,6 +489,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 * @param $name
 	 * @param $value
 	 * @return mixed
+	 * @throws ReflectionException
 	 */
 	public function setOldAttribute($name, $value): mixed
 	{
@@ -512,6 +515,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	/**
 	 * @param $param
 	 * @return $this
+	 * @throws ReflectionException
 	 */
 	public function setOldAttributes($param): static
 	{
@@ -772,6 +776,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 
 	/**
 	 * @return Relation|null
+	 * @throws ReflectionException
 	 */
 	public function getRelation(): ?Relation
 	{
