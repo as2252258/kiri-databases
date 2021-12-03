@@ -103,15 +103,6 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 
 
 	/**
-	 * @return Application
-	 */
-	#[Pure] protected function getContainer(): Application
-	{
-		return Kiri::app();
-	}
-
-
-	/**
 	 * @return array
 	 */
 	public function rules(): array
