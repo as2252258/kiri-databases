@@ -197,13 +197,6 @@ class Connection extends Component
 	 */
 	public function masterInstance(): PDO
 	{
-		var_dump([
-			'cds'        => $this->cds,
-			'username'   => $this->username,
-			'password'   => $this->password,
-			'attributes' => $this->attributes,
-			'dbname'     => $this->database
-		]);
 		return $this->connections()->get([
 			'cds'        => $this->cds,
 			'username'   => $this->username,
