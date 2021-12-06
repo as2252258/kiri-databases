@@ -43,7 +43,11 @@ class Connection extends Component
 
 	public string $database = '';
 
-	public int $timeout = 1900;
+	public int $connect_timeout = 30;
+
+	public int $read_timeout = 10;
+
+	public array $pool;
 
 	/**
 	 * @var bool
@@ -198,11 +202,14 @@ class Connection extends Component
 	public function masterInstance(): PDO
 	{
 		return $this->connections()->get([
-			'cds'        => $this->cds,
-			'username'   => $this->username,
-			'password'   => $this->password,
-			'attributes' => $this->attributes,
-			'dbname'     => $this->database
+			'cds'             => $this->cds,
+			'username'        => $this->username,
+			'password'        => $this->password,
+			'attributes'      => $this->attributes,
+			'connect_timeout' => $this->connect_timeout,
+			'read_timeout'    => $this->read_timeout,
+			'dbname'          => $this->database,
+			'pool'            => $this->pool
 		], true);
 	}
 

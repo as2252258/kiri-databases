@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Database;
 
 
-use Note\Inject;
 use Exception;
 use Kiri\Abstracts\Config;
 use Kiri\Abstracts\Providers;
@@ -12,6 +11,7 @@ use Kiri\Application;
 use Kiri\Events\EventProvider;
 use Kiri\Exception\ConfigException;
 use Kiri\Kiri;
+use Note\Inject;
 use Server\Events\OnWorkerStart;
 
 /**
@@ -83,18 +83,20 @@ class DatabasesProviders extends Providers
 	 */
 	private function _settings($database): array
 	{
+		$clientPool = $database['pool'] ?? ['min' => 1, 'max' => 5, 'tick' => 60];
 		return [
-			'class'       => Connection::class,
-			'id'          => $database['id'],
-			'cds'         => $database['cds'],
-			'username'    => $database['username'],
-			'password'    => $database['password'],
-			'tablePrefix' => $database['tablePrefix'],
-			'database'    => $database['database'],
-			'maxNumber'   => $this->_pooLength['max'],
-			'minNumber'   => $this->_pooLength['min'],
-			'charset'     => $database['charset'] ?? 'utf8mb4',
-			'slaveConfig' => $database['slaveConfig']
+			'id'              => $database['id'],
+			'cds'             => $database['cds'],
+			'username'        => $database['username'],
+			'password'        => $database['password'],
+			'tablePrefix'     => $database['tablePrefix'],
+			'database'        => $database['database'],
+			'connect_timeout' => $database['connect_timeout'] ?? 30,
+			'read_timeout'    => $database['read_timeout'] ?? 10,
+			'pool'            => $clientPool,
+			'attributes'      => $database['attributes'] ?? [],
+			'charset'         => $database['charset'] ?? 'utf8mb4',
+			'slaveConfig'     => $database['slaveConfig']
 		];
 	}
 

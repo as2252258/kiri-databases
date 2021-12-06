@@ -34,6 +34,8 @@ class PDO implements StopHeartbeatCheck
 	public string $username;
 	public string $password;
 	public string $charset;
+	public int $connect_timeout;
+	public int $read_timeout;
 
 
 	public array $attributes = [];
@@ -48,6 +50,8 @@ class PDO implements StopHeartbeatCheck
 		$this->cds = $config['cds'];
 		$this->username = $config['username'];
 		$this->password = $config['password'];
+		$this->connect_timeout = $config['connect_timeout'] ?? 30;
+		$this->read_timeout = $config['read_timeout'] ?? 10;
 		$this->charset = $config['charset'] ?? 'utf8mb4';
 		$this->attributes = $config['attributes'] ?? [];
 	}
@@ -302,7 +306,7 @@ class PDO implements StopHeartbeatCheck
 		$link = new \PDO('mysql:dbname=' . $this->dbname . ';host=' . $this->cds, $this->username, $this->password, [
 			\PDO::ATTR_EMULATE_PREPARES         => false,
 			\PDO::ATTR_CASE                     => \PDO::CASE_NATURAL,
-			\PDO::ATTR_TIMEOUT                  => 60,
+			\PDO::ATTR_TIMEOUT                  => $this->connect_timeout,
 			\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
 			\PDO::MYSQL_ATTR_INIT_COMMAND       => 'SET NAMES ' . $this->charset
 		]);
