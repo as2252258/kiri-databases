@@ -11,7 +11,6 @@ declare(strict_types=1);
 namespace Database;
 
 
-use Note\Inject;
 use Database\Affair\BeginTransaction;
 use Database\Affair\Commit;
 use Database\Affair\Rollback;
@@ -23,6 +22,7 @@ use Kiri\Abstracts\Config;
 use Kiri\Events\EventProvider;
 use Kiri\Exception\NotFindClassException;
 use Kiri\Kiri;
+use Note\Inject;
 use ReflectionException;
 use Server\Events\OnWorkerExit;
 use Server\Events\OnWorkerStop;
@@ -61,6 +61,7 @@ class Connection extends Component
 	 * @var array
 	 */
 	public array $slaveConfig = [];
+	public array $attributes = [];
 
 
 	/**
@@ -197,10 +198,11 @@ class Connection extends Component
 	public function masterInstance(): PDO
 	{
 		return $this->connections()->get([
-			'cds'      => $this->cds,
-			'username' => $this->username,
-			'password' => $this->password,
-			'database' => $this->database
+			'cds'        => $this->cds,
+			'username'   => $this->username,
+			'password'   => $this->password,
+			'attributes' => $this->attributes,
+			'dbname'     => $this->database
 		], true);
 	}
 
