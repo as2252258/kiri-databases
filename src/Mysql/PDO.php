@@ -44,7 +44,6 @@ class PDO implements StopHeartbeatCheck
 	 */
 	public function __construct(array $config)
 	{
-		var_dump($config);
 		$this->dbname = $config['dbname'];
 		$this->cds = $config['cds'];
 		$this->username = $config['username'];
