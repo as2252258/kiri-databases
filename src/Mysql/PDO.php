@@ -29,18 +29,27 @@ class PDO implements StopHeartbeatCheck
 
 	private int $_last = 0;
 
+	public string $dbname;
+	public string $cds;
+	public string $username;
+	public string $password;
+	public string $charset;
+
+
+	public array $attributes = [];
+
 
 	/**
-	 * @param string $dbname
-	 * @param string $cds
-	 * @param string $username
-	 * @param string $password
-	 * @param string $chatset
-	 * @throws
+	 * @param array $config
 	 */
-	public function __construct(public string $dbname, public string $cds,
-	                            public string $username, public string $password, public string $chatset = 'utf8mb4')
+	public function __construct(array $config)
 	{
+		$this->dbname = $config['dbname'];
+		$this->cds = $config['cds'];
+		$this->username = $config['username'];
+		$this->password = $config['password'];
+		$this->charset = $config['charset'] ?? 'utf8mb4';
+		$this->attributes = $config['attributes'] ?? [];
 	}
 
 
@@ -83,7 +92,7 @@ class PDO implements StopHeartbeatCheck
 				Kiri::getDi()->get(Logger::class)->critical('timer end');
 				$this->stopHeartbeatCheck();
 			}
-			if (time() - $this->_last > (int)Config::get('databases.pool.tick',60)) {
+			if (time() - $this->_last > (int)Config::get('databases.pool.tick', 60)) {
 				$this->stopHeartbeatCheck();
 				$this->pdo = null;
 			}
@@ -295,11 +304,16 @@ class PDO implements StopHeartbeatCheck
 			\PDO::ATTR_CASE                     => \PDO::CASE_NATURAL,
 			\PDO::ATTR_TIMEOUT                  => 60,
 			\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-			\PDO::MYSQL_ATTR_INIT_COMMAND       => 'SET NAMES ' . $this->chatset
+			\PDO::MYSQL_ATTR_INIT_COMMAND       => 'SET NAMES ' . $this->charset
 		]);
 		$link->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 		$link->setAttribute(\PDO::ATTR_STRINGIFY_FETCHES, false);
 		$link->setAttribute(\PDO::ATTR_ORACLE_NULLS, \PDO::NULL_EMPTY_STRING);
+		if (!empty($this->attributes) && is_array($this->attributes)) {
+			foreach ($this->attributes as $key => $attribute) {
+				$link->setAttribute($key, $attribute);
+			}
+		}
 		return $link;
 	}
 
