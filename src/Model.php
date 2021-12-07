@@ -117,6 +117,7 @@ class Model extends Base\Model
 		if (empty($select)) {
 			$select = duplicate(static::class);
 			$select->attributes = $attributes;
+			$select->setIsNowExample(true);
 			if (!$select->save()) {
 				Db::rollback();
 				return $logger->addError($select->getLastError(), 'mysql');

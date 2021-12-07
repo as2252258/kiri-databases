@@ -40,7 +40,7 @@ use validator\Validator;
  *
  * @package Kiri\Abstracts
  *
- * @property bool $isCreate
+ * @property bool $isNowExample
  * @property Application $container
  * @property EventDispatch $eventDispatch
  * @property array $attributes
@@ -229,7 +229,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	/**
 	 * @return bool
 	 */
-	public function getIsCreate(): bool
+	public function getIsNowExample(): bool
 	{
 		return $this->isNewExample === TRUE;
 	}
@@ -239,7 +239,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 * @param bool $bool
 	 * @return $this
 	 */
-	public function setIsCreate(bool $bool = FALSE): static
+	public function setIsNowExample(bool $bool = FALSE): static
 	{
 		$this->isNewExample = $bool;
 		return $this;
@@ -629,7 +629,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
     {
         $this->_attributes = $value;
         $this->_oldAttributes = $value;
-        $this->setIsCreate(FALSE);
+        $this->setIsNowExample(FALSE);
         return $this;
     }
 
@@ -1058,7 +1058,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		$model = duplicate(static::class);
 		$model->_attributes = $data;
 		$model->_oldAttributes = $data;
-		$model->setIsCreate(false);
+		$model->setIsNowExample(false);
 		return $model;
 	}
 
