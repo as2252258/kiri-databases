@@ -76,23 +76,17 @@ class Connection extends Component
 
 
 	/**
-	 * @var EventProvider
-	 */
-	#[Inject(EventProvider::class)]
-	public EventProvider $eventProvider;
-
-
-	/**
 	 * execute by __construct
 	 * @throws Exception
 	 */
 	public function init()
 	{
-		$this->eventProvider->on(OnWorkerStop::class, [$this, 'clear_connection'], 0);
-		$this->eventProvider->on(OnWorkerExit::class, [$this, 'clear_connection'], 0);
-		$this->eventProvider->on(BeginTransaction::class, [$this, 'beginTransaction'], 0);
-		$this->eventProvider->on(Rollback::class, [$this, 'rollback'], 0);
-		$this->eventProvider->on(Commit::class, [$this, 'commit'], 0);
+		$eventProvider = Kiri::getDi()->get(EventProvider::class);
+		$eventProvider->on(OnWorkerStop::class, [$this, 'clear_connection'], 0);
+		$eventProvider->on(OnWorkerExit::class, [$this, 'clear_connection'], 0);
+		$eventProvider->on(BeginTransaction::class, [$this, 'beginTransaction'], 0);
+		$eventProvider->on(Rollback::class, [$this, 'rollback'], 0);
+		$eventProvider->on(Commit::class, [$this, 'commit'], 0);
 
 		if (Db::transactionsActive()) {
 			$this->beginTransaction();

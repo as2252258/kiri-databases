@@ -11,7 +11,6 @@ use Kiri\Application;
 use Kiri\Events\EventProvider;
 use Kiri\Exception\ConfigException;
 use Kiri\Kiri;
-use Note\Inject;
 use Server\Events\OnWorkerStart;
 
 /**
@@ -22,13 +21,6 @@ class DatabasesProviders extends Providers
 {
 
 	private array $_pooLength = ['min' => 0, 'max' => 1];
-
-
-	/**
-	 * @var EventProvider
-	 */
-	#[Inject(EventProvider::class)]
-	public EventProvider $eventProvider;
 
 
 	/**
