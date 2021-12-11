@@ -645,7 +645,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
         if (empty($rule)) return TRUE;
         $validate = $this->resolve($rule);
         if (!$validate->validation()) {
-            return $this->addError('$validate->getError()', 'mysql');
+            return $this->addError($validate->getError(), 'mysql');
         } else {
             return TRUE;
         }
