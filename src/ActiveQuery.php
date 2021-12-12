@@ -87,7 +87,7 @@ class ActiveQuery extends Component implements ISqlBuilder
      * @return array
      * @throws Exception
      */
-    #[ArrayShape(['size' => "int", 'page' => "int", 'count' => "int", 'next' => "int", 'prev' => "int", 'list' => "array"])]
+    #[ArrayShape(['code' => "int", 'size' => "mixed", 'page' => "mixed", 'count' => "int", 'next' => "mixed", 'prev' => "mixed", 'params' => "array"])]
     public function pagination(int $size = 20, int $page = 1): array
     {
         $page = max(1, $page);
@@ -98,12 +98,13 @@ class ActiveQuery extends Component implements ISqlBuilder
         $count = $this->count();
         $lists = $this->limit($offset, $size)->get()->toArray();
         return [
-            'size'  => $size,
-            'page'  => $page,
-            'count' => $count,
-            'next'  => max($page + 1, 1),
-            'prev'  => max($page - 1, 1),
-            'list'  => $lists,
+            'code'   => 0,
+            'size'   => $size,
+            'page'   => $page,
+            'count'  => $count,
+            'next'   => max($page + 1, 1),
+            'prev'   => max($page - 1, 1),
+            'params' => $lists,
         ];
     }
 
