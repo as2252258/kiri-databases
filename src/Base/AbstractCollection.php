@@ -92,7 +92,7 @@ abstract class AbstractCollection extends Component implements \IteratorAggregat
      */
     public function addItem($item)
     {
-        array_push($this->_item, $item);
+        $this->_item[] = $item;
     }
 
     /**
