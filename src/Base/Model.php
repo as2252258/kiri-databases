@@ -33,6 +33,7 @@ use Kiri\Exception\NotFindClassException;
 use Kiri\Kiri;
 use Kiri\ToArray;
 use ReflectionException;
+use ReturnTypeWillChange;
 use validator\Validator;
 
 /**
@@ -1000,7 +1001,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
      * @param mixed $value
      * @throws Exception
      */
-    public function offsetSet(mixed $offset, mixed $value)
+    #[ReturnTypeWillChange] public function offsetSet(mixed $offset, mixed $value)
     {
         $this->__set($offset, $value);
     }
@@ -1009,7 +1010,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
      * @param mixed $offset
      * @throws Exception
      */
-    public function offsetUnset(mixed $offset)
+    #[ReturnTypeWillChange] public function offsetUnset(mixed $offset)
     {
         if (!isset($this->_attributes[$offset])
             && !isset($this->_oldAttributes[$offset])) {
