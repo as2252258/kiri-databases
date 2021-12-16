@@ -17,6 +17,7 @@ use Kiri\ToArray;
 use Exception;
 use JetBrains\PhpStorm\Pure;
 use Kiri\Abstracts\Component;
+use ReturnTypeWillChange;
 use Traversable;
 
 /**
@@ -143,7 +144,7 @@ abstract class AbstractCollection extends Component implements \IteratorAggregat
      * @param mixed $offset
      * @param mixed $value
      */
-    public function offsetSet(mixed $offset, mixed $value)
+    #[ReturnTypeWillChange] public function offsetSet(mixed $offset, mixed $value)
     {
         $this->_item[$offset] = $value;
     }
@@ -152,7 +153,7 @@ abstract class AbstractCollection extends Component implements \IteratorAggregat
     /**
      * @param mixed $offset
      */
-    public function offsetUnset(mixed $offset)
+    #[ReturnTypeWillChange] public function offsetUnset(mixed $offset)
     {
         if ($this->offsetExists($offset)) {
             unset($this->_item[$offset]);
