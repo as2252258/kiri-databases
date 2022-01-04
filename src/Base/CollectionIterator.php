@@ -20,31 +20,17 @@ class CollectionIterator extends \ArrayIterator
 	private ModelInterface|string $model;
 
 
-	/** @var ActiveQuery */
-	private ActiveQuery $query;
-
-
-	private ?ModelInterface $_clone = null;
-
-
-	public function clean()
-	{
-		unset($this->query);
-	}
-
 
 	/**
 	 * CollectionIterator constructor.
 	 * @param $model
-	 * @param $query
 	 * @param array $array
 	 * @param int $flags
 	 * @throws Exception
 	 */
-	public function __construct($model, $query, array $array = [], int $flags = 0)
+	public function __construct($model, array $array = [], int $flags = 0)
 	{
 		$this->model = $model;
-		$this->query = $query;
 		parent::__construct($array, $flags);
 	}
 

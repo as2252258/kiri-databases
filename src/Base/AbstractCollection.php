@@ -101,7 +101,7 @@ abstract class AbstractCollection extends Component implements \IteratorAggregat
      */
     public function getIterator(): Traversable|CollectionIterator|ArrayIterator
     {
-        return new CollectionIterator($this->model, $this->query, $this->_item);
+        return new CollectionIterator($this->model, $this->_item);
     }
 
 
