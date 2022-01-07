@@ -39,9 +39,6 @@ class Command extends Component
 	/** @var string */
 	public string $dbname = '';
 
-	/** @var PDOStatement|null */
-	private ?PDOStatement $prepare = null;
-
 
 	/**
 	 * @return array|bool|int|string|PDOStatement|null
@@ -53,12 +50,10 @@ class Command extends Component
 	}
 
 	/**
-	 * @param bool $isInsert
-	 * @param mixed $hasAutoIncrement
 	 * @return int|bool|array|string|null
 	 * @throws Exception
 	 */
-	public function save(bool $isInsert = TRUE, mixed $hasAutoIncrement = null): int|bool|array|string|null
+	public function save(): int|bool|array|string|null
 	{
 		return $this->execute(static::EXECUTE);
 	}
@@ -110,11 +105,11 @@ class Command extends Component
 	}
 
 	/**
-	 * @param $type
+	 * @param string $type
 	 * @return int|bool|array|string|null
 	 * @throws Exception
 	 */
-	private function execute($type): int|bool|array|string|null
+	private function execute(string $type): int|bool|array|string|null
 	{
 		try {
 			$time = microtime(true);
@@ -136,11 +131,11 @@ class Command extends Component
 
 
 	/**
-	 * @param $type
+	 * @param string $type
 	 * @return array|int|bool|null
 	 * @throws Exception
 	 */
-	private function search($type): array|int|bool|null
+	private function search(string $type): array|int|bool|null
 	{
 		$pdo = $this->db->getConnect($this->sql);
 		if ($type === static::FETCH_COLUMN) {
@@ -180,9 +175,6 @@ class Command extends Component
 	 */
 	public function bindValues(array $data = []): static
 	{
-		if (!is_array($this->params)) {
-			$this->params = [];
-		}
 		if (!empty($data)) {
 			$this->params = array_merge($this->params, $data);
 		}

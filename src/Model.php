@@ -17,6 +17,7 @@ use Kiri\Exception\NotFindClassException;
 use Kiri\Kiri;
 use Kiri\ToArray;
 use ReflectionException;
+use Swoole\Coroutine;
 
 defined('SAVE_FAIL') or define('SAVE_FAIL', 3227);
 defined('FIND_OR_CREATE_MESSAGE') or define('FIND_OR_CREATE_MESSAGE', 'Create a new model, but the data cannot be empty.');
@@ -213,16 +214,18 @@ class Model extends Base\Model
 	 */
 	public function delete(): bool
 	{
-		$conditions = $this->_oldAttributes;
-		if (empty($conditions)) {
-			return $this->addError("Delete condition do not empty.", 'mysql');
-		}
 		$primary = $this->getPrimary();
-
-		if (!empty($primary)) {
-			$conditions = [$primary => $this->getAttribute($primary)];
+		if (empty($primary) || !$this->hasPrimaryValue()) {
+			return $this->addError("Only primary key operations are supported.", 'mysql');
 		}
-		return static::deleteByCondition($conditions);
+		if (!$this->beforeDelete()) {
+			$result = static::deleteByCondition([$primary => $this->getPrimaryValue()]);
+			Coroutine::create(function () use ($result) {
+				$this->afterDelete($result);
+			});
+			return $result;
+		}
+		return false;
 	}
 
 
@@ -401,12 +404,11 @@ class Model extends Base\Model
 	}
 
 	/**
-	 * @return bool
-	 * @throws Exception
+	 * @param bool $result
+	 * @return void
 	 */
-	public function afterDelete(): bool
+	public function afterDelete(bool $result): void
 	{
-		return TRUE;
 	}
 
 	/**
