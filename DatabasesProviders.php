@@ -8,7 +8,6 @@ use Exception;
 use Kiri\Abstracts\Config;
 use Kiri\Abstracts\Providers;
 use Kiri\Application;
-use Kiri\Events\EventProvider;
 use Kiri\Exception\ConfigException;
 use Kiri\Kiri;
 use Server\Events\OnWorkerStart;
@@ -20,8 +19,6 @@ use Server\Events\OnWorkerStart;
 class DatabasesProviders extends Providers
 {
 
-	private array $_pooLength = ['min' => 0, 'max' => 1];
-
 
 	/**
 	 * @param Application $application
@@ -29,10 +26,6 @@ class DatabasesProviders extends Providers
 	 */
 	public function onImport(Application $application)
 	{
-		$application->set('db', $this);
-
-		$this->_pooLength = Config::get('databases.pool', ['min' => 0, 'max' => 1]);
-
 		$this->eventProvider->on(OnWorkerStart::class, [$this, 'createPool']);
 	}
 
@@ -40,14 +33,11 @@ class DatabasesProviders extends Providers
 	/**
 	 * @param $name
 	 * @return Connection
-	 * @throws ConfigException
 	 * @throws Exception
 	 */
 	public function get($name): Connection
 	{
-		$config = $this->_settings($this->getConfig($name));
-
-		return Kiri::getDi()->get(Connection::class)->configure($config);
+		return Kiri::app()->get($name);
 	}
 
 
@@ -61,10 +51,15 @@ class DatabasesProviders extends Providers
 		if (empty($databases)) {
 			return;
 		}
-		$connection = Kiri::getDi()->get(Connection::class);
-		foreach ($databases as $database) {
-			/** @var Connection $connection */
-			$connection->configure($database)->fill();
+
+		$app = Kiri::app();
+		foreach ($databases as $key => $database) {
+			$database = $this->_settings($database);
+
+			$connection = Kiri::getDi()->create(Connection::class, $database);
+			$connection->fill();
+
+			$app->set($key, $connection);
 		}
 	}
 
@@ -90,17 +85,6 @@ class DatabasesProviders extends Providers
 			'charset'         => $database['charset'] ?? 'utf8mb4',
 			'slaveConfig'     => $database['slaveConfig']
 		];
-	}
-
-
-	/**
-	 * @param $name
-	 * @return mixed
-	 * @throws ConfigException
-	 */
-	public function getConfig($name): mixed
-	{
-		return Config::get('databases.connections.' . $name, null, true);
 	}
 
 

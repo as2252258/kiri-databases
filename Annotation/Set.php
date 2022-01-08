@@ -1,10 +1,10 @@
 <?php
 
 
-namespace Database\Note;
+namespace Database\Annotation;
 
 
-use Note\Attribute;
+use Kiri\Annotation\Attribute;
 use Database\Base\Setter;
 use Exception;
 

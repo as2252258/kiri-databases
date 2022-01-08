@@ -195,7 +195,7 @@ trait QueryTrait
 	 * @param string $column
 	 * @return $this
 	 */
-	public function whereNotEmpty(string $column): static
+	public function whereAnnotationmpty(string $column): static
 	{
 		$this->where[] = $column . ' <> \'\'';
 		return $this;

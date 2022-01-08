@@ -22,7 +22,7 @@ use Kiri\Abstracts\Config;
 use Kiri\Events\EventProvider;
 use Kiri\Exception\NotFindClassException;
 use Kiri\Kiri;
-use Note\Inject;
+use Kiri\Annotation\Inject;
 use ReflectionException;
 use Server\Events\OnWorkerExit;
 use Server\Events\OnWorkerStop;
@@ -68,11 +68,7 @@ class Connection extends Component
 	public array $attributes = [];
 
 
-	/**
-	 * @var Schema
-	 */
-	#[Inject(Schema::class)]
-	public Schema $_schema;
+	private ?Schema $_schema = null;
 
 
 	/**
@@ -86,12 +82,6 @@ class Connection extends Component
 		$this->eventProvider->on(BeginTransaction::class, [$this, 'beginTransaction'], 0);
 		$this->eventProvider->on(Rollback::class, [$this, 'rollback'], 0);
 		$this->eventProvider->on(Commit::class, [$this, 'commit'], 0);
-
-		if (Db::transactionsActive()) {
-			$this->beginTransaction();
-		}
-
-		$this->_schema->db = $this;
 	}
 
 
@@ -103,17 +93,6 @@ class Connection extends Component
 	public function getConnect($sql = NULL): PDO
 	{
 		return $this->getPdo($sql);
-	}
-
-
-	/**
-	 * @param $config
-	 * @return $this
-	 */
-	public function configure($config): static
-	{
-		Kiri::configure($this, $config);
-		return $this;
 	}
 
 

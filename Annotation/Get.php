@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Database\Note;
+namespace Database\Annotation;
 
 
 use Attribute;
@@ -11,9 +11,9 @@ use Exception;
 
 /**
  * Class Get
- * @package Note\Model
+ * @package Annotation\Model
  */
-#[Attribute(Attribute::TARGET_METHOD)] class Get extends \Note\Attribute
+#[Attribute(Attribute::TARGET_METHOD)] class Get extends \Annotation\Attribute
 {
 
 

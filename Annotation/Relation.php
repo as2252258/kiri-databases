@@ -1,17 +1,17 @@
 <?php
 
 
-namespace Database\Note;
+namespace Database\Annotation;
 
 
-use Note\Attribute;
+use Kiri\Annotation\Attribute;
 use Database\Base\Relate;
 use Exception;
 
 
 /**
  * Class Relation
- * @package Note\Model
+ * @package Annotation\Model
  */
 #[\Attribute(\Attribute::TARGET_METHOD)] class Relation extends Attribute
 {
