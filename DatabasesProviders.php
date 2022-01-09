@@ -56,7 +56,7 @@ class DatabasesProviders extends Providers
 		foreach ($databases as $key => $database) {
 			$database = $this->_settings($database);
 
-			$connection = Kiri::getDi()->create(Connection::class, $database);
+			$connection = Kiri::getDi()->create(Connection::class, [$database]);
 			$connection->fill();
 
 			$app->set($key, $connection);
