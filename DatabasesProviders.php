@@ -10,7 +10,7 @@ use Kiri\Abstracts\Providers;
 use Kiri\Application;
 use Kiri\Exception\ConfigException;
 use Kiri\Kiri;
-use Server\Events\OnWorkerStart;
+use Kiri\Server\Events\OnWorkerStart;
 
 /**
  * Class DatabasesProviders

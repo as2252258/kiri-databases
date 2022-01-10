@@ -24,8 +24,8 @@ use Kiri\Exception\NotFindClassException;
 use Kiri\Kiri;
 use Kiri\Annotation\Inject;
 use ReflectionException;
-use Server\Events\OnWorkerExit;
-use Server\Events\OnWorkerStop;
+use Kiri\Server\Events\OnWorkerExit;
+use Kiri\Server\Events\OnWorkerStop;
 
 /**
  * Class Connection
