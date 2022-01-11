@@ -10,6 +10,7 @@ use Kiri\Abstracts\Providers;
 use Kiri\Application;
 use Kiri\Exception\ConfigException;
 use Kiri\Kiri;
+use Kiri\Server\Events\OnTaskerStart;
 use Kiri\Server\Events\OnWorkerStart;
 
 /**
@@ -27,6 +28,7 @@ class DatabasesProviders extends Providers
 	public function onImport(Application $application)
 	{
 		$this->eventProvider->on(OnWorkerStart::class, [$this, 'createPool']);
+		$this->eventProvider->on(OnTaskerStart::class, [$this, 'createPool']);
 	}
 
 
@@ -45,7 +47,7 @@ class DatabasesProviders extends Providers
 	 * @throws ConfigException
 	 * @throws Exception
 	 */
-	public function createPool(OnWorkerStart $onWorkerStart)
+	public function createPool(OnWorkerStart|OnTaskerStart $onWorkerStart)
 	{
 		$databases = Config::get('databases.connections', []);
 		if (empty($databases)) {
