@@ -14,7 +14,7 @@ use Database\Base\Getter;
 use Database\Traits\HasBase;
 use Exception;
 use Kiri\Exception\NotFindClassException;
-use Kiri\Kiri;
+use Kiri;
 use Kiri\ToArray;
 use ReflectionException;
 use Swoole\Coroutine;

@@ -12,7 +12,7 @@ use Database\Query;
 use Exception;
 use JetBrains\PhpStorm\Pure;
 use Kiri\Exception\NotFindClassException;
-use Kiri\Kiri;
+use Kiri;
 use ReflectionException;
 
 

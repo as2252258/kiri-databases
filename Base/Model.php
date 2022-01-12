@@ -27,7 +27,7 @@ use Database\Traits\HasBase;
 use Exception;
 use Kiri\Abstracts\Component;
 use Kiri\Exception\NotFindClassException;
-use Kiri\Kiri;
+use Kiri;
 use Kiri\ToArray;
 use ReflectionException;
 use ReturnTypeWillChange;

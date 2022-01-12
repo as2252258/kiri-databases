@@ -21,7 +21,7 @@ use Kiri\Abstracts\Component;
 use Kiri\Abstracts\Config;
 use Kiri\Events\EventProvider;
 use Kiri\Exception\NotFindClassException;
-use Kiri\Kiri;
+use Kiri;
 use Kiri\Annotation\Inject;
 use ReflectionException;
 use Kiri\Server\Events\OnWorkerExit;

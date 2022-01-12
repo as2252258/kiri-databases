@@ -18,7 +18,7 @@ use Database\Query;
 use Database\SqlBuilder;
 use Exception;
 use Kiri\Exception\NotFindClassException;
-use Kiri\Kiri;
+use Kiri;
 use ReflectionException;
 
 /**

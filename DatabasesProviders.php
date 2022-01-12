@@ -9,7 +9,7 @@ use Kiri\Abstracts\Config;
 use Kiri\Abstracts\Providers;
 use Kiri\Application;
 use Kiri\Exception\ConfigException;
-use Kiri\Kiri;
+use Kiri;
 use Kiri\Server\Events\OnTaskerStart;
 use Kiri\Server\Events\OnWorkerStart;
 

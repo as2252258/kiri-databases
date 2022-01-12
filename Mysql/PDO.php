@@ -5,7 +5,7 @@ namespace Database\Mysql;
 use Exception;
 use Kiri\Abstracts\Config;
 use Kiri\Abstracts\Logger;
-use Kiri\Kiri;
+use Kiri;
 use Kiri\Pool\StopHeartbeatCheck;
 use PDOStatement;
 use Swoole\Timer;
