@@ -819,6 +819,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 			throw new Exception('You need add static method `tableName` and return table name.');
 		}
 		$table = trim($this->table, '{%}');
+		var_dump($this->table, $table);
 		if (!empty($tablePrefix) && !str_starts_with($table, $tablePrefix)) {
 			$table = $tablePrefix . $table;
 		}
