@@ -3,10 +3,11 @@
 namespace Database\Mysql;
 
 use Exception;
-use Kiri\Abstracts\Config;
-use Kiri\Abstracts\Logger;
 use Kiri;
+use Kiri\Abstracts\Config;
+use Kiri\Events\EventProvider;
 use Kiri\Pool\StopHeartbeatCheck;
+use Kiri\Server\Events\OnWorkerExit;
 use PDOStatement;
 use Swoole\Timer;
 
@@ -38,6 +39,9 @@ class PDO implements StopHeartbeatCheck
 	public int $read_timeout;
 
 
+	private EventProvider $eventProvider;
+
+
 	public array $attributes = [];
 
 
@@ -57,9 +61,14 @@ class PDO implements StopHeartbeatCheck
 	}
 
 
-	public function init()
+	/**
+	 * @return void
+	 */
+	public function init(): void
 	{
 		$this->heartbeat_check();
+		$this->eventProvider = Kiri::getDi()->get(EventProvider::class);
+		$this->eventProvider->on(OnWorkerExit::class, [$this, 'onWorkerExit']);
 	}
 
 
@@ -73,13 +82,20 @@ class PDO implements StopHeartbeatCheck
 
 
 	/**
+	 * @param Kiri\Server\Events\OnWorkerExit $exit
+	 * @return void
+	 */
+	public function onWorkerExit(OnWorkerExit $exit)
+	{
+		$this->stopHeartbeatCheck();
+	}
+
+
+	/**
 	 *
 	 */
 	public function heartbeat_check(): void
 	{
-		if (env('state', 'start') == 'exit') {
-			return;
-		}
 		if ($this->_timer === -1) {
 			$this->_timer = Timer::tick(1000, fn() => $this->waite());
 		}
@@ -92,12 +108,14 @@ class PDO implements StopHeartbeatCheck
 	private function waite(): void
 	{
 		try {
-			if (env('state', 'start') == 'exit') {
-				Kiri::getDi()->get(Logger::class)->critical('timer end');
+			if ($this->_timer == -1) {
 				$this->stopHeartbeatCheck();
 			}
 			if (time() - $this->_last > (int)Config::get('databases.pool.tick', 60)) {
 				$this->stopHeartbeatCheck();
+
+				$this->eventProvider->off(OnWorkerExit::class, [$this, 'stopHeartbeatCheck']);
+
 				$this->pdo = null;
 			}
 		} catch (\Throwable $throwable) {
@@ -232,7 +250,7 @@ class PDO implements StopHeartbeatCheck
 				throw new Exception($this->_pdo()->errorInfo()[1]);
 			}
 			return $this->bindValue($statement, $params);
-		} catch (\PDOException | \Throwable $throwable) {
+		} catch (\PDOException|\Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
 				$this->pdo = null;
 
@@ -313,7 +331,7 @@ class PDO implements StopHeartbeatCheck
 		$link->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 		$link->setAttribute(\PDO::ATTR_STRINGIFY_FETCHES, false);
 		$link->setAttribute(\PDO::ATTR_ORACLE_NULLS, \PDO::NULL_EMPTY_STRING);
-		if (!empty($this->attributes) && is_array($this->attributes)) {
+		if (!empty($this->attributes)) {
 			foreach ($this->attributes as $key => $attribute) {
 				$link->setAttribute($key, $attribute);
 			}
