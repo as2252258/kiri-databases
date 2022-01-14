@@ -12,6 +12,7 @@ use Kiri\Application;
 use Kiri\Exception\ConfigException;
 use Kiri\Server\Events\OnTaskerStart;
 use Kiri\Server\Events\OnWorkerStart;
+use Kiri\Server\Events\OnProcessStart;
 
 /**
  * Class DatabasesProviders
@@ -28,6 +29,7 @@ class DatabasesProviders extends Providers
 	public function onImport(Application $application)
 	{
 		$this->eventProvider->on(OnWorkerStart::class, [$this, 'createPool']);
+		$this->eventProvider->on(OnProcessStart::class, [$this, 'createPool']);
 		$this->eventProvider->on(OnTaskerStart::class, [$this, 'createPool']);
 	}
 
