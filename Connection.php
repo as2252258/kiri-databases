@@ -97,7 +97,7 @@ class Connection extends Component
 	/**
 	 * @throws Exception
 	 */
-	public function fill($config)
+	public function fill()
 	{
 		$connections = $this->connections();
 		$pool = Config::get('databases.pool.max', 10);
@@ -107,31 +107,42 @@ class Connection extends Component
 			$connections->initConnections('Mysql:' . $this->slaveConfig['cds'], false, $pool);
 		}
 		$name = $connections->name('Mysql:' . $this->cds, true);
+
+		$config = $this->_config();
 		for ($i = 0; $i < $pool; $i++) {
-			$connections->addItem($name, $connections->create($name, [
-				'cds'             => $this->cds,
-				'username'        => $this->username,
-				'password'        => $this->password,
-				'attributes'      => $this->attributes,
-				'connect_timeout' => $this->connect_timeout,
-				'read_timeout'    => $this->read_timeout,
-				'dbname'          => $this->database,
-				'pool'            => $this->pool
-			])());
+			$connections->addItem($name, $connections->create($name, $config)());
 		}
-		$name = $connections->name('Mysql:' . $this->cds, false);
+
+		if (empty($this->slaveConfig)) {
+			return;
+		}
+
+		$config['cds'] = $this->slaveConfig['cds'];
+		$config['username'] = $this->slaveConfig['username'];
+		$config['password'] = $this->slaveConfig['password'];
+
+		$name = $connections->name('Mysql:' . $config['cds'], false);
 		for ($i = 0; $i < $pool; $i++) {
-			$connections->addItem($name, $connections->create($name, [
-				'cds'             => $this->cds,
-				'username'        => $this->username,
-				'password'        => $this->password,
-				'attributes'      => $this->attributes,
-				'connect_timeout' => $this->connect_timeout,
-				'read_timeout'    => $this->read_timeout,
-				'dbname'          => $this->database,
-				'pool'            => $this->pool
-			])());
+			$connections->addItem($name, $connections->create($name, $config)());
 		}
+	}
+
+
+	/**
+	 * @return array
+	 */
+	private function _config(): array
+	{
+		return [
+			'cds'             => $this->cds,
+			'username'        => $this->username,
+			'password'        => $this->password,
+			'attributes'      => $this->attributes,
+			'connect_timeout' => $this->connect_timeout,
+			'read_timeout'    => $this->read_timeout,
+			'dbname'          => $this->database,
+			'pool'            => $this->pool
+		];
 	}
 
 
