@@ -57,7 +57,7 @@ class DatabasesProviders extends Providers
 			$database = $this->_settings($database);
 
 			$connection = Kiri::getDi()->create(Connection::class, [$database]);
-			$connection->fill();
+			$connection->fill($database);
 
 			$app->set($key, $connection);
 		}

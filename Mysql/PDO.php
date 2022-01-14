@@ -114,8 +114,6 @@ class PDO implements StopHeartbeatCheck
 			if (time() - $this->_last > (int)Config::get('databases.pool.tick', 60)) {
 				$this->stopHeartbeatCheck();
 
-				$this->eventProvider->off(OnWorkerExit::class, [$this, 'stopHeartbeatCheck']);
-
 				$this->pdo = null;
 			}
 		} catch (\Throwable $throwable) {

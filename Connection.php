@@ -17,15 +17,13 @@ use Database\Affair\Rollback;
 use Database\Mysql\PDO;
 use Database\Mysql\Schema;
 use Exception;
+use Kiri;
 use Kiri\Abstracts\Component;
 use Kiri\Abstracts\Config;
-use Kiri\Events\EventProvider;
 use Kiri\Exception\NotFindClassException;
-use Kiri;
-use Kiri\Annotation\Inject;
-use ReflectionException;
 use Kiri\Server\Events\OnWorkerExit;
 use Kiri\Server\Events\OnWorkerStop;
+use ReflectionException;
 
 /**
  * Class Connection
@@ -99,7 +97,7 @@ class Connection extends Component
 	/**
 	 * @throws Exception
 	 */
-	public function fill()
+	public function fill($config)
 	{
 		$connections = $this->connections();
 		$pool = Config::get('databases.pool.max', 10);
@@ -107,6 +105,14 @@ class Connection extends Component
 		$connections->initConnections('Mysql:' . $this->cds, true, $pool);
 		if (!empty($this->slaveConfig) && $this->cds != $this->slaveConfig['cds']) {
 			$connections->initConnections('Mysql:' . $this->slaveConfig['cds'], false, $pool);
+		}
+		$name = $connections->name('Mysql:' . $this->cds, true);
+		for ($i = 0; $i < $pool; $i++) {
+			$pool->push($name, $connections->create($name, $config));
+		}
+		$name = $connections->name('Mysql:' . $this->cds, false);
+		for ($i = 0; $i < $pool; $i++) {
+			$pool->push($name, $connections->create($name, $config));
 		}
 	}
 
