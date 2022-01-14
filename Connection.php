@@ -108,11 +108,29 @@ class Connection extends Component
 		}
 		$name = $connections->name('Mysql:' . $this->cds, true);
 		for ($i = 0; $i < $pool; $i++) {
-			$connections->addItem($name, $connections->create($name, $config)());
+			$connections->addItem($name, $connections->create($name, [
+				'cds'             => $this->cds,
+				'username'        => $this->username,
+				'password'        => $this->password,
+				'attributes'      => $this->attributes,
+				'connect_timeout' => $this->connect_timeout,
+				'read_timeout'    => $this->read_timeout,
+				'dbname'          => $this->database,
+				'pool'            => $this->pool
+			])());
 		}
 		$name = $connections->name('Mysql:' . $this->cds, false);
 		for ($i = 0; $i < $pool; $i++) {
-			$connections->addItem($name, $connections->create($name, $config)());
+			$connections->addItem($name, $connections->create($name, [
+				'cds'             => $this->cds,
+				'username'        => $this->username,
+				'password'        => $this->password,
+				'attributes'      => $this->attributes,
+				'connect_timeout' => $this->connect_timeout,
+				'read_timeout'    => $this->read_timeout,
+				'dbname'          => $this->database,
+				'pool'            => $this->pool
+			])());
 		}
 	}
 
