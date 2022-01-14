@@ -325,8 +325,13 @@ class Connection extends Component
 			return;
 		}
 		$connections = $this->connections();
-		$connections->release($this->cds, true);
-		$connections->release($this->slaveConfig['cds'], false);
+		$connections->release($this->cds, true, $config = $this->_config());
+
+		$config['cds'] = $this->slaveConfig['cds'];
+		$config['username'] = $this->slaveConfig['username'];
+		$config['password'] = $this->slaveConfig['password'];
+
+		$connections->release($this->slaveConfig['cds'], false, $config);
 	}
 
 
@@ -337,8 +342,13 @@ class Connection extends Component
 	{
 		$connections = $this->connections();
 
-		$connections->release($this->cds, true);
-		$connections->release($this->slaveConfig['cds'], false);
+		$connections->release($this->cds, true, $config = $this->_config());
+
+		$config['cds'] = $this->slaveConfig['cds'];
+		$config['username'] = $this->slaveConfig['username'];
+		$config['password'] = $this->slaveConfig['password'];
+
+		$connections->release($this->slaveConfig['cds'], false, $config);
 	}
 
 	/**
