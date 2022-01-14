@@ -108,11 +108,11 @@ class Connection extends Component
 		}
 		$name = $connections->name('Mysql:' . $this->cds, true);
 		for ($i = 0; $i < $pool; $i++) {
-			$connections->release($name, $connections->create($name, $config)());
+			$connections->addItem($name, $connections->create($name, $config)());
 		}
 		$name = $connections->name('Mysql:' . $this->cds, false);
 		for ($i = 0; $i < $pool; $i++) {
-			$connections->release($name, $connections->create($name, $config)());
+			$connections->addItem($name, $connections->create($name, $config)());
 		}
 	}
 
