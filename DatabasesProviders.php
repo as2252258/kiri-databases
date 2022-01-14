@@ -49,7 +49,7 @@ class DatabasesProviders extends Providers
 	 * @throws ConfigException
 	 * @throws Exception
 	 */
-	public function createPool(OnTaskerStart|OnWorkerStart $onWorkerStart)
+	public function createPool(OnTaskerStart|OnWorkerStart|OnProcessStart $onWorkerStart)
 	{
 		$databases = Config::get('databases.connections', []);
 		if (empty($databases)) {
