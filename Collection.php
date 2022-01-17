@@ -82,10 +82,10 @@ class Collection extends AbstractCollection
 	 */
 	#[Pure] public function slice(int $start = 0, int $length = 20): array
 	{
-		if (empty($this->_item) || !is_array($this->_item)) {
+		if (empty($this->_item)) {
 			return [];
 		}
-		if (count($this->_item) < $length) {
+		if (\count($this->_item) < $length) {
 			return $this->_item;
 		} else {
 			return array_slice($this->_item, $start, $length);
@@ -138,7 +138,7 @@ class Collection extends AbstractCollection
 	 */
 	#[Pure] public function size(): int
 	{
-		return (int)count($this->_item);
+		return count($this->_item);
 	}
 
 	/**
