@@ -106,25 +106,25 @@ class Connection extends Component
 		if (!empty($this->slaveConfig) && $this->cds != $this->slaveConfig['cds']) {
 			$connections->initConnections('Mysql:' . $this->slaveConfig['cds'], false, $pool);
 		}
-		$name = $connections->name('Mysql:' . $this->cds, true);
-
-		$config = $this->_config();
-		for ($i = 0; $i < $pool; $i++) {
-			$connections->addItem($name, $connections->create($name, $config)());
-		}
-
-		if (empty($this->slaveConfig)) {
-			return;
-		}
-
-		$config['cds'] = $this->slaveConfig['cds'];
-		$config['username'] = $this->slaveConfig['username'];
-		$config['password'] = $this->slaveConfig['password'];
-
-		$name = $connections->name('Mysql:' . $config['cds'], false);
-		for ($i = 0; $i < $pool; $i++) {
-			$connections->addItem($name, $connections->create($name, $config)());
-		}
+//		$name = $connections->name('Mysql:' . $this->cds, true);
+//
+//		$config = $this->_config();
+//		for ($i = 0; $i < $pool; $i++) {
+//			$connections->addItem($name, $connections->create($name, $config)());
+//		}
+//
+//		if (empty($this->slaveConfig)) {
+//			return;
+//		}
+//
+//		$config['cds'] = $this->slaveConfig['cds'];
+//		$config['username'] = $this->slaveConfig['username'];
+//		$config['password'] = $this->slaveConfig['password'];
+//
+//		$name = $connections->name('Mysql:' . $config['cds'], false);
+//		for ($i = 0; $i < $pool; $i++) {
+//			$connections->addItem($name, $connections->create($name, $config)());
+//		}
 	}
 
 
