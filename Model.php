@@ -114,8 +114,7 @@ class Model extends Base\Model
 		}
 		$model = new static();
 
-		/** @var Connection $database */
-		$database = Kiri::app()->get($model->getConnection());
+		$database = $model->getConnection();
 		$database->beginTransaction();
 		try {
 			/** @var static $select */
