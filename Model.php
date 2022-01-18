@@ -112,7 +112,6 @@ class Model extends Base\Model
 		if (empty($attributes)) {
 			return $logger->addError(FIND_OR_CREATE_MESSAGE, 'mysql');
 		}
-		Db::beginTransaction();
 		try {
 			/** @var static $select */
 			$select = static::query()->where($condition)->first();
@@ -123,11 +122,8 @@ class Model extends Base\Model
 					throw new Exception($select->getLastError());
 				}
 			}
-			Db::commit();
-
 			return $select;
 		} catch (\Throwable $throwable) {
-			Db::rollback();
 			return $logger->addError($throwable->getMessage(), 'mysql');
 		}
 	}
