@@ -13,8 +13,8 @@ namespace Database;
 use Database\Base\Getter;
 use Database\Traits\HasBase;
 use Exception;
-use Kiri\Exception\NotFindClassException;
 use Kiri;
+use Kiri\Exception\NotFindClassException;
 use Kiri\ToArray;
 use ReflectionException;
 use Swoole\Coroutine;
@@ -113,24 +113,23 @@ class Model extends Base\Model
 			return $logger->addError(FIND_OR_CREATE_MESSAGE, 'mysql');
 		}
 		Db::beginTransaction();
-
-		/** @var static $select */
-		$select = static::query()->where($condition)->first();
-		var_dump($select);
-		if (empty($select)) {
-			$select = new static();
-			$select->attributes = $attributes;
-			if (!$select->save()) {
-				var_dump('end rollback');
-				Db::rollback();
-				return $logger->addError($select->getLastError(), 'mysql');
+		try {
+			/** @var static $select */
+			$select = static::query()->where($condition)->first();
+			if (empty($select)) {
+				$select = new static();
+				$select->attributes = $attributes;
+				if (!$select->save()) {
+					throw new Exception($select->getLastError());
+				}
 			}
+			Db::commit();
+
+			return $select;
+		} catch (\Throwable $throwable) {
+			Db::rollback();
+			return $logger->addError($throwable->getMessage(), 'mysql');
 		}
-
-		var_dump('end commit');
-
-		Db::commit();
-		return $select;
 	}
 
 
