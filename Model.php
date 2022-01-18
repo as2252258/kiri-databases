@@ -112,18 +112,14 @@ class Model extends Base\Model
 		if (empty($attributes)) {
 			return $logger->addError(FIND_OR_CREATE_MESSAGE, 'mysql');
 		}
-		var_dump('start transaction');
 		Db::beginTransaction();
-
-
-		var_dump('after transaction');
 
 		/** @var static $select */
 		$select = static::query()->where($condition)->first();
+		var_dump($select);
 		if (empty($select)) {
 			$select = new static();
 			$select->attributes = $attributes;
-			$select->setIsNowExample(true);
 			if (!$select->save()) {
 				var_dump('end rollback');
 				Db::rollback();
