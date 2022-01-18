@@ -112,7 +112,7 @@ class Model extends Base\Model
 		if (empty($attributes)) {
 			return $logger->addError(FIND_OR_CREATE_MESSAGE, 'mysql');
 		}
-		Db::beginTransaction();
+//		Db::beginTransaction();
 		/** @var static $select */
 		$select = static::query()->where($condition)->first();
 		if (empty($select)) {
@@ -120,11 +120,11 @@ class Model extends Base\Model
 			$select->attributes = $attributes;
 			$select->setIsNowExample(true);
 			if (!$select->save()) {
-				Db::rollback();
+//				Db::rollback();
 				return $logger->addError($select->getLastError(), 'mysql');
 			}
 		}
-		Db::commit();
+//		Db::commit();
 		return $select;
 	}
 
