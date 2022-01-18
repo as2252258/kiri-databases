@@ -112,18 +112,29 @@ class Model extends Base\Model
 		if (empty($attributes)) {
 			return $logger->addError(FIND_OR_CREATE_MESSAGE, 'mysql');
 		}
+		$model = new static();
+
+		/** @var Connection $database */
+		$database = Kiri::app()->get($model->getConnection());
+		$database->beginTransaction();
 		try {
 			/** @var static $select */
 			$select = static::query()->where($condition)->first();
 			if (empty($select)) {
-				$select = new static();
+				$select = $model;
 				$select->attributes = $attributes;
 				if (!$select->save()) {
 					throw new Exception($select->getLastError());
 				}
 			}
+
+			$database->commit();
+
 			return $select;
 		} catch (\Throwable $throwable) {
+
+			$database->rollback();
+
 			return $logger->addError($throwable->getMessage(), 'mysql');
 		}
 	}
