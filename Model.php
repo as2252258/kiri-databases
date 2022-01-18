@@ -114,6 +114,10 @@ class Model extends Base\Model
 		}
 		var_dump('start transaction');
 		Db::beginTransaction();
+
+
+		var_dump('after transaction');
+
 		/** @var static $select */
 		$select = static::query()->where($condition)->first();
 		if (empty($select)) {
