@@ -121,7 +121,7 @@ class Model extends Base\Model
 		/** @var static $select */
 		$select = static::query()->where($condition)->first();
 		if (empty($select)) {
-			$select = duplicate(static::class);
+			$select = new static();
 			$select->attributes = $attributes;
 			$select->setIsNowExample(true);
 			if (!$select->save()) {
