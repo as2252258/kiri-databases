@@ -43,7 +43,8 @@ class Db implements ISqlBuilder
 	public static function beginTransaction()
 	{
 		if (!static::transactionsActive()) {
-			di(EventDispatch::class)->dispatch(new BeginTransaction());
+			$event = \Kiri::getDi()->get(EventDispatch::class);
+			$event->dispatch(new BeginTransaction());
 		}
 		static::$_inTransaction = true;
 	}
@@ -55,7 +56,8 @@ class Db implements ISqlBuilder
 	public static function commit()
 	{
 		if (static::transactionsActive()) {
-			di(EventDispatch::class)->dispatch(new Commit());
+			$event = \Kiri::getDi()->get(EventDispatch::class);
+			$event->dispatch(new Commit());
 		}
 		static::$_inTransaction = false;
 	}
@@ -67,7 +69,8 @@ class Db implements ISqlBuilder
 	public static function rollback()
 	{
 		if (static::transactionsActive()) {
-			di(EventDispatch::class)->dispatch(new Rollback());
+			$event = \Kiri::getDi()->get(EventDispatch::class);
+			$event->dispatch(new Rollback());
 		}
 		static::$_inTransaction = false;
 	}
