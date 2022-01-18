@@ -142,7 +142,6 @@ class Model extends Base\Model
 			return $logger->addError(FIND_OR_CREATE_MESSAGE, 'mysql');
 		}
 
-		Db::beginTransaction();
 		/** @var static $select */
 		$select = static::query()->where($condition)->first();
 		if (empty($select)) {
@@ -150,10 +149,7 @@ class Model extends Base\Model
 		}
 		$select->attributes = $attributes;
 		if (!$select->save()) {
-			Db::rollback();
 			$select = $logger->addError($select->getLastError(), 'mysql');
-		} else {
-			Db::commit();
 		}
 		return $select;
 	}
