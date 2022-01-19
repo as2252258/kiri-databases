@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Database;
 
-use Exception;
 use Database\Traits\HasBase;
+use Exception;
 
 /**
  * Class HasCount
@@ -21,10 +21,10 @@ class HasCount extends HasBase
 	 */
 	public function __call($name, $arguments)
 	{
-		if (method_exists($this, $name)) {
-			return call_user_func([$this, $name], ...$arguments);
+		if (!method_exists($this, $name)) {
+			return $this->_relation->getQuery($this->model::className())->$name(...$arguments);
 		}
-		return $this->_relation->getQuery($this->model::className())->$name(...$arguments);
+		return call_user_func([$this, $name], ...$arguments);
 	}
 
 	/**

@@ -6,10 +6,11 @@
  * Time: 13:58
  */
 declare(strict_types=1);
+
 namespace Database;
 
-use Exception;
 use Database\Traits\HasBase;
+use Exception;
 
 /**
  * Class HasMany
@@ -27,10 +28,10 @@ class HasMany extends HasBase
 	 */
 	public function __call($name, $arguments)
 	{
-		if (method_exists($this, $name)) {
-			return call_user_func([$this, $name], ...$arguments);
+		if (!method_exists($this, $name)) {
+			return $this->_relation->getQuery($this->model::className())->$name(...$arguments);
 		}
-		return $this->_relation->getQuery($this->model::className())->$name(...$arguments);
+		return call_user_func([$this, $name], ...$arguments);
 	}
 
 	/**
