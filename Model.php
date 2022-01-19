@@ -114,8 +114,7 @@ class Model extends Base\Model
 		}
 		$model = new static();
 
-		$database = $model->getConnection();
-		$database->beginTransaction();
+		$database = $model->getConnection()->beginTransaction();
 		try {
 			/** @var static $select */
 			$select = static::query()->where($condition)->first();
@@ -152,16 +151,23 @@ class Model extends Base\Model
 			return $logger->addError(FIND_OR_CREATE_MESSAGE, 'mysql');
 		}
 
-		/** @var static $select */
-		$select = static::query()->where($condition)->first();
-		if (empty($select)) {
-			$select = duplicate(static::class);
+		$database = (new static())->getConnection()->beginTransaction();
+		try {
+			/** @var static $select */
+			$select = static::query()->where($condition)->first();
+			if (empty($select)) {
+				$select = duplicate(static::class);
+			}
+			$select->attributes = $attributes;
+			if (!$select->save()) {
+				throw new Exception($select->getLastError());
+			}
+			$database->commit();
+			return $select;
+		} catch (\Throwable $throwable) {
+			$database->rollback();
+			return $logger->addError($throwable->getMessage(), 'mysql');
 		}
-		$select->attributes = $attributes;
-		if (!$select->save()) {
-			$select = $logger->addError($select->getLastError(), 'mysql');
-		}
-		return $select;
 	}
 
 
