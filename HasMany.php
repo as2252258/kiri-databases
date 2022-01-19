@@ -23,9 +23,9 @@ class HasMany extends HasBase
 	/**
 	 * @param $name
 	 * @param $arguments
-	 * @return ActiveQuery
+	 * @return ActiveQuery|static
 	 */
-	public function __call($name, $arguments): mixed
+	public function __call($name, $arguments)
 	{
 		if (method_exists($this, $name)) {
 			return call_user_func([$this, $name], ...$arguments);

@@ -39,9 +39,6 @@ class PDO implements StopHeartbeatCheck
 	public int $read_timeout;
 
 
-	private EventProvider $eventProvider;
-
-
 	public array $attributes = [];
 
 
@@ -67,8 +64,8 @@ class PDO implements StopHeartbeatCheck
 	public function init(): void
 	{
 		$this->heartbeat_check();
-		$this->eventProvider = Kiri::getDi()->get(EventProvider::class);
-		$this->eventProvider->on(OnWorkerExit::class, [$this, 'onWorkerExit']);
+		$eventProvider = Kiri::getDi()->get(EventProvider::class);
+		$eventProvider->on(OnWorkerExit::class, [$this, 'onWorkerExit']);
 	}
 
 

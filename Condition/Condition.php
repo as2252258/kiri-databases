@@ -18,7 +18,7 @@ abstract class Condition extends Component
 	protected string $opera = '=';
 
 	/** @var array|mixed */
-	protected $value;
+	protected mixed $value;
 
 	const INT_TYPE = ['bit', 'bool', 'tinyint', 'smallint', 'mediumint', 'int', 'bigint', 'float', 'double', 'decimal', 'timestamp'];
 

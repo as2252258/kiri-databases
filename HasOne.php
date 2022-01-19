@@ -9,8 +9,8 @@ declare(strict_types=1);
 
 namespace Database;
 
-use Exception;
 use Database\Traits\HasBase;
+use Exception;
 
 /**
  * Class HasOne
@@ -23,9 +23,9 @@ class HasOne extends HasBase
 	/**
 	 * @param $name
 	 * @param $arguments
-	 * @return ActiveQuery
+	 * @return ActiveQuery|static
 	 */
-	public function __call($name, $arguments): mixed
+	public function __call($name, $arguments)
 	{
 		if (method_exists($this, $name)) {
 			return call_user_func([$this, $name], ...$arguments);

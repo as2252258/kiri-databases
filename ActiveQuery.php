@@ -135,7 +135,7 @@ class ActiveQuery extends Component implements ISqlBuilder
             $name = explode(',', $name);
         }
         foreach ($name as $val) {
-            array_push($this->with, $val);
+	        $this->with[] = $val;
         }
         return $this;
     }
