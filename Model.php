@@ -112,29 +112,16 @@ class Model extends Base\Model
 		if (empty($attributes)) {
 			return $logger->addError(FIND_OR_CREATE_MESSAGE, 'mysql');
 		}
-		$model = new static();
-
-		$database = $model->getConnection()->beginTransaction();
-		try {
-			/** @var static $select */
-			$select = static::query()->where($condition)->first();
-			if (empty($select)) {
-				$select = $model;
-				$select->attributes = $attributes;
-				if (!$select->save()) {
-					throw new Exception($select->getLastError());
-				}
+		/** @var static $select */
+		$select = static::query()->where($condition)->first();
+		if (empty($select)) {
+			$select = duplicate(static::class);
+			$select->attributes = $attributes;
+			if (!$select->save()) {
+				throw new Exception($select->getLastError());
 			}
-
-			$database->commit();
-
-			return $select;
-		} catch (\Throwable $throwable) {
-
-			$database->rollback();
-
-			return $logger->addError($throwable->getMessage(), 'mysql');
 		}
+		return $select;
 	}
 
 
@@ -150,24 +137,16 @@ class Model extends Base\Model
 		if (empty($attributes)) {
 			return $logger->addError(FIND_OR_CREATE_MESSAGE, 'mysql');
 		}
-
-		$database = (new static())->getConnection()->beginTransaction();
-		try {
-			/** @var static $select */
-			$select = static::query()->where($condition)->first();
-			if (empty($select)) {
-				$select = duplicate(static::class);
-			}
-			$select->attributes = $attributes;
-			if (!$select->save()) {
-				throw new Exception($select->getLastError());
-			}
-			$database->commit();
-			return $select;
-		} catch (\Throwable $throwable) {
-			$database->rollback();
-			return $logger->addError($throwable->getMessage(), 'mysql');
+		/** @var static $select */
+		$select = static::query()->where($condition)->first();
+		if (empty($select)) {
+			$select = duplicate(static::class);
 		}
+		$select->attributes = $attributes;
+		if (!$select->save()) {
+			throw new Exception($select->getLastError());
+		}
+		return $select;
 	}
 
 
