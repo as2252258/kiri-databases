@@ -75,11 +75,11 @@ class Connection extends Component
 	 */
 	public function init()
 	{
-		$this->eventProvider->on(OnWorkerStop::class, [$this, 'clear_connection'], 0);
-		$this->eventProvider->on(OnWorkerExit::class, [$this, 'clear_connection'], 0);
-		$this->eventProvider->on(BeginTransaction::class, [$this, 'beginTransaction'], 0);
-		$this->eventProvider->on(Rollback::class, [$this, 'rollback'], 0);
-		$this->eventProvider->on(Commit::class, [$this, 'commit'], 0);
+		$this->getEventProvider()->on(OnWorkerStop::class, [$this, 'clear_connection'], 0);
+		$this->getEventProvider()->on(OnWorkerExit::class, [$this, 'clear_connection'], 0);
+		$this->getEventProvider()->on(BeginTransaction::class, [$this, 'beginTransaction'], 0);
+		$this->getEventProvider()->on(Rollback::class, [$this, 'rollback'], 0);
+		$this->getEventProvider()->on(Commit::class, [$this, 'commit'], 0);
 	}
 
 

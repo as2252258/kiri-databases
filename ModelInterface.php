@@ -32,11 +32,11 @@ interface ModelInterface
 	public static function find(string|int $param): mixed;
 
 
-    /**
-     * @param array $data
-     * @return static
-     */
-    public static function populate(array $data): static;
+	/**
+	 * @param array $data
+	 * @return static
+	 */
+	public static function populate(array $data): static;
 
 
 	/**
@@ -44,6 +44,12 @@ interface ModelInterface
 	 * return a sql queryBuilder
 	 */
 	public static function query(): ActiveQuery;
+
+
+	/**
+	 * @return string
+	 */
+	public function getPrimary(): string;
 
 
 	/**

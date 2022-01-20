@@ -28,9 +28,9 @@ class DatabasesProviders extends Providers
 	 */
 	public function onImport(Application $application)
 	{
-		$this->eventProvider->on(OnWorkerStart::class, [$this, 'createPool']);
-		$this->eventProvider->on(OnProcessStart::class, [$this, 'createPool']);
-		$this->eventProvider->on(OnTaskerStart::class, [$this, 'createPool']);
+		$this->getEventProvider()->on(OnWorkerStart::class, [$this, 'createPool']);
+		$this->getEventProvider()->on(OnProcessStart::class, [$this, 'createPool']);
+		$this->getEventProvider()->on(OnTaskerStart::class, [$this, 'createPool']);
 	}
 
 

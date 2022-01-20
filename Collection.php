@@ -166,15 +166,12 @@ class Collection extends AbstractCollection
 	public function delete(): bool
 	{
 		$model = $this->getModel();
-		if (!$model->hasPrimary()) return false;
-		$ids = [];
-		foreach ($this as $item) {
-			$id = $item->getPrimaryValue();
-			if (!empty($id)) {
-				$ids[] = $id;
-			}
+		if ($model->hasPrimary()) {
+			$key = $model->getPrimary();
+
+			return $model::query()->whereIn($key, $this->column($key))->delete();
 		}
-		return $model::query()->whereIn($model->getPrimary(), $ids)->delete();
+		throw new Exception('Must set primary key. if you wante delete');
 	}
 
 	/**
