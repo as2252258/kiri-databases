@@ -23,6 +23,8 @@ use Kiri\Abstracts\Config;
 use Kiri\Exception\NotFindClassException;
 use Kiri\Server\Events\OnWorkerExit;
 use Kiri\Server\Events\OnWorkerStop;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use ReflectionException;
 
 /**
@@ -70,8 +72,9 @@ class Connection extends Component
 
 
 	/**
-	 * execute by __construct
-	 * @throws Exception
+	 * @return void
+	 * @throws ContainerExceptionInterface
+	 * @throws NotFoundExceptionInterface
 	 */
 	public function init()
 	{
