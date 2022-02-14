@@ -47,9 +47,9 @@ interface ModelInterface
 
 
 	/**
-	 * @return string
+	 * @return ?string
 	 */
-	public function getPrimary(): string;
+	public function getPrimary(): ?string;
 
 
 	/**
