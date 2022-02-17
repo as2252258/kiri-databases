@@ -13,6 +13,9 @@ use Kiri\Exception\ConfigException;
 use Kiri\Server\Events\OnTaskerStart;
 use Kiri\Server\Events\OnWorkerStart;
 use Kiri\Server\Events\OnProcessStart;
+use Kiri\Events\OnBeforeCommandExecute;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class DatabasesProviders
@@ -24,13 +27,13 @@ class DatabasesProviders extends Providers
 
 	/**
 	 * @param Application $application
-	 * @throws Exception
+	 * @return void
+	 * @throws ContainerExceptionInterface
+	 * @throws NotFoundExceptionInterface
 	 */
 	public function onImport(Application $application)
 	{
-		$this->getEventProvider()->on(OnWorkerStart::class, [$this, 'createPool']);
-		$this->getEventProvider()->on(OnProcessStart::class, [$this, 'createPool']);
-		$this->getEventProvider()->on(OnTaskerStart::class, [$this, 'createPool']);
+		$this->getEventProvider()->on(OnBeforeCommandExecute::class, [$this, 'createPool']);
 	}
 
 
@@ -49,7 +52,7 @@ class DatabasesProviders extends Providers
 	 * @throws ConfigException
 	 * @throws Exception
 	 */
-	public function createPool(OnTaskerStart|OnWorkerStart|OnProcessStart $onWorkerStart)
+	public function createPool(OnBeforeCommandExecute $onWorkerStart)
 	{
 		$databases = Config::get('databases.connections', []);
 		if (empty($databases)) {
