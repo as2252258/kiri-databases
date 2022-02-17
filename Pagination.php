@@ -146,10 +146,13 @@ class Pagination extends Component
 			return $this->output();
 		}
 		[$length, $data] = $this->get();
-
-		$this->executed($data, $param);
-
-		unset($data);
+		try {
+			call_user_func($this->_callback, $data, $param);
+		} catch (\Throwable $exception) {
+			$this->addError($exception, 'throwable');
+		} finally {
+			$data = null;
+		}
 		if ($length < $this->_limit) {
 			return $this->output();
 		}
