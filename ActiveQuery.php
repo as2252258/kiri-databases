@@ -87,7 +87,6 @@ class ActiveQuery extends Component implements ISqlBuilder
      * @return array
      * @throws Exception
      */
-    #[ArrayShape(['code' => "int", 'message' => "string", 'size' => "mixed", 'page' => "mixed", 'count' => "int", 'next' => "mixed", 'prev' => "mixed", 'param' => "array"])]
     public function pagination(int $size = 20, int $page = 1): array
     {
         $page = max(1, $page);
