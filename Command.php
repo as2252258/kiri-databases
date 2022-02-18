@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Database;
 
 
+use Database\Mysql\PDO;
 use Exception;
 use Kiri\Abstracts\Component;
 use Kiri\Core\Json;
@@ -21,11 +22,11 @@ use PDOStatement;
  */
 class Command extends Component
 {
-	const ROW_COUNT = 'ROW_COUNT';
-	const FETCH = 'FETCH';
-	const FETCH_ALL = 'FETCH_ALL';
-	const EXECUTE = 'EXECUTE';
-	const FETCH_COLUMN = 'FETCH_COLUMN';
+	const ROW_COUNT = 'count';
+	const FETCH = 'fetch';
+	const FETCH_ALL = 'fetchAll';
+	const EXECUTE = 'execute';
+	const FETCH_COLUMN = 'fetchColumn';
 
 	/** @var Connection */
 	public Connection $db;
@@ -104,6 +105,7 @@ class Command extends Component
 		return $this->execute(static::EXECUTE);
 	}
 
+
 	/**
 	 * @param string $type
 	 * @return int|bool|array|string|null
@@ -111,16 +113,41 @@ class Command extends Component
 	 */
 	private function execute(string $type): int|bool|array|string|null
 	{
+		$pdo = $this->db->getConnect($this->sql);
+		$time = microtime(true);
+		if ($type !== static::EXECUTE) {
+			$result = $this->search($type, $pdo);
+		} else {
+			$result = $this->_execute($pdo);
+		}
+		return $this->_timeout_log($time, $result);
+	}
+
+
+	/**
+	 * @param int $time
+	 * @param mixed $result
+	 * @return mixed
+	 * @throws Exception
+	 */
+	private function _timeout_log(int $time, mixed $result): mixed
+	{
+		if (microtime(true) - $time >= 0.02) {
+			$this->warning('Mysql:' . Json::encode([$this->sql, $this->params]) . (microtime(true) - $time));
+		}
+		return $result;
+	}
+
+
+	/**
+	 * @param PDO $pdo
+	 * @return bool|int
+	 * @throws Exception
+	 */
+	private function _execute(PDO $pdo): bool|int
+	{
 		try {
-			$time = microtime(true);
-			if ($type === static::EXECUTE) {
-				$result = $this->db->getConnect($this->sql)->execute($this->sql,$this->params);
-			} else {
-				$result = $this->search($type);
-			}
-			if (microtime(true) - $time >= 0.02) {
-				$this->warning('Mysql:' . Json::encode([$this->sql, $this->params]) . (microtime(true) - $time));
-			}
+			$result = $pdo->execute($this->sql, $this->params);
 		} catch (\Throwable $exception) {
 			$result = $this->addError($this->sql . '. error: ' . $exception->getMessage(), 'mysql');
 		} finally {
@@ -132,22 +159,20 @@ class Command extends Component
 
 	/**
 	 * @param string $type
+	 * @param PDO $pdo
 	 * @return array|int|bool|null
 	 * @throws Exception
 	 */
-	private function search(string $type): array|int|bool|null
+	private function search(string $type, PDO $pdo): array|int|bool|null
 	{
-		$pdo = $this->db->getConnect($this->sql);
-		if ($type === static::FETCH_COLUMN) {
-			$data = $pdo->fetchColumn($this->sql, $this->params);
-		} else if ($type === static::ROW_COUNT) {
-			$data = $pdo->count($this->sql, $this->params);
-		} else if ($type === static::FETCH_ALL) {
-			$data = $pdo->fetchAll($this->sql, $this->params);
-		} else {
-			$data = $pdo->fetch($this->sql, $this->params);
+		try {
+			$data = $pdo->{$type}($this->sql, $this->params);
+		} catch (\Throwable $throwable) {
+			$data = $this->addError($this->sql . '. error: ' . $throwable->getMessage(), 'mysql');
+		} finally {
+			$this->db->releaseSlaveConnect($pdo);
+			return $data;
 		}
-		return $data;
 	}
 
 
