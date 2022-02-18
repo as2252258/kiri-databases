@@ -9,11 +9,7 @@ use Kiri;
 use Kiri\Abstracts\Config;
 use Kiri\Abstracts\Providers;
 use Kiri\Application;
-use Kiri\Events\OnBeforeCommandExecute;
 use Kiri\Exception\ConfigException;
-use Kiri\Server\Events\OnServerBeforeStart;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class DatabasesProviders
@@ -26,12 +22,19 @@ class DatabasesProviders extends Providers
 	/**
 	 * @param Application $application
 	 * @return void
-	 * @throws ContainerExceptionInterface
-	 * @throws NotFoundExceptionInterface
+	 * @throws ConfigException
 	 */
 	public function onImport(Application $application)
 	{
-		$this->getEventProvider()->on(CreateConnectionPool::class, [$this, 'createPool']);
+		$databases = Config::get('databases.connections', []);
+		if (empty($databases)) {
+			return;
+		}
+
+		$app = Kiri::app();
+		foreach ($databases as $key => $database) {
+			$app->set($key, $this->_settings($database));
+		}
 	}
 
 
@@ -45,30 +48,6 @@ class DatabasesProviders extends Providers
 		return Kiri::app()->get($name);
 	}
 
-
-	/**
-	 * @throws ConfigException
-	 * @throws Exception
-	 */
-	public function createPool(OnServerBeforeStart $onWorkerStart)
-	{
-		$databases = Config::get('databases.connections', []);
-		if (empty($databases)) {
-			return;
-		}
-
-		$app = Kiri::app();
-		foreach ($databases as $key => $database) {
-			$database = $this->_settings($database);
-
-			$connection = Kiri::getDi()->create(Connection::class, [$database]);
-			$connection->fill();
-
-			$app->set($key, $connection);
-		}
-	}
-
-
 	/**
 	 * @param $database
 	 * @return array
@@ -79,6 +58,7 @@ class DatabasesProviders extends Providers
 		return [
 			'id'              => $database['id'],
 			'cds'             => $database['cds'],
+			'class'           => Connection::class,
 			'username'        => $database['username'],
 			'password'        => $database['password'],
 			'tablePrefix'     => $database['tablePrefix'],

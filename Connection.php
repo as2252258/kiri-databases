@@ -75,14 +75,18 @@ class Connection extends Component
 	 * @return void
 	 * @throws ContainerExceptionInterface
 	 * @throws NotFoundExceptionInterface
+	 * @throws Exception
 	 */
 	public function init()
 	{
-		$this->getEventProvider()->on(OnWorkerStop::class, [$this, 'clear_connection'], 0);
-		$this->getEventProvider()->on(OnWorkerExit::class, [$this, 'clear_connection'], 0);
-		$this->getEventProvider()->on(BeginTransaction::class, [$this, 'beginTransaction'], 0);
-		$this->getEventProvider()->on(Rollback::class, [$this, 'rollback'], 0);
-		$this->getEventProvider()->on(Commit::class, [$this, 'commit'], 0);
+		$provider = $this->getEventProvider();
+		$provider->on(OnWorkerStop::class, [$this, 'clear_connection'], 0);
+		$provider->on(OnWorkerExit::class, [$this, 'clear_connection'], 0);
+		$provider->on(BeginTransaction::class, [$this, 'beginTransaction'], 0);
+		$provider->on(Rollback::class, [$this, 'rollback'], 0);
+		$provider->on(Commit::class, [$this, 'commit'], 0);
+
+		$this->connectPoolInstance();
 	}
 
 
@@ -100,7 +104,7 @@ class Connection extends Component
 	/**
 	 * @throws Exception
 	 */
-	public function fill()
+	public function connectPoolInstance()
 	{
 		$connections = $this->connections();
 		$pool = Config::get('databases.pool.max', 10);
@@ -109,43 +113,6 @@ class Connection extends Component
 		if (!empty($this->slaveConfig) && $this->cds != $this->slaveConfig['cds']) {
 			$connections->initConnections('Mysql:' . $this->slaveConfig['cds'], false, $pool);
 		}
-//		$name = $connections->name('Mysql:' . $this->cds, true);
-//
-//		$config = $this->_config();
-//		for ($i = 0; $i < $pool; $i++) {
-//			$connections->addItem($name, $connections->create($name, $config)());
-//		}
-//
-//		if (empty($this->slaveConfig)) {
-//			return;
-//		}
-//
-//		$config['cds'] = $this->slaveConfig['cds'];
-//		$config['username'] = $this->slaveConfig['username'];
-//		$config['password'] = $this->slaveConfig['password'];
-//
-//		$name = $connections->name('Mysql:' . $config['cds'], false);
-//		for ($i = 0; $i < $pool; $i++) {
-//			$connections->addItem($name, $connections->create($name, $config)());
-//		}
-	}
-
-
-	/**
-	 * @return array
-	 */
-	private function _config(): array
-	{
-		return [
-			'cds'             => $this->cds,
-			'username'        => $this->username,
-			'password'        => $this->password,
-			'attributes'      => $this->attributes,
-			'connect_timeout' => $this->connect_timeout,
-			'read_timeout'    => $this->read_timeout,
-			'dbname'          => $this->database,
-			'pool'            => $this->pool
-		];
 	}
 
 
