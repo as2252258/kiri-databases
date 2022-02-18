@@ -9,11 +9,9 @@ use Kiri;
 use Kiri\Abstracts\Config;
 use Kiri\Abstracts\Providers;
 use Kiri\Application;
-use Kiri\Exception\ConfigException;
-use Kiri\Server\Events\OnTaskerStart;
-use Kiri\Server\Events\OnWorkerStart;
-use Kiri\Server\Events\OnProcessStart;
 use Kiri\Events\OnBeforeCommandExecute;
+use Kiri\Exception\ConfigException;
+use Kiri\Server\Events\OnServerBeforeStart;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
@@ -33,7 +31,7 @@ class DatabasesProviders extends Providers
 	 */
 	public function onImport(Application $application)
 	{
-		$this->getEventProvider()->on(OnBeforeCommandExecute::class, [$this, 'createPool']);
+		$this->getEventProvider()->on(OnServerBeforeStart::class, [$this, 'createPool']);
 	}
 
 
