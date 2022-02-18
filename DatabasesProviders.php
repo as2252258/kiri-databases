@@ -31,7 +31,7 @@ class DatabasesProviders extends Providers
 	 */
 	public function onImport(Application $application)
 	{
-		$this->getEventProvider()->on(OnServerBeforeStart::class, [$this, 'createPool']);
+		$this->getEventProvider()->on(CreateConnectionPool::class, [$this, 'createPool']);
 	}
 
 
@@ -50,7 +50,7 @@ class DatabasesProviders extends Providers
 	 * @throws ConfigException
 	 * @throws Exception
 	 */
-	public function createPool(OnBeforeCommandExecute $onWorkerStart)
+	public function createPool(OnServerBeforeStart $onWorkerStart)
 	{
 		$databases = Config::get('databases.connections', []);
 		if (empty($databases)) {
