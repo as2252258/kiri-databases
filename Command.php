@@ -125,12 +125,12 @@ class Command extends Component
 
 
 	/**
-	 * @param int $time
+	 * @param float $time
 	 * @param mixed $result
 	 * @return mixed
 	 * @throws Exception
 	 */
-	private function _timeout_log(int $time, mixed $result): mixed
+	private function _timeout_log(float $time, mixed $result): mixed
 	{
 		if (microtime(true) - $time >= 0.02) {
 			$this->warning('Mysql:' . Json::encode([$this->sql, $this->params]) . (microtime(true) - $time));
