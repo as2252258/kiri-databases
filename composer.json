@@ -12,7 +12,7 @@
     "php": ">=8.0",
     "ext-json": "*",
     "ext-pdo": "*",
-    "game-worker/kiri-validator": "~v2.0",
+    "game-worker/kiri-validator": "dev-master",
     "game-worker/kiri-event": "~v2.0"
   },
   "autoload": {
