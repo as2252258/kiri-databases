@@ -21,14 +21,11 @@ use Exception;
 	}
 
 
-    /**
-     * @param static $params
-     * @param mixed $class
-     * @param mixed|null $method
-     * @return bool
-     * @throws \Kiri\Exception\NotFindClassException
-     * @throws \ReflectionException
-     */
+	/**
+	 * @param mixed $class
+	 * @param mixed|null $method
+	 * @return bool
+	 */
     public function execute(mixed $class, mixed $method = null): bool
 	{
 		di(Setter::class)->addSetter($this->name, $class, $method);
