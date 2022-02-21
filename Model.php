@@ -297,6 +297,7 @@ class Model extends Base\Model
 	{
 		$data = $this->_attributes;
 		$lists = di(Getter::class)->getGetter(static::class);
+		var_dump($lists);
 		foreach ($lists as $key => $item) {
 			$data[$key] = $this->{$item}($data[$key] ?? null);
 		}
