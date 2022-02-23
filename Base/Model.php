@@ -28,7 +28,7 @@ use Exception;
 use Kiri;
 use Kiri\Abstracts\Component;
 use Kiri\Annotation\Annotation;
-use Kiri\Error\StdoutLogger;
+use Kiri\Error\StdoutLoggerInterface;
 use Kiri\Exception\NotFindClassException;
 use Kiri\ToArray;
 use ReflectionException;
@@ -240,7 +240,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function getLastError(): string
 	{
-		$logger = Kiri::getDi()->get(StdoutLogger::class);
+		$logger = Kiri::getDi()->get(StdoutLoggerInterface::class);
 		return $logger->getLastError('mysql');
 	}
 

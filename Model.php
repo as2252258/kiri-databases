@@ -16,7 +16,7 @@ use Exception;
 use Kiri;
 use Kiri\Exception\NotFindClassException;
 use Kiri\ToArray;
-use Kiri\Error\StdoutLogger;
+use Kiri\Error\StdoutLoggerInterface;
 use ReflectionException;
 use Swoole\Coroutine;
 
@@ -109,7 +109,7 @@ class Model extends Base\Model
 	 */
 	public static function findOrCreate(array $condition, array $attributes): bool|static
 	{
-		$logger = Kiri::getDi()->get(StdoutLogger::class);
+		$logger = Kiri::getDi()->get(StdoutLoggerInterface::class);
 		if (empty($attributes)) {
 			return $logger->addError(FIND_OR_CREATE_MESSAGE, 'mysql');
 		}
@@ -134,7 +134,7 @@ class Model extends Base\Model
 	 */
 	public static function createOrUpdate(array $condition, array $attributes = []): bool|static
 	{
-		$logger = Kiri::getDi()->get(StdoutLogger::class);
+		$logger = Kiri::getDi()->get(StdoutLoggerInterface::class);
 		if (empty($attributes)) {
 			return $logger->addError(FIND_OR_CREATE_MESSAGE, 'mysql');
 		}
