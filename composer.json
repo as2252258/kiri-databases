@@ -11,9 +11,7 @@
   "require": {
     "php": ">=8.0",
     "ext-json": "*",
-    "ext-pdo": "*",
-    "game-worker/kiri-validator": "~v2.0",
-    "game-worker/kiri-event": "~v2.0"
+    "ext-pdo": "*"
   },
   "autoload": {
     "psr-4": {
