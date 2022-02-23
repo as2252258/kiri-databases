@@ -865,7 +865,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 * @param $value
 	 * @throws Exception
 	 */
-	public function __set($name, $value)
+	public function __set($name, $value): void
 	{
 		if (method_exists($this, 'set' . ucfirst($name))) {
 			$this->{'set' . ucfirst($name)}($value);
