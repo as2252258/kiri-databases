@@ -209,7 +209,7 @@ class Model extends Base\Model
 		if (empty($primary) || !$this->hasPrimaryValue()) {
 			return $this->addError("Only primary key operations are supported.", 'mysql');
 		}
-		if (!$this->beforeDelete()) {
+		if ($this->beforeDelete()) {
 			$result = static::deleteByCondition([$primary => $this->getPrimaryValue()]);
 			Coroutine::create(function () use ($result) {
 				$this->afterDelete($result);
