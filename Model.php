@@ -206,11 +206,15 @@ class Model extends Base\Model
 	public function delete(): bool
 	{
 		$primary = $this->getPrimary();
+		var_dump(empty($primary), !$this->hasPrimaryValue());
 		if (empty($primary) || !$this->hasPrimaryValue()) {
 			return $this->addError("Only primary key operations are supported.", 'mysql');
 		}
+		var_dump('beforeDelete', $this->beforeDelete());
 		if ($this->beforeDelete()) {
+			var_dump([$primary => $this->getPrimaryValue()]);
 			$result = static::deleteByCondition([$primary => $this->getPrimaryValue()]);
+			var_dump($result);
 			Coroutine::create(function () use ($result) {
 				$this->afterDelete($result);
 			});
