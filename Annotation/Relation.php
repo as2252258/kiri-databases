@@ -4,7 +4,7 @@
 namespace Database\Annotation;
 
 
-use Kiri\Annotation\Attribute;
+use Kiri\Annotation\AbstractAttribute;
 use Database\Base\Relate;
 use Exception;
 
@@ -13,7 +13,7 @@ use Exception;
  * Class Relation
  * @package Annotation\Model
  */
-#[\Attribute(\Attribute::TARGET_METHOD)] class Relation extends Attribute
+#[\Attribute(\Attribute::TARGET_METHOD)] class Relation extends AbstractAttribute
 {
 
 

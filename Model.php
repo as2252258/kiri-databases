@@ -16,6 +16,7 @@ use Exception;
 use Kiri;
 use Kiri\Exception\NotFindClassException;
 use Kiri\ToArray;
+use Kiri\Error\StdoutLogger;
 use ReflectionException;
 use Swoole\Coroutine;
 
@@ -108,7 +109,7 @@ class Model extends Base\Model
 	 */
 	public static function findOrCreate(array $condition, array $attributes): bool|static
 	{
-		$logger = Kiri::app()->getLogger();
+		$logger = Kiri::getDi()->get(StdoutLogger::class);
 		if (empty($attributes)) {
 			return $logger->addError(FIND_OR_CREATE_MESSAGE, 'mysql');
 		}
@@ -133,7 +134,7 @@ class Model extends Base\Model
 	 */
 	public static function createOrUpdate(array $condition, array $attributes = []): bool|static
 	{
-		$logger = Kiri::app()->getLogger();
+		$logger = Kiri::getDi()->get(StdoutLogger::class);
 		if (empty($attributes)) {
 			return $logger->addError(FIND_OR_CREATE_MESSAGE, 'mysql');
 		}
@@ -207,7 +208,7 @@ class Model extends Base\Model
 	{
 		$primary = $this->getPrimary();
 		if (empty($primary) || !$this->hasPrimaryValue()) {
-			return $this->addError("Only primary key operations are supported.", 'mysql');
+			return $this->logger->addError("Only primary key operations are supported.", 'mysql');
 		}
 		if ($this->beforeDelete()) {
 			$result = static::deleteByCondition([$primary => $this->getPrimaryValue()]);

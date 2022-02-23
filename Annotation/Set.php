@@ -4,11 +4,11 @@
 namespace Database\Annotation;
 
 
-use Kiri\Annotation\Attribute;
+use Kiri\Annotation\AbstractAttribute;
 use Database\Base\Setter;
 use Exception;
 
-#[\Attribute(\Attribute::TARGET_METHOD)] class Set extends Attribute
+#[\Attribute(\Attribute::TARGET_METHOD)] class Set extends AbstractAttribute
 {
 
 

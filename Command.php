@@ -133,7 +133,7 @@ class Command extends Component
 	private function _timeout_log(float $time, mixed $result): mixed
 	{
 		if (microtime(true) - $time >= 0.02) {
-			$this->warning('Mysql:' . Json::encode([$this->sql, $this->params]) . (microtime(true) - $time));
+			$this->logger->warning('Mysql:' . Json::encode([$this->sql, $this->params]) . (microtime(true) - $time));
 		}
 		return $result;
 	}
@@ -149,7 +149,7 @@ class Command extends Component
 		try {
 			$result = $pdo->execute($this->sql, $this->params);
 		} catch (\Throwable $exception) {
-			$result = $this->addError($this->sql . '. error: ' . $exception->getMessage(), 'mysql');
+			$result = $this->logger->addError($this->sql . '. error: ' . $exception->getMessage(), 'mysql');
 		} finally {
 			$this->db->release();
 			return $result;
@@ -168,7 +168,7 @@ class Command extends Component
 		try {
 			$data = $pdo->{$type}($this->sql, $this->params);
 		} catch (\Throwable $throwable) {
-			$data = $this->addError($this->sql . '. error: ' . $throwable->getMessage(), 'mysql');
+			$data = $this->logger->addError($this->sql . '. error: ' . $throwable->getMessage(), 'mysql');
 		} finally {
 			$this->db->releaseSlaveConnect($pdo);
 			return $data;

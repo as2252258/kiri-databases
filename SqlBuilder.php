@@ -93,7 +93,7 @@ class SqlBuilder extends Component
 	private function __updateBuilder(array $string, array $params): array|bool
 	{
 		if (empty($string)) {
-			return $this->addError('None data update.');
+			return $this->logger->addError('None data update.');
 		}
 
 		$condition = $this->conditionToString();

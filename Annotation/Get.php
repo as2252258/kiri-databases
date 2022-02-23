@@ -13,7 +13,7 @@ use Exception;
  * Class Get
  * @package Annotation\Model
  */
-#[Attribute(Attribute::TARGET_METHOD)] class Get extends \Kiri\Annotation\Attribute
+#[Attribute(Attribute::TARGET_METHOD)] class Get extends \Kiri\Annotation\AbstractAttribute
 {
 
 

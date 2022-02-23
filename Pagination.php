@@ -149,7 +149,7 @@ class Pagination extends Component
 		try {
 			call_user_func($this->_callback, $data, $param);
 		} catch (\Throwable $exception) {
-			$this->addError($exception, 'throwable');
+			$this->logger->addError($exception, 'throwable');
 		} finally {
 			$data = null;
 		}
@@ -179,7 +179,7 @@ class Pagination extends Component
 		try {
 			call_user_func($this->_callback, $data, $param);
 		} catch (\Throwable $exception) {
-			$this->addError($exception, 'throwable');
+			$this->logger->addError($exception, 'throwable');
 		}
 	}
 

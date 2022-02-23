@@ -25,9 +25,11 @@ use Database\Relation;
 use Database\SqlBuilder;
 use Database\Traits\HasBase;
 use Exception;
-use Kiri\Abstracts\Component;
-use Kiri\Exception\NotFindClassException;
 use Kiri;
+use Kiri\Abstracts\Component;
+use Kiri\Annotation\Annotation;
+use Kiri\Error\StdoutLogger;
+use Kiri\Exception\NotFindClassException;
 use Kiri\ToArray;
 use ReflectionException;
 use ReturnTypeWillChange;
@@ -198,7 +200,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function init()
 	{
-		$an = Kiri::app()->getAnnotation();
+		$an = Kiri::getDi()->get(Annotation::class);
 		$an->injectProperty($this);
 	}
 
@@ -238,7 +240,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function getLastError(): string
 	{
-		return Kiri::app()->getLogger()->getLastError('mysql');
+		$logger = Kiri::getDi()->get(StdoutLogger::class);
+		return $logger->getLastError('mysql');
 	}
 
 
@@ -646,7 +649,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		if (empty($rule)) return TRUE;
 		$validate = $this->resolve($rule);
 		if (!$validate->validation()) {
-			return $this->addError($validate->getError(), 'mysql');
+			return $this->logger->addError($validate->getError(), 'mysql');
 		} else {
 			return TRUE;
 		}
