@@ -15,7 +15,6 @@ class Getter
 	 */
 	public function addGetter($name, $class, $method)
 	{
-		var_dump($name, $class);
 		$this->_classMapping[$class][$name] = $method;
 	}
 
