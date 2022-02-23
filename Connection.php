@@ -39,6 +39,7 @@ class Connection extends Component
 	public string $password = '';
 	public string $username = '';
 	public string $charset = 'utf-8';
+
 	public string $tablePrefix = '';
 
 	public string $database = '';
