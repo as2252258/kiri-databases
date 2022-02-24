@@ -170,7 +170,7 @@ class Command extends Component
 		} catch (\Throwable $throwable) {
 			$data = $this->logger->addError($this->sql . '. error: ' . $throwable->getMessage(), 'mysql');
 		} finally {
-			$this->db->releaseSlaveConnect($pdo);
+			$this->db->release();
 			return $data;
 		}
 	}
