@@ -92,13 +92,13 @@ class Connection extends Component
 
 
 	/**
-	 * @param null $sql
+	 * @param $isSearch
 	 * @return PDO
 	 * @throws Exception
 	 */
-	public function getConnect($sql = NULL): PDO
+	public function getConnect($isSearch): PDO
 	{
-		return $this->getPdo($sql);
+		return !$isSearch ? $this->masterInstance() : $this->slaveInstance();
 	}
 
 
@@ -118,20 +118,6 @@ class Connection extends Component
 
 
 	/**
-	 * @param $sql
-	 * @return PDO
-	 * @throws Exception
-	 */
-	private function getPdo($sql): PDO
-	{
-		if ($this->isWrite($sql)) {
-			return $this->masterInstance();
-		} else {
-			return $this->slaveInstance();
-		}
-	}
-
-	/**
 	 * @return mixed
 	 * @throws ReflectionException
 	 * @throws NotFindClassException
@@ -148,30 +134,6 @@ class Connection extends Component
 		return $this->_schema;
 	}
 
-	/**
-	 * @param $sql
-	 * @return bool
-	 */
-	public function isWrite($sql): bool
-	{
-		if (empty($sql)) return false;
-		if (str_starts_with(strtolower($sql), 'select')) {
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	 * @return mixed
-	 * @throws Exception
-	 */
-	public function getCacheDriver(): mixed
-	{
-		if (!$this->enableCache) {
-			return null;
-		}
-		return Kiri::app()->get($this->cacheDriver);
-	}
 
 	/**
 	 * @return PDO
@@ -188,7 +150,7 @@ class Connection extends Component
 			'read_timeout'    => $this->read_timeout,
 			'dbname'          => $this->database,
 			'pool'            => $this->pool
-		], true);
+		]);
 	}
 
 	/**
@@ -256,20 +218,6 @@ class Connection extends Component
 		$this->release();
 	}
 
-	/**
-	 * @param $sql
-	 * @return PDO
-	 * @throws Exception
-	 */
-	public function refresh($sql): PDO
-	{
-		if ($this->isWrite($sql)) {
-			$instance = $this->masterInstance();
-		} else {
-			$instance = $this->slaveInstance();
-		}
-		return $instance;
-	}
 
 	/**
 	 * @param null $sql
@@ -289,38 +237,19 @@ class Connection extends Component
 	 * 回收链接
 	 * @throws
 	 */
-	public function release()
-	{
-		if (!Kiri::isWorker() && !Kiri::isProcess()) {
-			$this->clear_connection();
-			return;
-		}
-		$connections = $this->connections();
-		$connections->release($this->cds);
-
-		if (empty($this->slaveConfig) || !isset($this->slaveConfig['cds'])) {
-			$this->slaveConfig['cds'] = $this->cds;
-		}
-
-		$connections->release($this->slaveConfig['cds']);
-	}
-
-
-	/**
-	 * @throws Exception
-	 */
-	public function recovery()
+	public function release($pdo, $isMaster)
 	{
 		$connections = $this->connections();
-
-		$connections->release($this->cds);
-
-		if (empty($this->slaveConfig) || !isset($this->slaveConfig['cds'])) {
-			$this->slaveConfig['cds'] = $this->cds;
+		if (!$isMaster) {
+			if (empty($this->slaveConfig) || !isset($this->slaveConfig['cds'])) {
+				$this->slaveConfig['cds'] = $this->cds;
+			}
+			$connections->addItem($this->slaveConfig['cds'], $pdo);
+		} else {
+			$connections->addItem($this->cds, $pdo);
 		}
-
-		$connections->release($this->slaveConfig['cds']);
 	}
+
 
 	/**
 	 *

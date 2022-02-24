@@ -151,7 +151,7 @@ class Command extends Component
 		} catch (\Throwable $exception) {
 			$result = $this->logger->addError($this->sql . '. error: ' . $exception->getMessage(), 'mysql');
 		} finally {
-			$this->db->release();
+			$this->db->release($pdo, true);
 			return $result;
 		}
 	}
@@ -170,7 +170,7 @@ class Command extends Component
 		} catch (\Throwable $throwable) {
 			$data = $this->logger->addError($this->sql . '. error: ' . $throwable->getMessage(), 'mysql');
 		} finally {
-			$this->db->release();
+			$this->db->release($pdo, false);
 			return $data;
 		}
 	}
