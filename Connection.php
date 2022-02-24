@@ -110,9 +110,9 @@ class Connection extends Component
 		$connections = $this->connections();
 		$pool = Config::get('databases.pool.max', 10);
 
-		$connections->initConnections('Mysql:' . $this->cds, true, $pool);
+		$connections->initConnections('Mysql:' . $this->cds, $pool);
 		if (!empty($this->slaveConfig) && $this->cds != $this->slaveConfig['cds']) {
-			$connections->initConnections('Mysql:' . $this->slaveConfig['cds'], false, $pool);
+			$connections->initConnections('Mysql:' . $this->slaveConfig['cds'], $pool);
 		}
 	}
 
@@ -203,7 +203,7 @@ class Connection extends Component
 		if ($this->slaveConfig['cds'] == $this->cds) {
 			return $this->masterInstance();
 		}
-		return $this->connections()->get($this->slaveConfig, false);
+		return $this->connections()->get($this->slaveConfig);
 	}
 
 
@@ -285,24 +285,6 @@ class Connection extends Component
 
 
 	/**
-	 * @param PDO $PDO
-	 * @return void
-	 * @throws Kiri\Exception\ConfigException
-	 * @throws Exception
-	 */
-	public function releaseSlaveConnect(PDO $PDO)
-	{
-		$connections = $this->connections();
-
-		if (empty($this->slaveConfig)) {
-			$this->slaveConfig = ['cds' => $this->cds, 'username' => $this->username, 'password' => $this->password];
-		}
-
-		$connections->recover($this->slaveConfig['cds'], $PDO, false);
-	}
-
-
-	/**
 	 *
 	 * 回收链接
 	 * @throws
@@ -314,13 +296,13 @@ class Connection extends Component
 			return;
 		}
 		$connections = $this->connections();
-		$connections->release($this->cds, true);
+		$connections->release($this->cds);
 
 		if (empty($this->slaveConfig) || !isset($this->slaveConfig['cds'])) {
 			$this->slaveConfig['cds'] = $this->cds;
 		}
 
-		$connections->release($this->slaveConfig['cds'], false);
+		$connections->release($this->slaveConfig['cds']);
 	}
 
 
@@ -331,13 +313,13 @@ class Connection extends Component
 	{
 		$connections = $this->connections();
 
-		$connections->release($this->cds, true);
+		$connections->release($this->cds);
 
 		if (empty($this->slaveConfig) || !isset($this->slaveConfig['cds'])) {
 			$this->slaveConfig['cds'] = $this->cds;
 		}
 
-		$connections->release($this->slaveConfig['cds'], false);
+		$connections->release($this->slaveConfig['cds']);
 	}
 
 	/**
@@ -349,13 +331,13 @@ class Connection extends Component
 	{
 		$connections = $this->connections();
 
-		$connections->connection_clear($this->cds, true);
+		$connections->connection_clear($this->cds);
 
 		if (empty($this->slaveConfig) || !isset($this->slaveConfig['cds'])) {
 			$this->slaveConfig['cds'] = $this->cds;
 		}
 
-		$connections->connection_clear($this->slaveConfig['cds'], false);
+		$connections->connection_clear($this->slaveConfig['cds']);
 	}
 
 
@@ -365,13 +347,13 @@ class Connection extends Component
 	public function disconnect()
 	{
 		$connections = $this->connections();
-		$connections->disconnect($this->cds, true);
+		$connections->disconnect($this->cds);
 
 		if (empty($this->slaveConfig) || !isset($this->slaveConfig['cds'])) {
 			$this->slaveConfig['cds'] = $this->cds;
 		}
 
-		$connections->disconnect($this->slaveConfig['cds'], false);
+		$connections->disconnect($this->slaveConfig['cds']);
 	}
 
 }
