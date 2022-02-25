@@ -259,6 +259,8 @@ class Connection extends Component
 		} else {
 			$connections->addItem($this->cds, $pdo);
 		}
+		Context::remove($this->cds);
+		Context::remove($this->slaveConfig['cds']);
 	}
 
 
