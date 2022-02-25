@@ -141,6 +141,8 @@ class PDO implements StopHeartbeatCheck
 			$this->_pdo()->beginTransaction();
 		}
 		$this->_transaction++;
+
+		echo __FUNCTION__, $this->_transaction, PHP_EOL;
 	}
 
 
