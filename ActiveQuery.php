@@ -255,7 +255,7 @@ class ActiveQuery extends Component implements ISqlBuilder
      */
     public function getWith(ModelInterface $model): ModelInterface
     {
-        if (empty($this->with) || !is_array($this->with)) {
+        if (empty($this->with)) {
             return $model;
         }
         return $model->setWith($this->with);
