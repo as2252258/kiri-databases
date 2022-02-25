@@ -183,16 +183,8 @@ class Connection extends Component
 	 */
 	public function beginTransaction(): static
 	{
-		$this->connections()->beginTransaction([
-			'cds'             => $this->cds,
-			'username'        => $this->username,
-			'password'        => $this->password,
-			'attributes'      => $this->attributes,
-			'connect_timeout' => $this->connect_timeout,
-			'read_timeout'    => $this->read_timeout,
-			'dbname'          => $this->database,
-			'pool'            => $this->pool
-		]);
+		$pdo = $this->masterInstance();
+		$pdo->beginTransaction();
 		return $this;
 	}
 
@@ -202,7 +194,8 @@ class Connection extends Component
 	 */
 	public function inTransaction(): bool|static
 	{
-		return $this->connections()->inTransaction($this->cds);
+		$pdo = $this->masterInstance();
+		return $pdo->inTransaction();
 	}
 
 	/**
@@ -211,12 +204,12 @@ class Connection extends Component
 	 */
 	public function rollback()
 	{
-		$this->connections()->rollback($this->cds);
-		$pdo = Context::getContext($this->cds);
+		$pdo = $this->masterInstance();
 		Context::remove($this->cds);
-		if ($pdo instanceof PDO) {
-			$this->release($pdo, $this->cds);
+		if ($pdo->inTransaction()) {
+			$pdo->rollback();
 		}
+		$this->release($pdo, $this->cds);
 	}
 
 	/**
@@ -225,12 +218,12 @@ class Connection extends Component
 	 */
 	public function commit()
 	{
-		$this->connections()->commit($this->cds);
-		$pdo = Context::getContext($this->cds);
+		$pdo = $this->masterInstance();
 		Context::remove($this->cds);
-		if ($pdo instanceof PDO) {
-			$this->release($pdo, $this->cds);
+		if ($pdo->inTransaction()) {
+			$pdo->commit();
 		}
+		$this->release($pdo, $this->cds);
 	}
 
 
