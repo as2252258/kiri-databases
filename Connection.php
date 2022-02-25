@@ -183,7 +183,16 @@ class Connection extends Component
 	 */
 	public function beginTransaction(): static
 	{
-		$this->connections()->beginTransaction($this->cds);
+		$this->connections()->beginTransaction([
+			'cds'             => $this->cds,
+			'username'        => $this->username,
+			'password'        => $this->password,
+			'attributes'      => $this->attributes,
+			'connect_timeout' => $this->connect_timeout,
+			'read_timeout'    => $this->read_timeout,
+			'dbname'          => $this->database,
+			'pool'            => $this->pool
+		]);
 		return $this;
 	}
 
