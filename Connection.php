@@ -20,6 +20,7 @@ use Exception;
 use Kiri;
 use Kiri\Abstracts\Component;
 use Kiri\Abstracts\Config;
+use Kiri\Context;
 use Kiri\Exception\NotFindClassException;
 use Kiri\Server\Events\OnWorkerExit;
 use Kiri\Server\Events\OnWorkerStop;
@@ -159,10 +160,7 @@ class Connection extends Component
 	 */
 	public function slaveInstance(): PDO
 	{
-		if (empty($this->slaveConfig) || Db::transactionsActive()) {
-			return $this->masterInstance();
-		}
-		if ($this->slaveConfig['cds'] == $this->cds) {
+		if (empty($this->slaveConfig) || $this->slaveConfig['cds'] == $this->cds) {
 			return $this->masterInstance();
 		}
 		return $this->connections()->get($this->slaveConfig);
@@ -205,7 +203,11 @@ class Connection extends Component
 	public function rollback()
 	{
 		$this->connections()->rollback($this->cds);
-		$this->release();
+		$pdo = Context::getContext($this->cds);
+		Context::remove($this->cds);
+		if ($pdo instanceof PDO) {
+			$this->release($pdo, $this->cds);
+		}
 	}
 
 	/**
@@ -215,7 +217,11 @@ class Connection extends Component
 	public function commit()
 	{
 		$this->connections()->commit($this->cds);
-		$this->release();
+		$pdo = Context::getContext($this->cds);
+		Context::remove($this->cds);
+		if ($pdo instanceof PDO) {
+			$this->release($pdo, $this->cds);
+		}
 	}
 
 
@@ -237,9 +243,12 @@ class Connection extends Component
 	 * 回收链接
 	 * @throws
 	 */
-	public function release($pdo, $isMaster)
+	public function release(PDO $pdo, $isMaster)
 	{
 		$connections = $this->connections();
+		if ($pdo->inTransaction()) {
+			return;
+		}
 		if (!$isMaster) {
 			if (empty($this->slaveConfig) || !isset($this->slaveConfig['cds'])) {
 				$this->slaveConfig['cds'] = $this->cds;
