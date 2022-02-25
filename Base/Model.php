@@ -387,7 +387,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public static function find(string|int $param): ?static
 	{
-		$columns = duplicate(static::class)->getPrimary();
+		$columns = (new static())->getPrimary();
 		if (empty($columns)) {
 			$columns = static::makeNewInstance()->getColumns()->getFirstPrimary();
 		}
@@ -401,7 +401,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	private static function makeNewInstance(): static
 	{
-		return duplicate(static::class);
+		return new static();
 	}
 
 
