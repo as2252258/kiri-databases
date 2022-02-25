@@ -251,16 +251,16 @@ class Connection extends Component
 		if ($pdo->inTransaction()) {
 			return;
 		}
+		Context::remove($this->cds);
+		Context::remove($this->slaveConfig['cds']);
 		if (!$isMaster) {
-			if (empty($this->slaveConfig) || !isset($this->slaveConfig['cds'])) {
+			if (!isset($this->slaveConfig['cds'])) {
 				$this->slaveConfig['cds'] = $this->cds;
 			}
 			$connections->addItem($this->slaveConfig['cds'], $pdo);
 		} else {
 			$connections->addItem($this->cds, $pdo);
 		}
-		Context::remove($this->cds);
-		Context::remove($this->slaveConfig['cds']);
 	}
 
 
@@ -275,7 +275,7 @@ class Connection extends Component
 
 		$connections->connection_clear($this->cds);
 
-		if (empty($this->slaveConfig) || !isset($this->slaveConfig['cds'])) {
+		if (!isset($this->slaveConfig['cds'])) {
 			$this->slaveConfig['cds'] = $this->cds;
 		}
 
@@ -291,7 +291,7 @@ class Connection extends Component
 		$connections = $this->connections();
 		$connections->disconnect($this->cds);
 
-		if (empty($this->slaveConfig) || !isset($this->slaveConfig['cds'])) {
+		if (!isset($this->slaveConfig['cds'])) {
 			$this->slaveConfig['cds'] = $this->cds;
 		}
 
