@@ -74,6 +74,7 @@ class PDO implements StopHeartbeatCheck
 	 */
 	public function inTransaction(): bool
 	{
+		echo __FUNCTION__, $this->_transaction, PHP_EOL;
 		return $this->_transaction > 0;
 	}
 
