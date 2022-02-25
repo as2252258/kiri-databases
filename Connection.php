@@ -205,7 +205,6 @@ class Connection extends Component
 	public function rollback()
 	{
 		$pdo = $this->masterInstance();
-		Context::remove($this->cds);
 		if ($pdo->inTransaction()) {
 			$pdo->rollback();
 		}
@@ -219,7 +218,6 @@ class Connection extends Component
 	public function commit()
 	{
 		$pdo = $this->masterInstance();
-		Context::remove($this->cds);
 		if ($pdo->inTransaction()) {
 			$pdo->commit();
 		}
