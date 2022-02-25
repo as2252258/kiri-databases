@@ -136,6 +136,7 @@ class PDO implements StopHeartbeatCheck
 	 */
 	public function beginTransaction()
 	{
+		var_dump($this->_transaction);
 		if ($this->_transaction == 0) {
 			$this->_pdo()->beginTransaction();
 		}
@@ -282,12 +283,9 @@ class PDO implements StopHeartbeatCheck
 		$this->_last = time();
 		$pdo = $this->_pdo();
 		if (!(($prepare = $pdo->prepare($sql)) instanceof PDOStatement)) {
-			var_dump($pdo->errorInfo(), $prepare->errorInfo(), $sql);
 			throw new Exception($prepare->errorInfo()[2] ?? static::DB_ERROR_MESSAGE);
 		}
 		if ($prepare->execute($params) === false) {
-			var_dump($pdo->errorInfo(), $prepare->errorInfo(), $sql);
-
 			throw new Exception($prepare->errorInfo()[2] ?? static::DB_ERROR_MESSAGE);
 		}
 		$result = (int)$pdo->lastInsertId();
