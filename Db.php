@@ -15,8 +15,12 @@ use Database\Affair\Rollback;
 use Database\Traits\QueryTrait;
 use Exception;
 use Kiri\Abstracts\Config;
+use Kiri\Context;
 use Kiri\Events\EventDispatch;
 use Kiri\Exception\ConfigException;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
+use ReflectionException;
 
 /**
  * Class Db
@@ -32,47 +36,49 @@ class Db implements ISqlBuilder
 	/**
 	 * @return bool
 	 */
-	public static function transactionsActive(): bool
+	public static function inTransactionsActive(): bool
 	{
-		return static::$_inTransaction === true;
+		return Context::hasContext('transactions::status') && Context::getContext('transactions::status') === true;
 	}
 
 	/**
-	 * @throws Exception
+	 * @throws ContainerExceptionInterface
+	 * @throws NotFoundExceptionInterface
+	 * @throws ReflectionException
 	 */
 	public static function beginTransaction()
 	{
-		if (!static::transactionsActive()) {
-			$event = \Kiri::getDi()->get(EventDispatch::class);
-			$event->dispatch(new BeginTransaction());
-		}
-		static::$_inTransaction = true;
+		Context::setContext('transactions::status', true);
+
+		$event = \Kiri::getDi()->get(EventDispatch::class);
+		$event->dispatch(new BeginTransaction());
 	}
 
 
 	/**
-	 * @throws Exception
+	 * @throws ContainerExceptionInterface
+	 * @throws NotFoundExceptionInterface
+	 * @throws ReflectionException
 	 */
 	public static function commit()
 	{
-		if (static::transactionsActive()) {
-			$event = \Kiri::getDi()->get(EventDispatch::class);
-			$event->dispatch(new Commit());
-		}
-		static::$_inTransaction = false;
+		$event = \Kiri::getDi()->get(EventDispatch::class);
+		$event->dispatch(new Commit());
+		Context::remove('transactions::status');
 	}
 
 
 	/**
-	 * @throws Exception
+	 * @return void
+	 * @throws ContainerExceptionInterface
+	 * @throws NotFoundExceptionInterface
+	 * @throws ReflectionException
 	 */
 	public static function rollback()
 	{
-		if (static::transactionsActive()) {
-			$event = \Kiri::getDi()->get(EventDispatch::class);
-			$event->dispatch(new Rollback());
-		}
-		static::$_inTransaction = false;
+		$event = \Kiri::getDi()->get(EventDispatch::class);
+		$event->dispatch(new Rollback());
+		Context::remove('transactions::status');
 	}
 
 
