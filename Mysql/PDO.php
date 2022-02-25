@@ -149,6 +149,7 @@ class PDO implements StopHeartbeatCheck
 	 */
 	public function commit()
 	{
+		var_dump($this->_transaction);
 		if ($this->_transaction == 0) {
 			$this->_pdo()->commit();
 		}
@@ -161,6 +162,7 @@ class PDO implements StopHeartbeatCheck
 	 */
 	public function rollback()
 	{
+		var_dump($this->_transaction);
 		if ($this->_transaction == 0) {
 			$this->_pdo()->rollBack();
 		}
