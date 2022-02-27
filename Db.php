@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Database;
 
-use Database\Affair\BeginTransaction;
 use Database\Affair\Commit;
 use Database\Affair\Rollback;
 use Database\Traits\QueryTrait;
@@ -41,17 +40,13 @@ class Db implements ISqlBuilder
 		return Context::hasContext('transactions::status') && Context::getContext('transactions::status') === true;
 	}
 
+
 	/**
-	 * @throws ContainerExceptionInterface
-	 * @throws NotFoundExceptionInterface
-	 * @throws ReflectionException
+	 * @return void
 	 */
-	public static function beginTransaction()
+	public static function beginTransaction(): void
 	{
 		Context::setContext('transactions::status', true);
-
-		$event = \Kiri::getDi()->get(EventDispatch::class);
-		$event->dispatch(new BeginTransaction());
 	}
 
 
@@ -60,7 +55,7 @@ class Db implements ISqlBuilder
 	 * @throws NotFoundExceptionInterface
 	 * @throws ReflectionException
 	 */
-	public static function commit()
+	public static function commit(): void
 	{
 		$event = \Kiri::getDi()->get(EventDispatch::class);
 		$event->dispatch(new Commit());
@@ -74,7 +69,7 @@ class Db implements ISqlBuilder
 	 * @throws NotFoundExceptionInterface
 	 * @throws ReflectionException
 	 */
-	public static function rollback()
+	public static function rollback(): void
 	{
 		$event = \Kiri::getDi()->get(EventDispatch::class);
 		$event->dispatch(new Rollback());
