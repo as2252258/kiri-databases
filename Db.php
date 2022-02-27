@@ -269,7 +269,7 @@ class Db implements ISqlBuilder
 	{
 		$connection = static::getDefaultConnection($connection);
 
-		$sprint = sprintf('DROP TABLE `%s`.`%s`', $connection->database, $table);
+		$sprint = sprintf('DROP TABLE' . ' `%s`.`%s`', $connection->database, $table);
 		return $connection->createCommand($sprint)->delete();
 	}
 
