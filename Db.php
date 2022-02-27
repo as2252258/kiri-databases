@@ -42,16 +42,13 @@ class Db implements ISqlBuilder
 	}
 
 	/**
-	 * @throws ContainerExceptionInterface
-	 * @throws NotFoundExceptionInterface
-	 * @throws ReflectionException
 	 */
 	public static function beginTransaction()
 	{
 		Context::setContext('transactions::status', true);
 
-		$event = \Kiri::getDi()->get(EventDispatch::class);
-		$event->dispatch(new BeginTransaction());
+//		$event = \Kiri::getDi()->get(EventDispatch::class);
+//		$event->dispatch(new BeginTransaction());
 	}
 
 
