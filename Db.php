@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Database;
 
-use Database\Affair\BeginTransaction;
 use Database\Affair\Commit;
 use Database\Affair\Rollback;
 use Database\Traits\QueryTrait;
@@ -46,9 +45,6 @@ class Db implements ISqlBuilder
 	public static function beginTransaction()
 	{
 		Context::setContext('transactions::status', true);
-
-//		$event = \Kiri::getDi()->get(EventDispatch::class);
-//		$event->dispatch(new BeginTransaction());
 	}
 
 
