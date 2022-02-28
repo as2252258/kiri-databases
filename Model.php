@@ -116,7 +116,7 @@ class Model extends Base\Model
 		/** @var static $select */
 		$select = static::query()->where($condition)->first();
 		if (empty($select)) {
-			$select = duplicate(static::class);
+			$select = new static();
 			$select->attributes = $attributes;
 			if (!$select->save()) {
 				throw new Exception($select->getLastError());
@@ -141,7 +141,7 @@ class Model extends Base\Model
 		/** @var static $select */
 		$select = static::query()->where($condition)->first();
 		if (empty($select)) {
-			$select = duplicate(static::class);
+			$select = new static();
 		}
 		$select->attributes = $attributes;
 		if (!$select->save()) {
