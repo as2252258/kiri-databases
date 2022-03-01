@@ -544,8 +544,9 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		$dbConnection = $this->getConnection()->createCommand($sql, $param);
 
 		$lastId = $dbConnection->save();
-
-		$lastId = $this->setPrimary((int)$lastId, $param);
+		if ($this->isAutoIncrement()) {
+			$lastId = $this->setPrimary((int)$lastId, $param);
+		}
 
 		$this->setIsNowExample(false);
 
@@ -712,10 +713,6 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		$assoc = array_diff_assoc($this->_attributes, $this->_oldAttributes);
 
 		$uassoc = array_intersect_assoc($this->_attributes, $this->_oldAttributes);
-
-		if (!$this->getIsNowExample()) {
-			var_dump($assoc, $uassoc);
-		}
 
 		return [$assoc, $uassoc, array_keys($assoc)];
 	}
