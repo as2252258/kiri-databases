@@ -547,6 +547,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 
 		$lastId = $this->setPrimary((int)$lastId, $param);
 
+		$this->setIsNowExample(false);
+
 		$this->refresh()->afterSave($attributes, $param);
 
 		return $lastId;
