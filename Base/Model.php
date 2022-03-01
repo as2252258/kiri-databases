@@ -546,6 +546,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		$lastId = $dbConnection->save();
 		if ($this->isAutoIncrement()) {
 			$lastId = $this->setPrimary((int)$lastId, $param);
+		} else {
+			$lastId = $this;
 		}
 
 		$this->setIsNowExample(false);
