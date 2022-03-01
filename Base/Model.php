@@ -621,7 +621,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 			return FALSE;
 		}
 		[$change, $condition, $fields] = $this->separation();
-		if (!empty($this->_oldAttributes)) {
+		if (!$this->getIsNowExample()) {
 			return $this->updateInternal($fields, $condition, $change);
 		} else {
 			return $this->insert($change, $fields);
