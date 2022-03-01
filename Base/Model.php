@@ -713,6 +713,10 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 
 		$uassoc = array_intersect_assoc($this->_attributes, $this->_oldAttributes);
 
+		if (!$this->getIsNowExample()) {
+			var_dump($assoc, $uassoc);
+		}
+
 		return [$assoc, $uassoc, array_keys($assoc)];
 	}
 
