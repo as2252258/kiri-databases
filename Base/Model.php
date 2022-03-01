@@ -397,7 +397,6 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 
 	/**
 	 * @return static
-	 * @throws ReflectionException
 	 */
 	private static function makeNewInstance(): static
 	{
@@ -710,7 +709,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	private function separation(): array
 	{
-		$assoc = array_diff_assoc($this->_oldAttributes, $this->_attributes);
+		$assoc = array_diff_assoc($this->_attributes, $this->_oldAttributes);
 
 		$uassoc = array_intersect_assoc($this->_attributes, $this->_oldAttributes);
 
