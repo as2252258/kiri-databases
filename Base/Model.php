@@ -574,7 +574,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		}
 
 		$primary = $this->getPrimary();
-		if (!isset($param[$primary]) || empty($param[$primary])) {
+		if (empty($param[$primary])) {
 			$this->setAttribute($primary, (int)$lastId);
 		}
 		return $this;
@@ -710,17 +710,11 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	private function separation(): array
 	{
-		$_tmp = [];
-		$condition = [];
-		foreach ($this->_attributes as $key => $val) {
-			$oldValue = $this->_oldAttributes[$key] ?? NULL;
-			if ($val === $oldValue) {
-				$condition[$key] = $val;
-			} else {
-				$_tmp[$key] = $val;
-			}
-		}
-		return [$_tmp, $condition, array_keys($_tmp)];
+		$assoc = array_diff_assoc($this->_oldAttributes, $this->_attributes);
+
+		$uassoc = array_intersect_assoc($this->_attributes, $this->_oldAttributes);
+
+		return [$assoc, $uassoc, array_keys($assoc)];
 	}
 
 
