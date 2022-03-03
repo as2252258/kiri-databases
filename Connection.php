@@ -21,6 +21,7 @@ use Kiri;
 use Kiri\Abstracts\Component;
 use Kiri\Abstracts\Config;
 use Kiri\Context;
+use Kiri\Events\EventProvider;
 use Kiri\Exception\NotFindClassException;
 use Kiri\Server\Events\OnWorkerExit;
 use Kiri\Server\Events\OnWorkerStop;
@@ -74,6 +75,17 @@ class Connection extends Component
 
 
 	/**
+	 * @param EventProvider $eventProvider
+	 * @param array $config
+	 * @throws Exception
+	 */
+	public function __construct(public EventProvider $eventProvider, array $config = [])
+	{
+		parent::__construct($config);
+	}
+
+
+	/**
 	 * @return void
 	 * @throws ContainerExceptionInterface
 	 * @throws NotFoundExceptionInterface
@@ -81,12 +93,11 @@ class Connection extends Component
 	 */
 	public function init()
 	{
-		$provider = $this->getEventProvider();
-		$provider->on(OnWorkerStop::class, [$this, 'clear_connection'], 0);
-		$provider->on(OnWorkerExit::class, [$this, 'clear_connection'], 0);
-		$provider->on(BeginTransaction::class, [$this, 'beginTransaction'], 0);
-		$provider->on(Rollback::class, [$this, 'rollback'], 0);
-		$provider->on(Commit::class, [$this, 'commit'], 0);
+		$this->eventProvider->on(OnWorkerStop::class, [$this, 'clear_connection'], 0);
+		$this->eventProvider->on(OnWorkerExit::class, [$this, 'clear_connection'], 0);
+		$this->eventProvider->on(BeginTransaction::class, [$this, 'beginTransaction'], 0);
+		$this->eventProvider->on(Rollback::class, [$this, 'rollback'], 0);
+		$this->eventProvider->on(Commit::class, [$this, 'commit'], 0);
 
 		$this->connectPoolInstance();
 	}
