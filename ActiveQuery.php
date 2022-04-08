@@ -221,13 +221,16 @@ class ActiveQuery extends Component implements ISqlBuilder
         return $this->all()->column($field, $setKey);
     }
 
+
     /**
      * @return array|Collection
      * @throws
      */
     public function all(): Collection|array
     {
-        $data = $this->execute($this->builder->all())->all();
+        if (($data = $this->execute($this->builder->all())->all()) == false) {
+            return new Collection($this, [], $this->modelClass);
+        }
         if (!empty($this->with)) {
             $this->getWith($this->modelClass);
         }
