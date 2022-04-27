@@ -102,7 +102,7 @@ class Relation extends Component
 
 		$activeModel = $this->_query[$identification]->get();
 		if (empty($activeModel)) {
-			return null;
+			return $activeModel;
 		}
 
 		return $this->_relations[$_identification] = $activeModel;
