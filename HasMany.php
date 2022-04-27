@@ -24,14 +24,16 @@ class HasMany extends HasBase
 	/**
 	 * @param $name
 	 * @param $arguments
-	 * @return ActiveQuery|static
+	 * @return static
 	 */
 	public function __call($name, $arguments)
 	{
 		if (!method_exists($this, $name)) {
-			return $this->_relation->getQuery($this->model::className())->$name(...$arguments);
-		}
-		return call_user_func([$this, $name], ...$arguments);
+            $this->_relation->getQuery($this->model::className())->$name(...$arguments);
+		} else {
+            call_user_func([$this, $name], ...$arguments);
+        }
+		return $this;
 	}
 
 	/**
