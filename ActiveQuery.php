@@ -200,10 +200,10 @@ class ActiveQuery extends Component implements ISqlBuilder
      * @return Pagination
      * @throws Exception
      */
-    public function page(int $size, callable $callback): Pagination
+    public function page(int $size, callable $callback, int $offset = 0): Pagination
     {
         $pagination = new Pagination($this);
-        $pagination->setOffset(0);
+        $pagination->setOffset($offset);
         $pagination->setLimit($size);
         $pagination->setCallback($callback);
         return $pagination;
@@ -281,16 +281,16 @@ class ActiveQuery extends Component implements ISqlBuilder
 
     /**
      * @param array $data
-     * @return array|Command|bool|int|string
+     * @return bool
      * @throws Exception
      */
-    public function batchUpdate(array $data): Command|array|bool|int|string
+    public function batchUpdate(array $data): bool
     {
         $generate = $this->builder->update($data);
         if (is_bool($generate)) {
             return $generate;
         }
-        return $this->execute(...$generate)->exec();
+        return (bool)$this->execute(...$generate)->exec();
     }
 
     /**
@@ -303,7 +303,7 @@ class ActiveQuery extends Component implements ISqlBuilder
         [$sql, $params] = $this->builder->insert($data, TRUE);
 
 
-        return $this->execute($sql, $params)->exec();
+        return (bool)$this->execute($sql, $params)->exec();
     }
 
     /**
