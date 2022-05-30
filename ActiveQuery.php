@@ -197,6 +197,7 @@ class ActiveQuery extends Component implements ISqlBuilder
     /**
      * @param int $size
      * @param callable $callback
+     * @param int $offset
      * @return Pagination
      * @throws Exception
      */
