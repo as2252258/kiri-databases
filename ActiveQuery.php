@@ -230,7 +230,7 @@ class ActiveQuery extends Component implements ISqlBuilder
      */
     public function all(): Collection|array
     {
-        if (($data = $this->execute($this->builder->all())->all()) == false) {
+        if (!($data = $this->execute($this->builder->all())->all())) {
             return new Collection($this, [], $this->modelClass);
         }
         if (!empty($this->with)) {
