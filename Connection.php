@@ -20,7 +20,6 @@ use Exception;
 use Kiri;
 use Kiri\Abstracts\Component;
 use Kiri\Abstracts\Config;
-use Kiri\Context;
 use Kiri\Events\EventProvider;
 use Kiri\Exception\NotFindClassException;
 use Kiri\Server\Events\OnWorkerExit;
@@ -54,6 +53,9 @@ class Connection extends Component
 	 * enable database cache
 	 */
 	public bool $enableCache = false;
+
+
+	private ?PDO $_pdo = null;
 
 
 	/**
@@ -104,7 +106,7 @@ class Connection extends Component
 	 */
 	public function getConnect($isSearch): PDO
 	{
-		return !$isSearch ? $this->masterInstance() : $this->slaveInstance();
+		return !$isSearch ? $this->getMasterClient() : $this->getSlaveClient();
 	}
 
 
@@ -145,7 +147,7 @@ class Connection extends Component
 	 * @return PDO
 	 * @throws Exception
 	 */
-	public function masterInstance(): PDO
+	public function getMasterClient(): PDO
 	{
 		return $this->connections()->get([
 			'cds'             => $this->cds,
@@ -163,10 +165,10 @@ class Connection extends Component
 	 * @return PDO
 	 * @throws Exception
 	 */
-	public function slaveInstance(): PDO
+	public function getSlaveClient(): PDO
 	{
 		if (empty($this->slaveConfig) || $this->slaveConfig['cds'] == $this->cds) {
-			return $this->masterInstance();
+			return $this->getMasterClient();
 		}
 		return $this->connections()->get($this->slaveConfig);
 	}
@@ -188,9 +190,22 @@ class Connection extends Component
 	 */
 	public function beginTransaction(): static
 	{
-		$pdo = $this->masterInstance();
+		$pdo = $this->getMasterClient();
 		$pdo->beginTransaction();
 		return $this;
+	}
+
+
+	/**
+	 * @return PDO
+	 * @throws Exception
+	 */
+	public function getPdo(): PDO
+	{
+		if (!$this->_pdo) {
+			$this->_pdo = $this->getMasterClient();
+		}
+		return $this->_pdo;
 	}
 
 	/**
@@ -199,8 +214,10 @@ class Connection extends Component
 	 */
 	public function inTransaction(): bool|static
 	{
-		$pdo = $this->masterInstance();
-		return $pdo->inTransaction();
+		if (!$this->_pdo) {
+			$this->_pdo = $this->getMasterClient();
+		}
+		return $this->_pdo->inTransaction();
 	}
 
 	/**
@@ -209,11 +226,11 @@ class Connection extends Component
 	 */
 	public function rollback()
 	{
-		$pdo = $this->masterInstance();
-		if ($pdo->inTransaction()) {
-			$pdo->rollback();
+		if ($this->_pdo->inTransaction()) {
+			$this->_pdo->rollback();
 		}
-		$this->release($pdo, $this->cds);
+		$this->release($this->_pdo);
+		$this->_pdo = null;
 	}
 
 	/**
@@ -222,11 +239,11 @@ class Connection extends Component
 	 */
 	public function commit()
 	{
-		$pdo = $this->masterInstance();
-		if ($pdo->inTransaction()) {
-			$pdo->commit();
+		if ($this->_pdo->inTransaction()) {
+			$this->_pdo->commit();
 		}
-		$this->release($pdo, $this->cds);
+		$this->release($this->_pdo);
+		$this->_pdo = null;
 	}
 
 
@@ -248,21 +265,15 @@ class Connection extends Component
 	 * 回收链接
 	 * @throws
 	 */
-	public function release(PDO $pdo, $isMaster)
+	public function release(PDO $pdo)
 	{
 		$connections = $this->connections();
-		if ($pdo->inTransaction()) {
-			return;
-		}
-		Context::remove($this->cds);
-		Context::remove($this->slaveConfig['cds']);
-		if (!$isMaster) {
-			if (!isset($this->slaveConfig['cds'])) {
-				$this->slaveConfig['cds'] = $this->cds;
+		if (!$pdo->inTransaction()) {
+			$cds = $this->cds;
+			if (isset($this->slaveConfig['cds'])) {
+				$cds = $this->slaveConfig['cds'];
 			}
-			$connections->addItem($this->slaveConfig['cds'], $pdo);
-		} else {
-			$connections->addItem($this->cds, $pdo);
+			$connections->addItem($cds, $pdo);
 		}
 	}
 

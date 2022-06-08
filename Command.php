@@ -137,13 +137,13 @@ class Command extends Component
 	 */
 	private function _execute(): bool|int
 	{
-		$pdo = $this->db->masterInstance();
+		$pdo = $this->db->getPdo();
 		try {
 			$result = $pdo->execute($this->sql, $this->params);
 		} catch (\Throwable $exception) {
 			$result = $this->logger->addError($this->sql . '. error: ' . $exception->getMessage(), 'mysql');
 		} finally {
-			$this->db->release($pdo, true);
+			$this->db->release($pdo);
 			return $result;
 		}
 	}
@@ -156,7 +156,7 @@ class Command extends Component
 	 */
 	private function search(string $type): array|int|bool|null
 	{
-		$pdo = $this->db->slaveInstance();
+		$pdo = $this->db->getSlaveClient();
 		try {
 			$data = $pdo->{$type}($this->sql, $this->params);
 		} catch (\Throwable $throwable) {
