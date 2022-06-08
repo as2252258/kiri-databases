@@ -24,9 +24,6 @@ use Kiri\Context;
 use Kiri\Events\EventProvider;
 use Kiri\Exception\NotFindClassException;
 use Kiri\Server\Events\OnWorkerExit;
-use Kiri\Server\Events\OnWorkerStop;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use ReflectionException;
 
 /**
