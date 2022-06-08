@@ -127,7 +127,7 @@ class Command extends Component
 	 */
 	private function print_r($time): string
 	{
-		return print_r([$this->sql, $this->params], true) . (microtime(true) - $time);
+		return print_r(['time' => microtime(true) - $time, 'sql' => $this->sql, 'param' => $this->params], true);
 	}
 
 
