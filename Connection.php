@@ -230,12 +230,7 @@ class Connection extends Component
 			$this->_pdo->rollback();
 		}
 		$this->release($this->_pdo);
-
-		var_dump($this->_pdo->inTransaction());
-
 		$this->_pdo = null;
-
-		var_dump($this->_pdo);
 	}
 
 	/**
@@ -248,12 +243,7 @@ class Connection extends Component
 			$this->_pdo->commit();
 		}
 		$this->release($this->_pdo);
-
-		var_dump($this->_pdo->inTransaction());
-
 		$this->_pdo = null;
-
-		var_dump($this->_pdo);
 	}
 
 
