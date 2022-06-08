@@ -140,18 +140,20 @@ class Command extends Component
 
 
 	/**
-	 * @param PDO $pdo
 	 * @return bool|int
 	 * @throws Exception
 	 */
-	private function _execute(PDO $pdo): bool|int
+	private function _execute(): bool|int
 	{
 		try {
+			$pdo = $this->db->masterInstance();
+
 			$result = $pdo->execute($this->sql, $this->params);
+
+			$this->db->release($pdo, true);
 		} catch (\Throwable $exception) {
 			$result = $this->logger->addError($this->sql . '. error: ' . $exception->getMessage(), 'mysql');
 		} finally {
-			$this->db->release($pdo, true);
 			return $result;
 		}
 	}
@@ -159,18 +161,20 @@ class Command extends Component
 
 	/**
 	 * @param string $type
-	 * @param PDO $pdo
 	 * @return array|int|bool|null
 	 * @throws Exception
 	 */
-	private function search(string $type, PDO $pdo): array|int|bool|null
+	private function search(string $type): array|int|bool|null
 	{
 		try {
+			$pdo = $this->db->slaveInstance();
+
 			$data = $pdo->{$type}($this->sql, $this->params);
+
+			$this->db->release($pdo, false);
 		} catch (\Throwable $throwable) {
 			$data = $this->logger->addError($this->sql . '. error: ' . $throwable->getMessage(), 'mysql');
 		} finally {
-			$this->db->release($pdo, false);
 			return $data;
 		}
 	}

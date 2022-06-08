@@ -94,7 +94,7 @@ class PDO implements StopHeartbeatCheck
 	public function heartbeat_check(): void
 	{
 		if ($this->_timer === -1) {
-			$this->_timer = Timer::tick(1000, fn() => $this->waite());
+			$this->_timer = Timer::tick(1000, [$this, 'waite']);
 		}
 	}
 
@@ -105,10 +105,8 @@ class PDO implements StopHeartbeatCheck
 	private function waite(): void
 	{
 		try {
-			if ($this->_timer == -1) {
-				$this->stopHeartbeatCheck();
-			}
-			if (time() - $this->_last > (int)Config::get('databases.pool.tick', 60)) {
+			$tick = (int)Config::get('databases.pool.tick', 60);
+			if ($this->_timer == -1 || time() - $this->_last > $tick) {
 				$this->stopHeartbeatCheck();
 
 				$this->pdo = null;
