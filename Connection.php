@@ -87,8 +87,6 @@ class Connection extends Component
 
 	/**
 	 * @return void
-	 * @throws ContainerExceptionInterface
-	 * @throws NotFoundExceptionInterface
 	 * @throws Exception
 	 */
 	public function init()
@@ -120,10 +118,10 @@ class Connection extends Component
 	{
 		$connections = $this->connections();
 		$pool = Config::get('databases.pool.max', 10);
-
-		$connections->initConnections('Mysql:' . $this->cds, $pool);
 		if (!empty($this->slaveConfig) && $this->cds != $this->slaveConfig['cds']) {
 			$connections->initConnections('Mysql:' . $this->slaveConfig['cds'], $pool);
+		} else {
+			$connections->initConnections('Mysql:' . $this->cds, $pool);
 		}
 	}
 
