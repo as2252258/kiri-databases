@@ -10,10 +10,8 @@ declare(strict_types=1);
 namespace Database;
 
 
-use Database\Mysql\PDO;
 use Exception;
 use Kiri\Abstracts\Component;
-use Kiri\Core\Json;
 use PDOStatement;
 
 /**
@@ -113,29 +111,23 @@ class Command extends Component
 	 */
 	private function execute(string $type): int|bool|array|string|null
 	{
-		$pdo = $this->db->getConnect($this->sql);
 		$time = microtime(true);
-		if ($type !== static::EXECUTE) {
-			$result = $this->search($type, $pdo);
-		} else {
-			$result = $this->_execute($pdo);
-		}
-		return $this->_timeout_log($time, $result);
+
+		$result = $type !== static::EXECUTE ? $this->search($type) : $this->_execute();
+
+		$this->logger->debug('Mysql:' . $this->print_r($time));
+
+		return $result;
 	}
 
 
 	/**
-	 * @param float $time
-	 * @param mixed $result
-	 * @return mixed
-	 * @throws Exception
+	 * @param $time
+	 * @return string
 	 */
-	private function _timeout_log(float $time, mixed $result): mixed
+	private function print_r($time): string
 	{
-		if (microtime(true) - $time >= 0.02) {
-			$this->logger->warning('Mysql:' . Json::encode([$this->sql, $this->params]) . (microtime(true) - $time));
-		}
-		return $result;
+		return print_r([$this->sql, $this->params], true) . (microtime(true) - $time);
 	}
 
 
