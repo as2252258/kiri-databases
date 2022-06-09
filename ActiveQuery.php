@@ -85,7 +85,7 @@ class ActiveQuery extends Component implements ISqlBuilder
      * @param int $size
      * @param int $page
      * @return array
-     * @throws Exception
+     * @throws
      */
     #[ArrayShape([])]
     public function pagination(int $size = 20, int $page = 1): array
@@ -145,7 +145,7 @@ class ActiveQuery extends Component implements ISqlBuilder
      * @param $sql
      * @param array $params
      * @return mixed
-     * @throws Exception
+     * @throws
      */
     public function execute($sql, array $params = []): Command
     {
@@ -155,7 +155,7 @@ class ActiveQuery extends Component implements ISqlBuilder
 
     /**
      * @return ModelInterface|null
-     * @throws Exception
+     * @throws
      */
     public function first(): ModelInterface|null
     {
@@ -169,7 +169,7 @@ class ActiveQuery extends Component implements ISqlBuilder
 
     /**
      * @return string
-     * @throws Exception
+     * @throws
      */
     public function toSql(): string
     {
@@ -187,7 +187,7 @@ class ActiveQuery extends Component implements ISqlBuilder
 
 
     /**
-     * @throws Exception
+     * @throws
      */
     public function flush(): array|bool|int|string|null
     {
@@ -200,7 +200,7 @@ class ActiveQuery extends Component implements ISqlBuilder
      * @param callable $callback
      * @param int $offset
      * @return Pagination
-     * @throws Exception
+     * @throws
      */
     public function page(int $size, callable $callback, int $offset = 0): Pagination
     {
@@ -216,7 +216,7 @@ class ActiveQuery extends Component implements ISqlBuilder
      * @param string $setKey
      *
      * @return array|null
-     * @throws Exception
+     * @throws
      */
     public function column(string $field, string $setKey = ''): ?array
     {
@@ -247,7 +247,7 @@ class ActiveQuery extends Component implements ISqlBuilder
     /**
      * @param $data
      * @return ModelInterface
-     * @throws Exception
+     * @throws
      */
     public function populate($data): ModelInterface
     {
@@ -269,7 +269,7 @@ class ActiveQuery extends Component implements ISqlBuilder
 
     /**
      * @return int
-     * @throws Exception
+     * @throws
      */
     public function count(): int
     {
@@ -284,7 +284,7 @@ class ActiveQuery extends Component implements ISqlBuilder
     /**
      * @param array $data
      * @return bool
-     * @throws Exception
+     * @throws
      */
     public function batchUpdate(array $data): bool
     {
@@ -298,7 +298,7 @@ class ActiveQuery extends Component implements ISqlBuilder
     /**
      * @param array $data
      * @return bool
-     * @throws Exception
+     * @throws
      */
     public function batchInsert(array $data): bool
     {
@@ -312,7 +312,7 @@ class ActiveQuery extends Component implements ISqlBuilder
      * @param $filed
      *
      * @return null
-     * @throws Exception
+     * @throws
      */
     public function value($filed)
     {
@@ -321,7 +321,7 @@ class ActiveQuery extends Component implements ISqlBuilder
 
     /**
      * @return bool
-     * @throws Exception
+     * @throws
      */
     public function exists(): bool
     {
@@ -332,7 +332,7 @@ class ActiveQuery extends Component implements ISqlBuilder
     /**
      * @param bool $getSql
      * @return int|bool|string|null
-     * @throws Exception
+     * @throws
      */
     public function delete(bool $getSql = FALSE): int|bool|string|null
     {
