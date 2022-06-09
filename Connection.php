@@ -149,6 +149,9 @@ class Connection extends Component
 	 */
 	public function getMasterClient(): PDO
 	{
+		if ($this->_pdo) {
+			return $this->_pdo;
+		}
 		return $this->connections()->get([
 			'cds'             => $this->cds,
 			'username'        => $this->username,
