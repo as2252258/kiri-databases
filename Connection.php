@@ -106,7 +106,7 @@ class Connection extends Component
 	 */
 	public function getConnect($isSearch): PDO
 	{
-		return !$isSearch ? $this->getMasterClient() : $this->getSlaveClient();
+		return !$isSearch ? $this->getPdo() : $this->getSlaveClient();
 	}
 
 
@@ -149,9 +149,6 @@ class Connection extends Component
 	 */
 	public function getMasterClient(): PDO
 	{
-		if ($this->_pdo instanceof PDO) {
-			return $this->_pdo;
-		}
 		return $this->connections()->get([
 			'cds'             => $this->cds,
 			'username'        => $this->username,
@@ -171,7 +168,7 @@ class Connection extends Component
 	public function getSlaveClient(): PDO
 	{
 		if (empty($this->slaveConfig) || $this->slaveConfig['cds'] == $this->cds) {
-			return $this->getMasterClient();
+			return $this->getPdo();
 		}
 		return $this->connections()->get($this->slaveConfig);
 	}
@@ -193,7 +190,7 @@ class Connection extends Component
 	 */
 	public function beginTransaction(): static
 	{
-		$pdo = $this->getMasterClient();
+		$pdo = $this->getPdo();
 		$pdo->beginTransaction();
 		return $this;
 	}
@@ -217,10 +214,7 @@ class Connection extends Component
 	 */
 	public function inTransaction(): bool|static
 	{
-		if (!$this->_pdo) {
-			$this->_pdo = $this->getMasterClient();
-		}
-		return $this->_pdo->inTransaction();
+		return $this->getPdo()->inTransaction();
 	}
 
 	/**
