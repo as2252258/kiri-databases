@@ -149,7 +149,7 @@ class Connection extends Component
 	 */
 	public function getMasterClient(): PDO
 	{
-		if ($this->_pdo) {
+		if ($this->_pdo instanceof PDO) {
 			return $this->_pdo;
 		}
 		return $this->connections()->get([
