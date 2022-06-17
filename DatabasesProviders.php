@@ -16,6 +16,7 @@ use Kiri\Annotation\Inject;
 use Kiri\Server\Events\OnWorkerStart;
 use Kiri\Server\Events\OnTaskerStart;
 use Psr\Log\LoggerInterface;
+use Kiri\Server\Events\OnWorkerExit;
 
 /**
  * Class DatabasesProviders
@@ -46,8 +47,22 @@ class DatabasesProviders extends Providers
 		}
 		$this->provider->on(OnWorkerStart::class, [$this, 'check']);
 		$this->provider->on(OnTaskerStart::class, [$this, 'check']);
+		$this->provider->on(OnWorkerExit::class, [$this, 'exit']);
 		foreach ($databases as $key => $database) {
 			$application->set($key, $this->_settings($database));
+		}
+	}
+
+
+	/**
+	 * @param OnWorkerExit $exit
+	 * @return void
+	 */
+	public function exit(OnWorkerExit $exit): void
+	{
+		$id = (int)Kiri\Context::getContext('db.loop.id');
+		if (!empty($id)) {
+			$exit->server->clearTimer($id);
 		}
 	}
 
@@ -69,7 +84,7 @@ class DatabasesProviders extends Providers
 	 */
 	public function check(OnTaskerStart|OnWorkerStart $start): void
 	{
-		$start->server->tick(50 * 1000, static function () use ($start) {
+		$timerTick = $start->server->tick(50 * 1000, static function () use ($start) {
 			$databases = Config::get('databases.connections', []);
 			$logger = Kiri::getDi()->get(LoggerInterface::class);
 			$logger->alert('db size ' . count($databases) . ' ticker ' . date('Y-m-d H:i:s'));
@@ -98,6 +113,7 @@ class DatabasesProviders extends Providers
 				$logger->alert($message);
 			}
 		});
+		Kiri\Context::setContext('db.loop.id', $timerTick);
 	}
 
 
