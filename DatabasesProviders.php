@@ -72,7 +72,7 @@ class DatabasesProviders extends Providers
 		$start->server->tick(50 * 1000, static function () use ($start) {
 			$databases = Config::get('databases.connections', []);
 			$logger = Kiri::getDi()->get(LoggerInterface::class);
-			$logger->alert('db ticker ' . date('Y-m-d H:i:s'));
+			$logger->alert('db size ' . count($databases) . ' ticker ' . date('Y-m-d H:i:s'));
 			if (!empty($databases)) {
 				$valid = 0;
 				$count = 0;
