@@ -79,19 +79,17 @@ class DatabasesProviders extends Providers
 
 				$connection = Kiri::getDi()->get(PoolConnection::class);
 				foreach ($databases as $database) {
-					$count += 1;
+					[$total, $success] = $connection->check($database['cds']);
 
-					$success = $connection->check($database['cds']);
-					if ($success) {
-						$valid += 1;
-					}
+					$count += $total;
+					$valid += $success;
+
 					if (isset($database['slaveConfig']) && isset($database['slaveConfig']['cds'])) {
 						if ($database['slaveConfig']['cds'] != $database['cds']) {
-							$count += 1;
-							$success = $connection->check($database['slaveConfig']['cds']);
-							if ($success) {
-								$valid += 1;
-							}
+							[$total, $success] = $connection->check($database['slaveConfig']['cds']);
+
+							$count += $total;
+							$valid += $success;
 						}
 					}
 				}
