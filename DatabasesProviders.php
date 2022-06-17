@@ -69,38 +69,36 @@ class DatabasesProviders extends Providers
 	 */
 	public function check(OnTaskerStart|OnWorkerStart $start): void
 	{
-		$start->server->tick(1150 * 1000, function () use ($start) {
+		$start->server->tick(50 * 1000, static function () use ($start) {
 			$databases = Config::get('databases.connections', []);
-			if (empty($databases)) {
-				return;
-			}
+			$logger = Kiri::getDi()->get(LoggerInterface::class);
+			$logger->alert('db ticker ' . date('Y-m-d H:i:s'));
+			if (!empty($databases)) {
+				$valid = 0;
+				$count = 0;
 
-			$valid = 0;
-			$count = 0;
+				$connection = Kiri::getDi()->get(PoolConnection::class);
+				foreach ($databases as $database) {
+					$count += 1;
 
-			$connection = Kiri::getDi()->get(PoolConnection::class);
-			foreach ($databases as $database) {
-				$count += 1;
-
-				$success = $connection->check($database['cds']);
-				if ($success) {
-					$valid += 1;
-				}
-				if (isset($database['slaveConfig']) && isset($database['slaveConfig']['cds'])) {
-					if ($database['slaveConfig']['cds'] != $database['cds']) {
-						$count += 1;
-						$success = $connection->check($database['slaveConfig']['cds']);
-						if ($success) {
-							$valid += 1;
+					$success = $connection->check($database['cds']);
+					if ($success) {
+						$valid += 1;
+					}
+					if (isset($database['slaveConfig']) && isset($database['slaveConfig']['cds'])) {
+						if ($database['slaveConfig']['cds'] != $database['cds']) {
+							$count += 1;
+							$success = $connection->check($database['slaveConfig']['cds']);
+							if ($success) {
+								$valid += 1;
+							}
 						}
 					}
 				}
+
+				$message = sprintf('Worker %d db client has %d, valid %d', $start->workerId, $count, $valid);
+				$logger->alert($message);
 			}
-
-			$message = sprintf('Worker %d db client has %d, valid %d', $start->workerId, $count, $valid);
-
-			$logger = Kiri::getDi()->get(LoggerInterface::class);
-			$logger->alert($message);
 		});
 	}
 
