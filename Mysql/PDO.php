@@ -25,8 +25,7 @@ class PDO implements StopHeartbeatCheck
 
 	private int $_transaction = 0;
 
-
-	private int $_timer = -1;
+	private int $_last = 0;
 
 	public string $dbname;
 	public string $cds;
@@ -226,11 +225,16 @@ class PDO implements StopHeartbeatCheck
 	public function check(): bool
 	{
 		try {
+			if ($this->_last == 0) {
+				$this->_last = time();
+			}
+			if (time() - $this->_last >= 600) {
+				throw new Exception('Idle dis.');
+			}
 			if (!($this->pdo instanceof \PDO)) {
 				return $result = false;
 			}
 			$this->pdo->getAttribute(\PDO::ATTR_SERVER_INFO);
-
 			$result = true;
 		} catch (\Throwable $throwable) {
 			$this->pdo = null;
