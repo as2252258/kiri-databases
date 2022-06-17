@@ -28,8 +28,6 @@ class PDO implements StopHeartbeatCheck
 
 	private int $_timer = -1;
 
-	private int $_last = 0;
-
 	public string $dbname;
 	public string $cds;
 	public string $username;
@@ -60,10 +58,10 @@ class PDO implements StopHeartbeatCheck
 
 	/**
 	 * @return void
+	 * @throws Exception
 	 */
 	public function init(): void
 	{
-		$this->heartbeat_check();
 		$eventProvider = Kiri::getDi()->get(EventProvider::class);
 		$eventProvider->on(OnWorkerExit::class, [$this, 'onWorkerExit']);
 	}
@@ -82,7 +80,7 @@ class PDO implements StopHeartbeatCheck
 	 * @param Kiri\Server\Events\OnWorkerExit $exit
 	 * @return void
 	 */
-	public function onWorkerExit(OnWorkerExit $exit)
+	public function onWorkerExit(OnWorkerExit $exit): void
 	{
 		$this->stopHeartbeatCheck();
 	}
@@ -91,41 +89,9 @@ class PDO implements StopHeartbeatCheck
 	/**
 	 *
 	 */
-	public function heartbeat_check(): void
-	{
-		if ($this->_timer === -1) {
-			$this->_timer = Timer::tick(1000, [$this, 'waite']);
-		}
-	}
-
-
-	/**
-	 * @throws Exception
-	 */
-	private function waite(): void
-	{
-		try {
-			$tick = (int)Config::get('databases.pool.tick', 60);
-			if ($this->_timer == -1 || time() - $this->_last > $tick) {
-				$this->stopHeartbeatCheck();
-
-				$this->pdo = null;
-			}
-		} catch (\Throwable $throwable) {
-			error($throwable);
-		}
-	}
-
-
-	/**
-	 *
-	 */
 	public function stopHeartbeatCheck(): void
 	{
-		if ($this->_timer > -1) {
-			Timer::clear($this->_timer);
-		}
-		$this->_timer = -1;
+		$this->pdo = null;
 	}
 
 
@@ -250,6 +216,27 @@ class PDO implements StopHeartbeatCheck
 				return $this->queryPrev($sql, $params);
 			}
 			throw new Exception($throwable->getMessage());
+		}
+	}
+
+
+	/**
+	 * @return bool
+	 */
+	public function check(): bool
+	{
+		try {
+			if (!($this->pdo instanceof \PDO)) {
+				return $result = false;
+			}
+			$this->pdo->getAttribute(\PDO::ATTR_SERVER_INFO);
+
+			$result = true;
+		} catch (\Throwable $throwable) {
+			$this->pdo = null;
+			$result = false;
+		} finally {
+			return $result;
 		}
 	}
 

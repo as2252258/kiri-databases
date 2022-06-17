@@ -23,7 +23,11 @@ use Kiri\Abstracts\Config;
 use Kiri\Events\EventProvider;
 use Kiri\Exception\NotFindClassException;
 use Kiri\Server\Events\OnWorkerExit;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use ReflectionException;
+use Kiri\Pool\Connection as PoolConnection;
+use Kiri\Di\ContainerInterface;
 
 /**
  * Class Connection
@@ -47,6 +51,9 @@ class Connection extends Component
 	public int $read_timeout = 10;
 
 	public array $pool;
+
+
+	private PoolConnection $connection;
 
 	/**
 	 * @var bool
@@ -75,12 +82,17 @@ class Connection extends Component
 
 	/**
 	 * @param EventProvider $eventProvider
+	 * @param Kiri\Di\ContainerInterface $container
 	 * @param array $config
+	 * @throws ContainerExceptionInterface
+	 * @throws NotFoundExceptionInterface
 	 * @throws Exception
 	 */
-	public function __construct(public EventProvider $eventProvider, array $config = [])
+	public function __construct(public EventProvider $eventProvider, public ContainerInterface $container, array $config = [])
 	{
 		parent::__construct($config);
+
+		$this->connection = $this->container->get(PoolConnection::class);
 	}
 
 
@@ -88,7 +100,7 @@ class Connection extends Component
 	 * @return void
 	 * @throws Exception
 	 */
-	public function init()
+	public function init(): void
 	{
 		$this->eventProvider->on(OnWorkerExit::class, [$this, 'clear_connection'], 0);
 		$this->eventProvider->on(BeginTransaction::class, [$this, 'beginTransaction'], 0);
@@ -100,27 +112,15 @@ class Connection extends Component
 
 
 	/**
-	 * @param $isSearch
-	 * @return PDO
-	 * @throws Exception
-	 */
-	public function getConnect($isSearch): PDO
-	{
-		return !$isSearch ? $this->getPdo() : $this->getSlaveClient();
-	}
-
-
-	/**
 	 * @throws Exception
 	 */
 	public function connectPoolInstance()
 	{
-		$connections = $this->connections();
 		$pool = Config::get('databases.pool.max', 10);
 		if (!empty($this->slaveConfig) && $this->cds != $this->slaveConfig['cds']) {
-			$connections->initConnections('Mysql:' . $this->slaveConfig['cds'], $pool);
+			$this->connection->initConnections('Mysql:' . $this->slaveConfig['cds'], $pool);
 		} else {
-			$connections->initConnections('Mysql:' . $this->cds, $pool);
+			$this->connection->initConnections('Mysql:' . $this->cds, $pool);
 		}
 	}
 
@@ -149,7 +149,7 @@ class Connection extends Component
 	 */
 	public function getMasterClient(): PDO
 	{
-		return $this->connections()->get([
+		return $this->connection->get([
 			'cds'             => $this->cds,
 			'username'        => $this->username,
 			'password'        => $this->password,
@@ -170,19 +170,8 @@ class Connection extends Component
 		if (empty($this->slaveConfig) || $this->slaveConfig['cds'] == $this->cds) {
 			return $this->getPdo();
 		}
-		return $this->connections()->get($this->slaveConfig);
+		return $this->connection->get($this->slaveConfig);
 	}
-
-
-	/**
-	 * @return \Kiri\Pool\Connection
-	 * @throws Exception
-	 */
-	private function connections(): \Kiri\Pool\Connection
-	{
-		return Kiri::getDi()->get(\Kiri\Pool\Connection::class);
-	}
-
 
 	/**
 	 * @return $this
@@ -264,7 +253,7 @@ class Connection extends Component
 	 */
 	public function release(PDO $pdo)
 	{
-		$connections = $this->connections();
+		$connections = $this->connection;
 		if (!$pdo->inTransaction()) {
 			$cds = $this->cds;
 			if (isset($this->slaveConfig['cds'])) {
@@ -282,15 +271,11 @@ class Connection extends Component
 	 */
 	public function clear_connection()
 	{
-		$connections = $this->connections();
-
-		$connections->connection_clear($this->cds);
-
-		if (!isset($this->slaveConfig['cds'])) {
-			$this->slaveConfig['cds'] = $this->cds;
+		$this->connection->connection_clear($this->cds);
+		if (!isset($this->slaveConfig['cds']) || $this->cds == $this->slaveConfig['cds']) {
+			return;
 		}
-
-		$connections->connection_clear($this->slaveConfig['cds']);
+		$this->connection->connection_clear($this->slaveConfig['cds']);
 	}
 
 
@@ -299,14 +284,11 @@ class Connection extends Component
 	 */
 	public function disconnect()
 	{
-		$connections = $this->connections();
-		$connections->disconnect($this->cds);
-
-		if (!isset($this->slaveConfig['cds'])) {
-			$this->slaveConfig['cds'] = $this->cds;
+		$this->connection->disconnect($this->cds);
+		if (!isset($this->slaveConfig['cds']) || $this->cds == $this->slaveConfig['cds']) {
+			return;
 		}
-
-		$connections->disconnect($this->slaveConfig['cds']);
+		$this->connection->disconnect($this->slaveConfig['cds']);
 	}
 
 }

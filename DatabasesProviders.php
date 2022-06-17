@@ -9,7 +9,12 @@ use Kiri;
 use Kiri\Abstracts\Config;
 use Kiri\Abstracts\Providers;
 use Kiri\Application;
+use Kiri\Pool\Connection as PoolConnection;
 use Kiri\Exception\ConfigException;
+use Kiri\Events\EventProvider;
+use Kiri\Annotation\Inject;
+use Kiri\Server\Events\OnWorkerStart;
+use Kiri\Server\Events\OnTaskerStart;
 
 /**
  * Class DatabasesProviders
@@ -20,20 +25,28 @@ class DatabasesProviders extends Providers
 
 
 	/**
+	 * @var EventProvider
+	 */
+	#[Inject(EventProvider::class)]
+	public EventProvider $provider;
+
+
+	/**
 	 * @param Application $application
 	 * @return void
 	 * @throws ConfigException
+	 * @throws Exception
 	 */
-	public function onImport(Application $application)
+	public function onImport(Application $application): void
 	{
 		$databases = Config::get('databases.connections', []);
 		if (empty($databases)) {
 			return;
 		}
-
-		$app = Kiri::app();
+		$this->provider->on(OnWorkerStart::class, [$this, 'check']);
+		$this->provider->on(OnTaskerStart::class, [$this, 'check']);
 		foreach ($databases as $key => $database) {
-			$app->set($key, $this->_settings($database));
+			$application->set($key, $this->_settings($database));
 		}
 	}
 
@@ -47,6 +60,32 @@ class DatabasesProviders extends Providers
 	{
 		return Kiri::app()->get($name);
 	}
+
+
+	/**
+	 * @param OnTaskerStart|OnWorkerStart $start
+	 * @return void
+	 */
+	public function check(OnTaskerStart|OnWorkerStart $start): void
+	{
+		$start->server->tick(60000, function () {
+			$databases = Config::get('databases.connections', []);
+			if (empty($databases)) {
+				return;
+			}
+
+			$connection = Kiri::getDi()->get(PoolConnection::class);
+			foreach ($databases as $database) {
+				$connection->check($database['cds']);
+				if (isset($database['slaveConfig']) && isset($database['slaveConfig']['cds'])) {
+					if ($database['slaveConfig']['cds'] != $database['cds']) {
+						$connection->check($database['cds']);
+					}
+				}
+			}
+		});
+	}
+
 
 	/**
 	 * @param $database
