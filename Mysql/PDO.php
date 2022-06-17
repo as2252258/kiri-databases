@@ -225,9 +225,7 @@ class PDO implements StopHeartbeatCheck
 	public function check(): bool
 	{
 		try {
-			if ($this->_last == 0) {
-				$this->_last = time();
-			}
+			if ($this->_last == 0) $this->_last = time();
 			if (time() - $this->_last >= 600) {
 				throw new Exception('Idle dis.');
 			}
