@@ -86,32 +86,32 @@ class DatabasesProviders extends Providers
 	{
 		$timerTick = $start->server->tick(50 * 1000, static function () use ($start) {
 			$databases = Config::get('databases.connections', []);
+			$valid = 0;
+			$count = 0;
 			$logger = Kiri::getDi()->get(LoggerInterface::class);
-			$logger->alert('db size ' . count($databases) . ' ticker ' . date('Y-m-d H:i:s'));
 			if (!empty($databases)) {
-				$valid = 0;
-				$count = 0;
-
 				$connection = Kiri::getDi()->get(PoolConnection::class);
 				foreach ($databases as $database) {
-					[$total, $success] = $connection->check($database['cds']);
+					try {
+						[$total, $success] = $connection->check($database['cds']);
 
-					$count += $total;
-					$valid += $success;
+						$count += $total;
+						$valid += $success;
 
-					if (isset($database['slaveConfig']) && isset($database['slaveConfig']['cds'])) {
-						if ($database['slaveConfig']['cds'] != $database['cds']) {
-							[$total, $success] = $connection->check($database['slaveConfig']['cds']);
+						if (isset($database['slaveConfig']) && isset($database['slaveConfig']['cds'])) {
+							if ($database['slaveConfig']['cds'] != $database['cds']) {
+								[$total, $success] = $connection->check($database['slaveConfig']['cds']);
 
-							$count += $total;
-							$valid += $success;
+								$count += $total;
+								$valid += $success;
+							}
 						}
+					} catch (\Throwable $throwable) {
+						$logger->error($throwable->getMessage());
 					}
 				}
-
-				$message = sprintf('Worker %d db client has %d, valid %d', $start->workerId, $count, $valid);
-				$logger->alert($message);
 			}
+			$logger->alert(sprintf('Worker %d db client has %d, valid %d', $start->workerId, $count, $valid));
 		});
 		Kiri\Context::setContext('db.loop.id', $timerTick);
 	}
