@@ -15,6 +15,7 @@ use Kiri\Events\EventProvider;
 use Kiri\Annotation\Inject;
 use Kiri\Server\Events\OnWorkerStart;
 use Kiri\Server\Events\OnTaskerStart;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class DatabasesProviders
@@ -68,21 +69,38 @@ class DatabasesProviders extends Providers
 	 */
 	public function check(OnTaskerStart|OnWorkerStart $start): void
 	{
-		$start->server->tick(60000, function () {
+		$start->server->tick(1150 * 1000, function () use ($start) {
 			$databases = Config::get('databases.connections', []);
 			if (empty($databases)) {
 				return;
 			}
 
+			$valid = 0;
+			$count = 0;
+
 			$connection = Kiri::getDi()->get(PoolConnection::class);
 			foreach ($databases as $database) {
-				$connection->check($database['cds']);
+				$count += 1;
+
+				$success = $connection->check($database['cds']);
+				if ($success) {
+					$valid += 1;
+				}
 				if (isset($database['slaveConfig']) && isset($database['slaveConfig']['cds'])) {
 					if ($database['slaveConfig']['cds'] != $database['cds']) {
-						$connection->check($database['cds']);
+						$count += 1;
+						$success = $connection->check($database['slaveConfig']['cds']);
+						if ($success) {
+							$valid += 1;
+						}
 					}
 				}
 			}
+
+			$message = sprintf('Worker %d db client has %d, valid %d', $start->workerId, $count, $valid);
+
+			$logger = Kiri::getDi()->get(LoggerInterface::class);
+			$logger->alert($message);
 		});
 	}
 
