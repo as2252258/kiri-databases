@@ -17,6 +17,7 @@ use Kiri\Server\Events\OnWorkerStart;
 use Kiri\Server\Events\OnTaskerStart;
 use Psr\Log\LoggerInterface;
 use Kiri\Server\Events\OnWorkerExit;
+use Swoole\Timer;
 
 /**
  * Class DatabasesProviders
@@ -62,7 +63,7 @@ class DatabasesProviders extends Providers
 	{
 		$id = (int)Kiri\Context::getContext('db.loop.id');
 		if (!empty($id)) {
-			$exit->server->clearTimer($id);
+			Timer::clear($id);
 		}
 	}
 
@@ -84,7 +85,7 @@ class DatabasesProviders extends Providers
 	 */
 	public function check(OnTaskerStart|OnWorkerStart $start): void
 	{
-		$timerTick = $start->server->tick(50 * 1000, static function () use ($start) {
+		$timerTick = Timer::tick(50 * 1000, static function () use ($start) {
 			$databases = Config::get('databases.connections', []);
 			$valid = 0;
 			$count = 0;
