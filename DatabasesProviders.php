@@ -48,7 +48,7 @@ class DatabasesProviders extends Providers
 		}
 		$this->provider->on(OnWorkerStart::class, [$this, 'check']);
 		$this->provider->on(OnTaskerStart::class, [$this, 'check']);
-		$this->provider->on(OnWorkerExit::class, [$this, 'exit']);
+		$this->provider->on(OnWorkerExit::class, [$this, 'exit'], 9999);
 		foreach ($databases as $key => $database) {
 			$application->set($key, $this->_settings($database));
 		}
