@@ -13,11 +13,11 @@ namespace Database\Base;
 use ArrayIterator;
 use Database\ActiveQuery;
 use Database\ModelInterface;
-use Kiri\ToArray;
 use Exception;
 use JetBrains\PhpStorm\Pure;
 use Kiri\Abstracts\Component;
-use ReturnTypeWillChange;
+use Kiri\ReturnTypeWillChange;
+use Kiri\ToArray;
 use Traversable;
 
 /**

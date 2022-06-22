@@ -113,14 +113,18 @@ class Model extends Base\Model
 		if (empty($attributes)) {
 			return $logger->addError(FIND_OR_CREATE_MESSAGE, 'mysql');
 		}
+		
 		/** @var static $select */
 		$select = static::query()->where($condition)->first();
-		if (empty($select)) {
-			$select = new static();
-			$select->attributes = $attributes;
-			if (!$select->save()) {
-				throw new Exception($select->getLastError());
-			}
+		if (!empty($select)) {
+			return $select;
+		}
+
+		$select = new static();
+		$select->setAttributes($condition);
+		$select->setAttributes($attributes);
+		if (!$select->save()) {
+			throw new Exception($select->getLastError());
 		}
 		return $select;
 	}
@@ -142,8 +146,9 @@ class Model extends Base\Model
 		$select = static::query()->where($condition)->first();
 		if (empty($select)) {
 			$select = new static();
+			$select->setAttributes($condition);
 		}
-		$select->attributes = $attributes;
+		$select->setAttributes($attributes);
 		if (!$select->save()) {
 			throw new Exception($select->getLastError());
 		}
@@ -152,17 +157,14 @@ class Model extends Base\Model
 
 
 	/**
-	 * @param $action
 	 * @param $columns
-	 * @param null|array $condition
+	 * @param $action
 	 * @return array|bool|int|string|null
 	 * @throws Exception
 	 */
-	private function mathematics($columns, $action, ?array $condition = null): int|bool|array|string|null
+	private function mathematics($columns, $action): int|bool|array|string|null
 	{
-		if (empty($condition)) {
-			$condition = [$this->getPrimary() => $this->getPrimaryValue()];
-		}
+		$condition = [$this->getPrimary() => $this->getPrimaryValue()];
 
 		$activeQuery = static::query()->where($condition);
 		$create = SqlBuilder::builder($activeQuery)->mathematics($columns, $action);
@@ -191,13 +193,10 @@ class Model extends Base\Model
 	 */
 	public static function inserts(array $data): bool
 	{
-		$result = false;
 		if (empty($data)) {
-			error('Insert data empty.', 'mysql');
-		} else {
-			$result = static::query()->batchInsert($data);
+			return error('Insert data empty.', 'mysql');
 		}
-		return $result;
+		return static::query()->batchInsert($data);
 	}
 
 	/**
@@ -210,14 +209,14 @@ class Model extends Base\Model
 		if (empty($primary) || !$this->hasPrimaryValue()) {
 			return $this->logger->addError("Only primary key operations are supported.", 'mysql');
 		}
-		if ($this->beforeDelete()) {
-			$result = static::deleteByCondition([$primary => $this->getPrimaryValue()]);
-			Coroutine::create(function () use ($result) {
-				$this->afterDelete($result);
-			});
-			return $result;
+		if (!$this->beforeDelete()) {
+			return false;
 		}
-		return false;
+		$result = static::deleteByCondition([$primary => $this->getPrimaryValue()]);
+
+		$this->afterDelete($result);
+
+		return $result;
 	}
 
 
@@ -226,8 +225,6 @@ class Model extends Base\Model
 	 * @param array $attributes
 	 *
 	 * @return bool
-	 * @throws NotFindClassException
-	 * @throws ReflectionException
 	 * @throws Exception
 	 */
 	public static function updateAll(mixed $condition, array $attributes = []): bool
@@ -240,8 +237,6 @@ class Model extends Base\Model
 	/**
 	 * @param $condition
 	 * @return array|Collection
-	 * @throws NotFindClassException
-	 * @throws ReflectionException
 	 */
 	public static function get($condition): Collection|array
 	{
@@ -265,30 +260,6 @@ class Model extends Base\Model
 		return $query->all();
 	}
 
-	/**
-	 * @param $method
-	 * @return mixed
-	 * @throws Exception
-	 */
-	private function withRelation($method): mixed
-	{
-		$method = $this->getRelate($method);
-		if (empty($method)) {
-			return null;
-		}
-		$resolve = $this->{$method}();
-		if ($resolve instanceof HasBase) {
-			$resolve = $resolve->get();
-		}
-		if ($resolve instanceof ToArray) {
-			return $resolve->toArray();
-		} else if (is_object($resolve)) {
-			return get_object_vars($resolve);
-		} else {
-			return $resolve;
-		}
-	}
-
 
 	/**
 	 * @return array
@@ -297,9 +268,8 @@ class Model extends Base\Model
 	public function toArray(): array
 	{
 		$data = $this->_attributes;
-		$lists = di(Getter::class)->getGetter(static::class);
-		foreach ($lists as $key => $item) {
-			$data[$key] = $this->{$item}($data[$key] ?? null);
+		foreach ($data as $key => $datum) {
+			$data[$key] = $this->withPropertyOverride($key, $datum);
 		}
 		return $this->withRelates($data);
 	}
@@ -315,7 +285,7 @@ class Model extends Base\Model
 			return $relates;
 		}
 		foreach ($with as $val) {
-			$relates[$val] = $this->withRelation($val);
+			$relates[$val] = $this->withRelate($val);
 		}
 		return $relates;
 	}

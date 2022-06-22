@@ -17,8 +17,6 @@ use ArrayAccess;
 use Closure;
 use Database\ActiveQuery;
 use Database\Connection;
-use Database\HasMany;
-use Database\HasOne;
 use Database\ModelInterface;
 use Database\Mysql\Columns;
 use Database\Relation;
@@ -30,9 +28,9 @@ use Kiri\Abstracts\Component;
 use Kiri\Annotation\Annotation;
 use Kiri\Error\StdoutLoggerInterface;
 use Kiri\Exception\NotFindClassException;
+use ReturnTypeWillChange;
 use Kiri\ToArray;
 use ReflectionException;
-use ReturnTypeWillChange;
 use validator\Validator;
 
 /**
@@ -106,59 +104,6 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	public function rules(): array
 	{
 		return [];
-	}
-
-
-	/**
-	 * @param string $name
-	 * @param mixed $value
-	 * @return mixed
-	 * @throws ReflectionException
-	 */
-	private function _setter(string $name, mixed $value): mixed
-	{
-		$method = di(Setter::class)->getSetter(static::class, $name);
-		if (!empty($method)) {
-			$value = $this->{$method}($value);
-		}
-		return $value;
-	}
-
-
-	/**
-	 * @param string $name
-	 * @param $value
-	 * @return mixed
-	 * @throws ReflectionException
-	 */
-	private function _getter(string $name, $value): mixed
-	{
-		$data = di(Getter::class)->getGetter(static::class, $name);
-		if (empty($data)) {
-			return $this->_relater($name, $value);
-		}
-		return $this->{$data}($value);
-	}
-
-
-	/**
-	 * @param string $name
-	 * @param $value
-	 * @return mixed
-	 * @throws ReflectionException
-	 * @throws Exception
-	 */
-	private function _relater(string $name, $value): mixed
-	{
-		$data = di(Relate::class)->getRelate(static::class, $name);
-		if (!empty($data)) {
-			$data = $this->{$data}();
-			if ($data instanceof HasBase) {
-				return $data->get();
-			}
-			return $data;
-		}
-		return $this->_decode($name, $value);
 	}
 
 
@@ -310,10 +255,10 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function getPrimaryValue(): ?int
 	{
-		if (!$this->hasPrimary()) {
-			return NULL;
+		if ($this->hasPrimary()) {
+			return $this->getAttribute($this->primary);
 		}
-		return $this->getAttribute($this->primary);
+		return null;
 	}
 
 	/**
@@ -407,8 +352,6 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	/**
 	 * @param $condition
 	 * @return static|null
-	 * @throws NotFindClassException
-	 * @throws ReflectionException
 	 * @throws Exception
 	 */
 	public static function first($condition): ?static
@@ -428,10 +371,11 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 
 	/**
 	 * @return Connection
+	 * @throws Exception
 	 */
 	public function getConnection(): Connection
 	{
-		return Kiri::app()->get($this->connection);
+		return Kiri::service()->get($this->connection);
 	}
 
 
@@ -484,7 +428,10 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function setAttribute($name, $value): mixed
 	{
-		return $this->_attributes[$name] = $this->_setter($name, $value);
+		if (method_exists($this, 'set' . ucfirst($name) . 'Attribute')) {
+			$value = $this->{'set' . ucfirst($name) . 'Attribute'}($value);
+		}
+		return $this->_attributes[$name] = $value;
 	}
 
 	/**
@@ -495,7 +442,10 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function setOldAttribute($name, $value): mixed
 	{
-		return $this->_oldAttributes[$name] = $this->_setter($name, $value);
+		if (method_exists($this, 'set' . ucfirst($name) . 'Attribute')) {
+			$value = $this->{'set' . ucfirst($name) . 'Attribute'}($value);
+		}
+		return $this->_oldAttributes[$name] = $value;
 	}
 
 	/**
@@ -687,9 +637,6 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function getAttribute(string $name)
 	{
-		if ($this->hasAnnotation($name)) {
-			return $this->runAnnotation($name, $this->_attributes[$name]);
-		}
 		return $this->_attributes[$name] ?? NULL;
 	}
 
@@ -866,10 +813,11 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function __set($name, $value): void
 	{
-		if (method_exists($this, 'set' . ucfirst($name))) {
-			$this->{'set' . ucfirst($name)}($value);
+		$method = 'set' . ucfirst($name) . 'Attribute';
+		if (method_exists($this, $method)) {
+			$this->_attributes[$name] = $this->{$method}($value);
 		} else {
-			$this->_attributes[$name] = $this->_setter($name, $value);
+			$this->_attributes[$name] = $value;
 		}
 	}
 
@@ -881,13 +829,70 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function __get($name): mixed
 	{
-		$method = 'get' . ucfirst($name);
-		if (method_exists($this, $method)) {
-			return $this->{$method}();
+		if (isset($this->_attributes[$name])) {
+			return $this->withPropertyOverride($name);
 		}
-		$value = $this->_attributes[$name] ?? NULL;
+		return $this->getRelateValue($name);
+	}
 
-		return $this->_getter($name, $value);
+
+	/**
+	 * @param $name
+	 * @param null $value
+	 * @return mixed
+	 * @throws Exception
+	 */
+	protected function withPropertyOverride($name, $value = null): mixed
+	{
+		if (is_null($value)) {
+			$value = $this->_attributes[$name] ?? NULL;
+		}
+		$method = 'get' . ucfirst($name) . 'Attribute';
+		if (!method_exists($this, $method)) {
+			return $this->_decode($name, $value);
+		}
+		return $this->{$method}($value);
+	}
+
+
+	/**
+	 * @param $name
+	 * @return bool
+	 */
+	protected function hasRelateMethod($name): bool
+	{
+		return method_exists($this, 'get' . ucfirst($name));
+	}
+
+
+	/**
+	 * @param $name
+	 * @return mixed|null
+	 */
+	protected function withRelate($name): mixed
+	{
+		$response = $this->getRelateValue($name);
+		if ($response instanceof ToArray) {
+			$response = $response->toArray();
+		}
+		return $response;
+	}
+
+
+	/**
+	 * @param $name
+	 * @return mixed
+	 */
+	protected function getRelateValue($name): mixed
+	{
+		if (!$this->hasRelateMethod($name)) {
+			return null;
+		}
+		$response = $this->{'get' . ucfirst($name)}();
+		if ($response instanceof HasBase) {
+			$response = $response->get();
+		}
+		return $response;
 	}
 
 
@@ -897,7 +902,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 * @return mixed
 	 * @throws Exception
 	 */
-	private function _decode($name, $value): mixed
+	protected function _decode($name, $value): mixed
 	{
 		return $this->getColumns()->_decode($name, $value);
 	}
@@ -918,30 +923,6 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 
 
 	/**
-	 * @param string $type
-	 * @return array
-	 */
-	protected function getAnnotation(string $type = self::GET): array
-	{
-		return $this->_annotations[$type] ?? [];
-	}
-
-
-	/**
-	 * @param $name
-	 * @param string $type
-	 * @return bool
-	 */
-	protected function hasAnnotation($name, string $type = self::GET): bool
-	{
-		if (!isset($this->_annotations[$type])) {
-			return FALSE;
-		}
-		return isset($this->_annotations[$type][$name]);
-	}
-
-
-	/**
 	 * @param $item
 	 * @param $data
 	 * @return array
@@ -958,22 +939,6 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	public function __isset($name): bool
 	{
 		return isset($this->_attributes[$name]);
-	}
-
-	/**
-	 * @param $call
-	 * @return mixed
-	 * @throws Exception
-	 */
-	private function resolveClass($call): mixed
-	{
-		if ($call instanceof HasOne) {
-			return $call->get();
-		} else if ($call instanceof HasMany) {
-			return $call->get();
-		} else {
-			return $call;
-		}
 	}
 
 
@@ -1025,19 +990,12 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	}
 
 	/**
+	 * @param string ...$params
 	 * @return array
 	 */
-	public function unset(): array
+	public function unset(string ...$params): array
 	{
-		$fields = func_get_args();
-		$fields = array_shift($fields);
-		if (!is_array($fields)) {
-			$fields = explode(',', $fields);
-		}
-
-		$array = array_combine($fields, $fields);
-
-		return array_diff_assoc($array, $this->_attributes);
+		return array_diff_assoc($params, $this->_attributes);
 	}
 
 

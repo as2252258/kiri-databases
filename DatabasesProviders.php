@@ -8,7 +8,6 @@ use Exception;
 use Kiri;
 use Kiri\Abstracts\Config;
 use Kiri\Abstracts\Providers;
-use Kiri\Application;
 use Kiri\Pool\Connection as PoolConnection;
 use Kiri\Exception\ConfigException;
 use Kiri\Events\EventProvider;
@@ -18,6 +17,7 @@ use Kiri\Server\Events\OnTaskerStart;
 use Psr\Log\LoggerInterface;
 use Kiri\Server\Events\OnWorkerExit;
 use Swoole\Timer;
+use Kiri\Di\LocalService;
 
 /**
  * Class DatabasesProviders
@@ -35,12 +35,12 @@ class DatabasesProviders extends Providers
 
 
 	/**
-	 * @param Application $application
+	 * @param LocalService $application
 	 * @return void
 	 * @throws ConfigException
 	 * @throws Exception
 	 */
-	public function onImport(Application $application): void
+	public function onImport(LocalService $application): void
 	{
 		$databases = Config::get('databases.connections', []);
 		if (empty($databases)) {
@@ -75,7 +75,7 @@ class DatabasesProviders extends Providers
 	 */
 	public function get($name): Connection
 	{
-		return Kiri::app()->get($name);
+		return Kiri::service()->get($name);
 	}
 
 
