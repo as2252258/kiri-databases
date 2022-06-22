@@ -5,7 +5,6 @@ namespace Database\Annotation;
 
 
 use Kiri\Annotation\AbstractAttribute;
-use Database\Base\Relate;
 use Exception;
 
 
@@ -34,7 +33,6 @@ use Exception;
 	 */
 	public function execute(mixed $class, mixed $method = null): bool
 	{
-		di(Relate::class)->addRelate($this->name, $class, $method);
 		return true;
 	}
 

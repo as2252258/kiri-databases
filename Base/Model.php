@@ -735,17 +735,6 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 
 
 	/**
-	 * @param $name
-	 * @return array|string|null
-	 * @throws Exception
-	 */
-	public function getRelate($name): null|array|string
-	{
-		return di(Relate::class)->getRelate(static::class, $name);
-	}
-
-
-	/**
 	 * @param $attribute
 	 * @return bool
 	 * @throws Exception

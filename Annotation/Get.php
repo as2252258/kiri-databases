@@ -5,15 +5,14 @@ namespace Database\Annotation;
 
 
 use Attribute;
-use Database\Base\Getter;
-use Exception;
+use Kiri\Annotation\AbstractAttribute;
 
 
 /**
  * Class Get
  * @package Annotation\Model
  */
-#[Attribute(Attribute::TARGET_METHOD)] class Get extends \Kiri\Annotation\AbstractAttribute
+#[Attribute(Attribute::TARGET_METHOD)] class Get extends AbstractAttribute
 {
 
 
@@ -33,7 +32,6 @@ use Exception;
 	 */
     public function execute(mixed $class, mixed $method = null): bool
 	{
-		di(Getter::class)->addGetter($this->name, $class, $method);
 		return true;
 	}
 

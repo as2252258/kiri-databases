@@ -13,7 +13,7 @@ class Getter
 	 * @param $class
 	 * @param $method
 	 */
-	public function addGetter($name, $class, $method)
+	public function addGetter($name, $class, $method): void
 	{
 		$this->_classMapping[$class][$name] = $method;
 	}

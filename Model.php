@@ -10,15 +10,11 @@ declare(strict_types=1);
 namespace Database;
 
 
-use Database\Base\Getter;
-use Database\Traits\HasBase;
 use Exception;
 use Kiri;
 use Kiri\Exception\NotFindClassException;
-use Kiri\ToArray;
 use Kiri\Error\StdoutLoggerInterface;
 use ReflectionException;
-use Swoole\Coroutine;
 
 defined('SAVE_FAIL') or define('SAVE_FAIL', 3227);
 defined('FIND_OR_CREATE_MESSAGE') or define('FIND_OR_CREATE_MESSAGE', 'Create a new model, but the data cannot be empty.');
