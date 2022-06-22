@@ -53,20 +53,25 @@ class DatabasesProviders extends Providers
 			$application->set($key, $this->_settings($database));
 		}
 	}
-
-
+	
+	
 	/**
 	 * @param OnWorkerExit $exit
 	 * @return void
+	 * @throws ConfigException
+	 * @throws Exception
 	 */
 	public function exit(OnWorkerExit $exit): void
 	{
-		$id = (int)Kiri\Context::getContext('db.loop.id');
-		if (!empty($id)) {
-			Timer::clear($id);
+		Timer::clearAll();
+		$databases = Config::get('databases.connections', []);
+		if (!empty($databases)) {
+			$connection = Kiri::getDi()->get(PoolConnection::class);
+			foreach ($databases as $database) {
+				$connection->disconnect($database['cds']);
+			}
 		}
 	}
-
 
 	/**
 	 * @param $name
@@ -85,7 +90,7 @@ class DatabasesProviders extends Providers
 	 */
 	public function check(OnTaskerStart|OnWorkerStart $start): void
 	{
-		$timerTick = Timer::tick(50 * 1000, static function () use ($start) {
+		Timer::tick(50 * 1000, static function () use ($start) {
 			$databases = Config::get('databases.connections', []);
 			$valid = 0;
 			$count = 0;
@@ -114,7 +119,6 @@ class DatabasesProviders extends Providers
 			}
 			$logger->alert(sprintf('Worker %d db client has %d, valid %d', $start->workerId, $count, $valid));
 		});
-		Kiri\Context::setContext('db.loop.id', $timerTick);
 	}
 
 
