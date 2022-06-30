@@ -16,7 +16,7 @@ use Database\ModelInterface;
 use Exception;
 use JetBrains\PhpStorm\Pure;
 use Kiri\Abstracts\Component;
-use Kiri\ReturnTypeWillChange;
+use ReturnTypeWillChange;
 use Kiri\ToArray;
 use Traversable;
 
