@@ -27,18 +27,14 @@ class DatabasesProviders extends Providers
 {
 
 
+    public int $timer = 50000;
+
+
     /**
      * @var EventProvider
      */
     #[Inject(EventProvider::class)]
     public EventProvider $provider;
-
-
-    /**
-     * @var PoolConnection
-     */
-    #[Inject(PoolConnection::class)]
-    public PoolConnection $connection;
 
 
     /**
@@ -73,8 +69,9 @@ class DatabasesProviders extends Providers
         Timer::clearAll();
         $databases = Config::get('databases.connections', []);
         if (!empty($databases)) {
+            $connection = Kiri::getDi()->get(PoolConnection::class);
             foreach ($databases as $database) {
-                $this->connection->disconnect($database['cds']);
+                $connection->disconnect($database['cds']);
             }
         }
     }
@@ -96,7 +93,7 @@ class DatabasesProviders extends Providers
      */
     public function check(OnTaskerStart|OnWorkerStart $start): void
     {
-        Timer::tick(50000, static function () use ($start) {
+        Timer::tick($this->timer, static function () use ($start) {
             $valid = $count = 0;
             $logger = Kiri::getDi()->get(LoggerInterface::class);
             $databases = Config::get('databases.connections', []);
