@@ -27,7 +27,7 @@ class DatabasesProviders extends Providers
 {
 
 
-    public int $timer = 50000;
+    public int $timer = 30000;
 
 
     /**
