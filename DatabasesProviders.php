@@ -90,7 +90,7 @@ class DatabasesProviders extends Providers
 	 */
 	public function check(OnTaskerStart|OnWorkerStart $start): void
 	{
-		$start->server->tick(50000, static function () use ($start) {
+		Timer::tick(50000, function () use ($start) {
 			$databases = Config::get('databases.connections', []);
 			$valid = 0;
 			$count = 0;
