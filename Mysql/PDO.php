@@ -233,6 +233,7 @@ class PDO implements StopHeartbeatCheck
 			$this->pdo->getAttribute(\PDO::ATTR_SERVER_INFO);
 			$result = true;
 		} catch (\Throwable $throwable) {
+			Kiri::getLogger()->error($throwable->getMessage());
 			$this->pdo = null;
 			$result = false;
 		} finally {
