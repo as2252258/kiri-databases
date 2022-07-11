@@ -89,9 +89,7 @@ class DatabasesProviders extends Providers
 	 */
 	public function check(OnTaskerStart|OnWorkerStart $start): void
 	{
-		Timer::after(60000, static function () use ($start) {
-			DatabasesProviders::filter($start);
-		});
+		Timer::after(60000, fn() => DatabasesProviders::filter($start));
 	}
 
 
@@ -106,7 +104,7 @@ class DatabasesProviders extends Providers
 		$logger = Kiri::getDi()->get(LoggerInterface::class);
 		$databases = Config::get('databases.connections', []);
 		if (!empty($databases)) {
-			DatabasesProviders::each($databases, $logger, $count, $valid);
+			[$valid, $count] = DatabasesProviders::each($databases, $logger);
 		}
 		$const = 'Worker %d db client has %d, valid %d';
 		$logger->alert(sprintf($const, $start->workerId, $count, $valid));
@@ -118,13 +116,12 @@ class DatabasesProviders extends Providers
 	/**
 	 * @param $databases
 	 * @param LoggerInterface $logger
-	 * @param $count
-	 * @param $valid
-	 * @return void
+	 * @return array
 	 */
-	public static function each($databases, LoggerInterface $logger, &$count, &$valid): void
+	public static function each($databases, LoggerInterface $logger): array
 	{
 		$connection = Kiri::getDi()->get(PoolConnection::class);
+		$valid = $count = 0;
 		foreach ($databases as $database) {
 			try {
 				[$total, $success] = $connection->check($database['cds']);
@@ -144,6 +141,8 @@ class DatabasesProviders extends Providers
 				$logger->error($throwable->getMessage());
 			}
 		}
+
+		return [$valid, $count];
 	}
 
 
