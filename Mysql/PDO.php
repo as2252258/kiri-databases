@@ -66,7 +66,7 @@ class PDO implements StopHeartbeatCheck
     {
         $eventProvider = Kiri::getDi()->get(EventProvider::class);
         $eventProvider->on(OnWorkerExit::class, [$this, 'onWorkerExit']);
-        $this->_timerId = Timer::tick(6000, [$this, 'check']);
+        $this->_timerId = Timer::tick(60000, [$this, 'check']);
     }
 
 
