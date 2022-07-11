@@ -89,27 +89,26 @@ class DatabasesProviders extends Providers
 	 */
 	public function check(OnTaskerStart|OnWorkerStart $start): void
 	{
-		Timer::after(60000, fn() => DatabasesProviders::filter($start));
+		Timer::after(60000, [$this, 'filter']);
 	}
 
 
 	/**
-	 * @param OnTaskerStart|OnWorkerStart $start
 	 * @return void
 	 * @throws ConfigException
 	 */
-	public static function filter(OnTaskerStart|OnWorkerStart $start): void
+	public function filter(): void
 	{
 		$valid = $count = 0;
 		$logger = Kiri::getDi()->get(LoggerInterface::class);
 		$databases = Config::get('databases.connections', []);
 		if (!empty($databases)) {
-			[$valid, $count] = DatabasesProviders::each($databases, $logger);
+			[$valid, $count] = $this->each($databases, $logger);
 		}
 		$const = 'Worker %d db client has %d, valid %d';
-		$logger->alert(sprintf($const, $start->workerId, $count, $valid));
+		$logger->alert(sprintf($const, env('environmental_workerId'), $count, $valid));
 
-		Timer::after(60000, fn() => DatabasesProviders::filter($start));
+		Timer::after(60000,  [$this, 'filter']);
 	}
 
 
@@ -118,7 +117,7 @@ class DatabasesProviders extends Providers
 	 * @param LoggerInterface $logger
 	 * @return array
 	 */
-	public static function each($databases, LoggerInterface $logger): array
+	public function each($databases, LoggerInterface $logger): array
 	{
 		$connection = Kiri::getDi()->get(PoolConnection::class);
 		$valid = $count = 0;
