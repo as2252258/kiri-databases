@@ -93,17 +93,18 @@ class DatabasesProviders extends Providers
 	 */
 	public function check(OnTaskerStart|OnWorkerStart $start): void
 	{
-		Timer::after(10000, [$this, 'filter']);
+		Timer::tick(10000, [$this, 'filter']);
 	}
 
 
 	/**
+	 * @param $timerId
 	 * @return void
 	 * @throws ConfigException
 	 * @throws ContainerExceptionInterface
 	 * @throws NotFoundExceptionInterface
 	 */
-	public function filter(): void
+	public function filter($timerId): void
 	{
 		$valid = $count = 0;
 		$logger = Kiri::getDi()->get(LoggerInterface::class);
@@ -114,9 +115,8 @@ class DatabasesProviders extends Providers
 		$const = 'Worker %d db client has %d, valid %d';
 		$logger->alert(sprintf($const, env('environmental_workerId'), $count, $valid));
 		if ($this->container->get(WorkerStatus::class)->is(StatusEnum::EXIT)) {
-			return;
+			Timer::clear($timerId);
 		}
-		Timer::after(10000, [$this, 'filter']);
 	}
 
 
