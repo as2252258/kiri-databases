@@ -14,9 +14,13 @@ use Kiri\Events\EventProvider;
 use Kiri\Annotation\Inject;
 use Kiri\Server\Events\OnWorkerStart;
 use Kiri\Server\Events\OnTaskerStart;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use Kiri\Server\Events\OnWorkerExit;
 use Swoole\Timer;
+use Kiri\Server\WorkerStatus;
+use Kiri\Server\Abstracts\StatusEnum;
 use Kiri\Di\LocalService;
 
 /**
@@ -96,6 +100,8 @@ class DatabasesProviders extends Providers
 	/**
 	 * @return void
 	 * @throws ConfigException
+	 * @throws ContainerExceptionInterface
+	 * @throws NotFoundExceptionInterface
 	 */
 	public function filter(): void
 	{
@@ -107,8 +113,10 @@ class DatabasesProviders extends Providers
 		}
 		$const = 'Worker %d db client has %d, valid %d';
 		$logger->alert(sprintf($const, env('environmental_workerId'), $count, $valid));
-
-		Timer::after(10000,  [$this, 'filter']);
+		if ($this->container->get(WorkerStatus::class)->is(StatusEnum::EXIT)) {
+			return;
+		}
+		Timer::after(10000, [$this, 'filter']);
 	}
 
 
