@@ -93,30 +93,19 @@ class DatabasesProviders extends Providers
 	 */
 	public function check(OnTaskerStart|OnWorkerStart $start): void
 	{
-		Timer::tick(10000, [$this, 'filter']);
-	}
-
-
-	/**
-	 * @param $timerId
-	 * @return void
-	 * @throws ConfigException
-	 * @throws ContainerExceptionInterface
-	 * @throws NotFoundExceptionInterface
-	 */
-	public function filter($timerId): void
-	{
-		$valid = $count = 0;
-		$logger = Kiri::getDi()->get(LoggerInterface::class);
-		$databases = Config::get('databases.connections', []);
-		if (!empty($databases)) {
-			[$valid, $count] = $this->each($databases, $logger);
-		}
-		$const = 'Worker %d db client has %d, valid %d';
-		$logger->alert(sprintf($const, env('environmental_workerId'), $count, $valid));
-		if ($this->container->get(WorkerStatus::class)->is(StatusEnum::EXIT)) {
-			Timer::clear($timerId);
-		}
+		Timer::tick(10000, function ($timerId) {
+			$valid = $count = 0;
+			$logger = Kiri::getDi()->get(LoggerInterface::class);
+			$databases = Config::get('databases.connections', []);
+			if (!empty($databases)) {
+				[$valid, $count] = $this->each($databases, $logger);
+			}
+			$const = 'Worker %d db client has %d, valid %d';
+			$logger->alert(sprintf($const, env('environmental_workerId'), $count, $valid));
+			if ($this->container->get(WorkerStatus::class)->is(StatusEnum::EXIT)) {
+				Timer::clear($timerId);
+			}
+		});
 	}
 
 
