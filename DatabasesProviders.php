@@ -89,16 +89,29 @@ class DatabasesProviders extends Providers
 	 */
 	public function check(OnTaskerStart|OnWorkerStart $start): void
 	{
-		Timer::tick(60000, static function () use ($start) {
-			$valid = $count = 0;
-			$logger = Kiri::getDi()->get(LoggerInterface::class);
-			$databases = Config::get('databases.connections', []);
-			if (!empty($databases)) {
-				DatabasesProviders::each($databases, $logger, $count, $valid);
-			}
-			$const = 'Worker %d db client has %d, valid %d';
-			$logger->alert(sprintf($const, $start->workerId, $count, $valid));
+		Timer::after(60000, static function () use ($start) {
+			DatabasesProviders::filter($start);
 		});
+	}
+
+
+	/**
+	 * @param OnTaskerStart|OnWorkerStart $start
+	 * @return void
+	 * @throws ConfigException
+	 */
+	public static function filter(OnTaskerStart|OnWorkerStart $start): void
+	{
+		$valid = $count = 0;
+		$logger = Kiri::getDi()->get(LoggerInterface::class);
+		$databases = Config::get('databases.connections', []);
+		if (!empty($databases)) {
+			DatabasesProviders::each($databases, $logger, $count, $valid);
+		}
+		$const = 'Worker %d db client has %d, valid %d';
+		$logger->alert(sprintf($const, $start->workerId, $count, $valid));
+
+		Timer::after(60000, fn() => DatabasesProviders::filter($start));
 	}
 
 
