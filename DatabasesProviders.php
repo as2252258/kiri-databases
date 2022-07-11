@@ -26,10 +26,6 @@ use Kiri\Di\LocalService;
 class DatabasesProviders extends Providers
 {
 
-
-	public int $timer = 30000;
-
-
 	/**
 	 * @var EventProvider
 	 */
