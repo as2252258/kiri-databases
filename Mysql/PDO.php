@@ -4,12 +4,10 @@ namespace Database\Mysql;
 
 use Exception;
 use Kiri;
-use Kiri\Abstracts\Config;
 use Kiri\Events\EventProvider;
 use Kiri\Pool\StopHeartbeatCheck;
 use Kiri\Server\Events\OnWorkerExit;
 use PDOStatement;
-use Swoole\Timer;
 
 /**
  *
