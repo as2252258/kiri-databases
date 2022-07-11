@@ -89,7 +89,7 @@ class DatabasesProviders extends Providers
 	 */
 	public function check(OnTaskerStart|OnWorkerStart $start): void
 	{
-		Timer::after(60000, [$this, 'filter']);
+		Timer::after(10000, [$this, 'filter']);
 	}
 
 
@@ -108,7 +108,7 @@ class DatabasesProviders extends Providers
 		$const = 'Worker %d db client has %d, valid %d';
 		$logger->alert(sprintf($const, env('environmental_workerId'), $count, $valid));
 
-		Timer::after(60000,  [$this, 'filter']);
+		Timer::after(10000,  [$this, 'filter']);
 	}
 
 
