@@ -47,8 +47,6 @@ class DatabasesProviders extends Providers
 		if (empty($databases)) {
 			return;
 		}
-		$this->provider->on(OnWorkerStart::class, [$this, 'check']);
-		$this->provider->on(OnTaskerStart::class, [$this, 'check']);
 		$this->provider->on(OnWorkerExit::class, [$this, 'exit'], 9999);
 		foreach ($databases as $key => $database) {
 			$application->set($key, $this->_settings($database));
@@ -82,61 +80,6 @@ class DatabasesProviders extends Providers
 	public function get($name): Connection
 	{
 		return Kiri::service()->get($name);
-	}
-
-
-	/**
-	 * @param OnTaskerStart|OnWorkerStart $start
-	 * @return void
-	 */
-	public function check(OnTaskerStart|OnWorkerStart $start): void
-	{
-		Timer::tick(10000, function ($timerId) {
-			$valid = $count = 0;
-			$logger = Kiri::getDi()->get(LoggerInterface::class);
-			$databases = Config::get('databases.connections', []);
-			if (!empty($databases)) {
-				[$valid, $count] = $this->each($databases, $logger);
-			}
-			$const = 'Worker %d db client has %d, valid %d';
-			$logger->alert(sprintf($const, env('environmental_workerId'), $count, $valid));
-			if ($this->container->get(WorkerStatus::class)->is(StatusEnum::EXIT)) {
-				Timer::clear($timerId);
-			}
-		});
-	}
-
-
-	/**
-	 * @param $databases
-	 * @param LoggerInterface $logger
-	 * @return array
-	 */
-	public function each($databases, LoggerInterface $logger): array
-	{
-		$connection = Kiri::getDi()->get(PoolConnection::class);
-		$valid = $count = 0;
-		foreach ($databases as $database) {
-			try {
-				[$total, $success] = $connection->check($database['cds']);
-
-				$count += $total;
-				$valid += $success;
-
-				if (isset($database['slaveConfig']) && isset($database['slaveConfig']['cds'])) {
-					if ($database['slaveConfig']['cds'] != $database['cds']) {
-						[$total, $success] = $connection->check($database['slaveConfig']['cds']);
-
-						$count += $total;
-						$valid += $success;
-					}
-				}
-			} catch (\Throwable $throwable) {
-				$logger->error($throwable->getMessage());
-			}
-		}
-
-		return [$valid, $count];
 	}
 
 
