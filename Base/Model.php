@@ -802,7 +802,12 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function __set($name, $value): void
 	{
-		$method = 'set' . ucfirst($name) . 'Attribute';
+		$method = 'set' . ucfirst($name);
+		if (method_exists($this, $method)) {
+			$this->{$method}($value);
+			return;
+		}
+		$method = $method . 'Attribute';
 		if (method_exists($this, $method)) {
 			$this->_attributes[$name] = $this->{$method}($value);
 		} else {
