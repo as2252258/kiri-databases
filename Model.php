@@ -192,7 +192,7 @@ class Model extends Base\Model
 		if (empty($data)) {
 			return error('Insert data empty.', 'mysql');
 		}
-		return static::query()->batchInsert($data);
+		return static::query()->insert($data);
 	}
 
 	/**
@@ -226,7 +226,7 @@ class Model extends Base\Model
 	public static function updateAll(mixed $condition, array $attributes = []): bool
 	{
 		$condition = static::query()->where($condition);
-		return $condition->batchUpdate($attributes);
+		return $condition->update($attributes);
 	}
 
 

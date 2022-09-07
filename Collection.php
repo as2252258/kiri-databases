@@ -68,7 +68,7 @@ class Collection extends AbstractCollection
 			$lists[] = $item[$primary];
 		}
 		return $this->getModel()::query()->whereIn($primary, $lists)
-			->batchUpdate($attributes);
+			->update($attributes);
 	}
 
 	/**

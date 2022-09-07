@@ -286,7 +286,7 @@ class ActiveQuery extends Component implements ISqlBuilder
      * @return bool
      * @throws
      */
-    public function batchUpdate(array $data): bool
+    public function update(array $data): bool
     {
         $generate = $this->builder->update($data);
         if (is_bool($generate)) {
@@ -300,7 +300,7 @@ class ActiveQuery extends Component implements ISqlBuilder
      * @return bool
      * @throws
      */
-    public function batchInsert(array $data): bool
+    public function insert(array $data): bool
     {
         [$sql, $params] = $this->builder->insert($data, TRUE);
 
