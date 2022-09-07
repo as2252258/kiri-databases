@@ -50,6 +50,27 @@ class Collection extends AbstractCollection
 		return $_tmp;
 	}
 
+
+	/**
+	 * @param array $attributes
+	 * @return bool
+	 * @throws Exception
+	 */
+	public function update(array $attributes): bool
+	{
+		$lists = [];
+		$primary = $this->getModel()->getPrimary();
+		$items = $this->getItems();
+		if ($this->isEmpty() || !isset($items[0][$primary])) {
+			return false;
+		}
+		foreach ($items as $item) {
+			$lists[] = $item[$primary];
+		}
+		return $this->getModel()::query()->whereIn($primary, $lists)
+			->batchUpdate($attributes);
+	}
+
 	/**
 	 * @param string $field
 	 * @return array|null

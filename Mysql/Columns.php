@@ -187,7 +187,7 @@ class Columns extends Component
 	 */
 	#[Pure] public function isJson($format): bool
 	{
-		return in_array($format, ['json']);
+		return $format == 'json';
 	}
 
 	/**
