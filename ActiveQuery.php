@@ -327,18 +327,18 @@ class ActiveQuery extends Component implements ISqlBuilder
     {
         return !empty($this->execute($this->builder->one())->fetchColumn());
     }
-
-
-    /**
-     * @param bool $getSql
-     * @return int|bool|string|null
-     * @throws
-     */
-    public function delete(bool $getSql = FALSE): int|bool|string|null
+	
+	
+	/**
+	 * @param bool $getSql
+	 * @return bool|string
+	 * @throws Exception
+	 */
+    public function delete(bool $getSql = FALSE): bool|string
     {
         $sql = $this->builder->delete();
         if ($getSql === FALSE) {
-            return $this->execute($sql)->delete();
+            return (bool)$this->execute($sql)->delete();
         }
         return $sql;
     }
