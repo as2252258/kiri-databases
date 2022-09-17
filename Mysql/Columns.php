@@ -123,7 +123,7 @@ class Columns extends Component
 		} else if ($this->isFloat($format)) {
 			return (float)$val;
 		} else {
-			return stripslashes($val);
+			return stripslashes((string)$val);
 		}
 	}
 
