@@ -168,7 +168,7 @@ class Connection extends Component
 	public function getSlaveClient(): PDO
 	{
 		if (empty($this->slaveConfig) || $this->slaveConfig['cds'] == $this->cds) {
-			return $this->getPdo();
+			return $this->getMasterClient();
 		}
 		return $this->connection->get($this->slaveConfig);
 	}
@@ -215,7 +215,7 @@ class Connection extends Component
 		if ($this->_pdo->inTransaction()) {
 			$this->_pdo->rollback();
 		}
-		$this->release($this->_pdo);
+		$this->release($this->_pdo, true);
 		$this->_pdo = null;
 	}
 
@@ -228,7 +228,7 @@ class Connection extends Component
 		if ($this->_pdo->inTransaction()) {
 			$this->_pdo->commit();
 		}
-		$this->release($this->_pdo);
+		$this->release($this->_pdo, true);
 		$this->_pdo = null;
 	}
 
@@ -251,15 +251,14 @@ class Connection extends Component
 	 * 回收链接
 	 * @throws
 	 */
-	public function release(PDO $pdo)
+	public function release(PDO $pdo, $isMaster)
 	{
 		$connections = $this->connection;
-		if (!$pdo->inTransaction()) {
-			$cds = $this->cds;
-			if (isset($this->slaveConfig['cds'])) {
-				$cds = $this->slaveConfig['cds'];
-			}
+		if (!$isMaster) {
+			$cds = $this->slaveConfig['cds'] ?? $this->cds;
 			$connections->addItem($cds, $pdo);
+		} else if (!$pdo->inTransaction()) {
+			$connections->addItem($this->cds, $pdo);
 		}
 	}
 

@@ -143,7 +143,7 @@ class Command extends Component
 		} catch (\Throwable $exception) {
 			$result = $this->logger->addError($this->sql . '. error: ' . $exception->getMessage(), 'mysql');
 		} finally {
-			$this->db->release($pdo);
+			$this->db->release($pdo, true);
 			return $result;
 		}
 	}
