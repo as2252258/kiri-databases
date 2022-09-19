@@ -48,9 +48,30 @@ class DatabasesProviders extends Providers
 			return;
 		}
 		$this->provider->on(OnWorkerExit::class, [$this, 'exit'], 9999);
+		$this->provider->on(OnWorkerStart::class, [$this, 'start']);
 		foreach ($databases as $key => $database) {
 			$application->set($key, $this->_settings($database));
 		}
+	}
+
+
+	public function start(OnWorkerStart $start)
+	{
+		Timer::tick(60000, function () {
+			$databases = Config::get('databases.connections', []);
+			if (empty($databases)) {
+				return;
+			}
+
+			$min = Config::get('databases.pool.min', 5);
+
+			$connection = Kiri::getDi()->get(PoolConnection::class);
+			foreach ($databases as $database) {
+				$connection->flush($database['cds'], $min);
+			}
+
+			$this->logger->warning("database tick clear.");
+		});
 	}
 
 
