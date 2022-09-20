@@ -40,65 +40,65 @@ class Command extends Component
 
 
 	/**
-	 * @return array|bool|int|string|PDOStatement|null
+	 * @return mixed
 	 * @throws Exception
 	 */
-	public function incrOrDecr(): array|bool|int|string|PDOStatement|null
+	public function incrOrDecr(): mixed
 	{
 		return $this->execute(static::EXECUTE);
 	}
 
 	/**
-	 * @return int|bool|array|string|null
+	 * @return mixed
 	 * @throws Exception
 	 */
-	public function save(): int|bool|array|string|null
+	public function save(): mixed
 	{
 		return $this->execute(static::EXECUTE);
 	}
 
 
 	/**
-	 * @return int|bool|array|string|null
+	 * @return mixed
 	 * @throws Exception
 	 */
-	public function all(): int|bool|array|string|null
+	public function all(): mixed
 	{
 		return $this->execute(static::FETCH_ALL);
 	}
 
 	/**
-	 * @return array|bool|int|string|null
+	 * @return mixed
 	 * @throws Exception
 	 */
-	public function one(): null|array|bool|int|string
+	public function one(): mixed
 	{
 		return $this->execute(static::FETCH);
 	}
 
 	/**
-	 * @return int|bool|array|string|null
+	 * @return mixed
 	 * @throws Exception
 	 */
-	public function fetchColumn(): int|bool|array|string|null
+	public function fetchColumn(): mixed
 	{
 		return $this->execute(static::FETCH_COLUMN);
 	}
 
 	/**
-	 * @return int|bool|array|string|null
+	 * @return mixed
 	 * @throws Exception
 	 */
-	public function rowCount(): int|bool|array|string|null
+	public function rowCount(): mixed
 	{
 		return $this->execute(static::ROW_COUNT);
 	}
 
 	/**
-	 * @return int|bool|array|string|null
+	 * @return mixed
 	 * @throws Exception
 	 */
-	public function flush(): int|bool|array|string|null
+	public function flush(): mixed
 	{
 		return $this->execute(static::EXECUTE);
 	}
@@ -106,10 +106,10 @@ class Command extends Component
 
 	/**
 	 * @param string $type
-	 * @return int|bool|array|string|null
+	 * @return mixed
 	 * @throws Exception
 	 */
-	private function execute(string $type): int|bool|array|string|null
+	private function execute(string $type): mixed
 	{
 		$time = microtime(true);
 
@@ -154,7 +154,7 @@ class Command extends Component
 	 * @return array|int|bool|null
 	 * @throws Exception
 	 */
-	private function search(string $type): array|int|bool|null
+	private function search(string $type): mixed
 	{
 		$pdo = $this->db->getSlaveClient();
 		try {
@@ -169,19 +169,19 @@ class Command extends Component
 
 
 	/**
-	 * @return int|bool|array|string|null
+	 * @return mixed
 	 * @throws Exception
 	 */
-	public function delete(): int|bool|array|string|null
+	public function delete(): mixed
 	{
 		return $this->execute(static::EXECUTE);
 	}
 
 	/**
-	 * @return int|bool|array|string|null
+	 * @return mixed
 	 * @throws Exception
 	 */
-	public function exec(): int|bool|array|string|null
+	public function exec(): mixed
 	{
 		return $this->execute(static::EXECUTE);
 	}

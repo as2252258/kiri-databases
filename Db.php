@@ -305,11 +305,11 @@ class Db implements ISqlBuilder
 	/**
 	 * @param string $table
 	 * @param Connection|NULL $connection
-	 * @return bool|int|null
+	 * @return mixed
 	 * @throws ConfigException
 	 * @throws Exception
 	 */
-	public static function desc(string $table, Connection $connection = NULL): bool|int|null
+	public static function desc(string $table, Connection $connection = NULL): mixed
 	{
 		$connection = static::getDefaultConnection($connection);
 
