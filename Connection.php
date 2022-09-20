@@ -277,11 +277,10 @@ class Connection extends Component
 	 */
 	public function clear_connection()
 	{
-		$this->connection->connection_clear($this->cds);
-		if (!isset($this->slaveConfig['cds']) || $this->cds == $this->slaveConfig['cds']) {
-			return;
-		}
-		$this->connection->connection_clear($this->slaveConfig['cds']);
+		$cds = $this->slaveConfig['cds'] ?? $this->cds;
+
+		$this->connection->connection_clear($cds.'master');
+		$this->connection->connection_clear($cds.'slave');
 	}
 
 
@@ -290,11 +289,10 @@ class Connection extends Component
 	 */
 	public function disconnect()
 	{
-		$this->connection->disconnect($this->cds);
-		if (!isset($this->slaveConfig['cds']) || $this->cds == $this->slaveConfig['cds']) {
-			return;
-		}
-		$this->connection->disconnect($this->slaveConfig['cds']);
+		$cds = $this->slaveConfig['cds'] ?? $this->cds;
+
+		$this->connection->connection_clear($cds.'master');
+		$this->connection->connection_clear($cds.'slave');
 	}
 
 }
