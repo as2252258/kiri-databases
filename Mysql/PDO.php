@@ -334,16 +334,13 @@ class PDO implements StopHeartbeatCheck
             \PDO::ATTR_EMULATE_PREPARES => false,
             \PDO::ATTR_CASE => \PDO::CASE_NATURAL,
             \PDO::ATTR_TIMEOUT => $this->connect_timeout,
-            \PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
             \PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $this->charset
         ]);
         $link->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         $link->setAttribute(\PDO::ATTR_STRINGIFY_FETCHES, false);
         $link->setAttribute(\PDO::ATTR_ORACLE_NULLS, \PDO::NULL_EMPTY_STRING);
-        if (!empty($this->attributes)) {
-            foreach ($this->attributes as $key => $attribute) {
-                $link->setAttribute($key, $attribute);
-            }
+        foreach ($this->attributes as $key => $attribute) {
+            $link->setAttribute($key, $attribute);
         }
         return $link;
     }

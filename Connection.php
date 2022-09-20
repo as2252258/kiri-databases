@@ -159,7 +159,7 @@ class Connection extends Component
 			'read_timeout'    => $this->read_timeout,
 			'dbname'          => $this->database,
 			'pool'            => $this->pool
-		]);
+		], true);
 	}
 
 	/**
@@ -168,10 +168,16 @@ class Connection extends Component
 	 */
 	public function getSlaveClient(): PDO
 	{
-		if (empty($this->slaveConfig) || $this->slaveConfig['cds'] == $this->cds) {
-			return $this->getMasterClient();
-		}
-		return $this->connection->get($this->slaveConfig);
+		return $this->connection->get([
+			'cds'             => $this->slaveConfig['cds'] ?? $this->cds,
+			'username'        => $this->slaveConfig['username'] ?? $this->username,
+			'password'        => $this->slaveConfig['password'] ?? $this->password,
+			'attributes'      => $this->slaveConfig['attributes'] ?? $this->attributes,
+			'connect_timeout' => $this->connect_timeout,
+			'read_timeout'    => $this->read_timeout,
+			'dbname'          => $this->slaveConfig['database'] ?? $this->database,
+			'pool'            => $this->pool
+		], false);
 	}
 
 	/**
