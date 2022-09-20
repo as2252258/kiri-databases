@@ -26,6 +26,8 @@ class Command extends Component
 	const EXECUTE = 'execute';
 	const FETCH_COLUMN = 'fetchColumn';
 
+	const DB_ERROR_MESSAGE = 'The system is busy, please try again later.';
+
 	/** @var Connection */
 	public Connection $db;
 
@@ -139,12 +141,49 @@ class Command extends Component
 	{
 		$pdo = $this->db->getPdo();
 		try {
-			$result = $pdo->execute($this->sql, $this->params);
+			if (!(($prepare = $pdo->prepare($this->sql)) instanceof PDOStatement)) {
+				throw new Exception($prepare->errorInfo()[2] ?? static::DB_ERROR_MESSAGE);
+			}
+			if ($prepare->execute($this->params) === false) {
+				throw new Exception($prepare->errorInfo()[2] ?? static::DB_ERROR_MESSAGE);
+			}
+
+			$result = (int)$pdo->lastInsertId();
+			$prepare->closeCursor();
+
+			$result = $result == 0 ? true : $result;
 		} catch (\Throwable $exception) {
 			$result = $this->logger->addError($this->sql . '. error: ' . $exception->getMessage(), 'mysql');
 		} finally {
 			$this->db->release($pdo, true);
 			return $result;
+		}
+	}
+
+
+	/**
+	 * @param \PDO $pdo
+	 * @param string $sql
+	 * @param array $params
+	 * @return PDOStatement
+	 * @throws Exception
+	 */
+	private function queryPrev(\PDO $pdo): PDOStatement
+	{
+		try {
+			if (($statement = $pdo->query($this->sql)) === false) {
+				throw new Exception($pdo->errorInfo()[1]);
+			}
+			foreach ($this->params as $key => $param) {
+				$statement->bindValue($key, $param);
+			}
+			return $statement;
+		} catch (\PDOException|\Throwable $throwable) {
+			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
+				unset($pdo);
+				return $this->queryPrev($this->db->getSlaveClient());
+			}
+			throw new Exception($throwable->getMessage());
 		}
 	}
 
@@ -158,7 +197,17 @@ class Command extends Component
 	{
 		$pdo = $this->db->getSlaveClient();
 		try {
-			$data = $pdo->{$type}($this->sql, $this->params);
+			if ($type == self::FETCH_ALL) {
+				$data = $this->queryPrev($pdo)->fetchAll(\PDO::FETCH_ASSOC);
+			} else if ($type == self::FETCH) {
+				$data = $this->queryPrev($pdo)->fetch(\PDO::FETCH_ASSOC);
+			} else if ($type == self::FETCH_COLUMN) {
+				$data = $this->queryPrev($pdo)->fetchColumn(\PDO::FETCH_ASSOC);
+			} else if ($type == self::ROW_COUNT) {
+				$data = $this->queryPrev($pdo)->rowCount();
+			} else {
+				$data = null;
+			}
 		} catch (\Throwable $throwable) {
 			$data = $this->logger->addError($this->sql . '. error: ' . $throwable->getMessage(), 'mysql');
 		} finally {

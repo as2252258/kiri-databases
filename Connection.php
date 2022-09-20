@@ -14,7 +14,7 @@ namespace Database;
 use Database\Affair\BeginTransaction;
 use Database\Affair\Commit;
 use Database\Affair\Rollback;
-use Database\Mysql\PDO;
+use PDO;
 use Database\Mysql\Schema;
 use Exception;
 use Kiri;
