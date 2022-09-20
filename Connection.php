@@ -199,7 +199,7 @@ class Connection extends Component
 	public function getPdo(): PDO
 	{
 		if (!Context::hasContext('master:client')) {
-			Context::setContext('master:client',  $this->getMasterClient());
+			Context::setContext('master:client', $this->getMasterClient());
 		}
 		return Context::getContext('master:client');
 	}
@@ -260,14 +260,14 @@ class Connection extends Component
 	 * 回收链接
 	 * @throws
 	 */
-	public function release(PDO $pdo, $isMaster)
+	public function release(PDO $pdo, bool $isMaster)
 	{
 		$connections = $this->connection;
+		$cds = ($this->slaveConfig['cds'] ?? $this->cds) . ($isMaster ? 'master' : 'slave');
 		if (!$isMaster) {
-			$cds = $this->slaveConfig['cds'] ?? $this->cds;
 			$connections->addItem($cds, $pdo);
 		} else if (!$pdo->inTransaction()) {
-			$connections->addItem($this->cds, $pdo);
+			$connections->addItem($cds, $pdo);
 		}
 	}
 
