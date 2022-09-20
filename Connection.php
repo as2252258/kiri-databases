@@ -18,6 +18,7 @@ use Database\Mysql\PDO;
 use Database\Mysql\Schema;
 use Exception;
 use Kiri;
+use Kiri\Context;
 use Kiri\Abstracts\Component;
 use Kiri\Abstracts\Config;
 use Kiri\Events\EventProvider;
@@ -191,10 +192,10 @@ class Connection extends Component
 	 */
 	public function getPdo(): PDO
 	{
-		if (!$this->_pdo) {
-			$this->_pdo = $this->getMasterClient();
+		if (!Context::hasContext('master:client')) {
+			Context::setContext('master:client',  $this->getMasterClient());
 		}
-		return $this->_pdo;
+		return Context::getContext('master:client');
 	}
 
 	/**
@@ -212,11 +213,12 @@ class Connection extends Component
 	 */
 	public function rollback()
 	{
-		if ($this->_pdo->inTransaction()) {
-			$this->_pdo->rollback();
+		$pdo = $this->getPdo();
+		if ($pdo->inTransaction()) {
+			$pdo->rollback();
 		}
-		$this->release($this->_pdo, true);
-		$this->_pdo = null;
+		$this->release($pdo, true);
+		Context::remove('master:client');
 	}
 
 	/**
@@ -225,11 +227,12 @@ class Connection extends Component
 	 */
 	public function commit()
 	{
-		if ($this->_pdo->inTransaction()) {
-			$this->_pdo->commit();
+		$pdo = $this->getPdo();
+		if ($pdo->inTransaction()) {
+			$pdo->commit();
 		}
-		$this->release($this->_pdo, true);
-		$this->_pdo = null;
+		$this->release($pdo, true);
+		Context::remove('master:client');
 	}
 
 
