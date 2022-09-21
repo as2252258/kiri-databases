@@ -661,9 +661,12 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		$assoc = array_diff_assoc($this->_attributes, $this->_oldAttributes);
 
+		$column = $this->getColumns();
+
 		$uassoc = array_intersect_assoc($this->_attributes, $this->_oldAttributes);
 		foreach ($assoc as $key => $item) {
-			if ($item === null) {
+			$encode = $column->get_fields($key);
+			if ($column->isString($encode) && $item === null) {
 				unset($assoc[$key]);
 			}
 		}
