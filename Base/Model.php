@@ -662,7 +662,11 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		$assoc = array_diff_assoc($this->_attributes, $this->_oldAttributes);
 
 		$uassoc = array_intersect_assoc($this->_attributes, $this->_oldAttributes);
-
+		foreach ($assoc as $key => $item) {
+			if ($item === null) {
+				unset($assoc[$key]);
+			}
+		}
 		return [$assoc, $uassoc, array_keys($assoc)];
 	}
 
