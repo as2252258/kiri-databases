@@ -73,7 +73,7 @@ abstract class HasBase implements \Database\Traits\Relation
 	public function __call($name, $arguments)
 	{
 		if (!method_exists($this, $name)) {
-			$key = $this->model::className() . '_' . $this->primaryId . '_' . $this->value;
+			$key = $this->model . '_' . $this->primaryId . '_' . $this->value;
 			var_dump($this->model, $this->primaryId, $this->value);
 			$this->_relation->getQuery(md5($key))->$name(...$arguments);
 		} else {
