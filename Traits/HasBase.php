@@ -40,12 +40,12 @@ abstract class HasBase implements \Database\Traits\Relation
 	/**
 	 * HasBase constructor.
 	 * @param ModelInterface $model
-	 * @param $primaryId
+	 * @param string $primaryId
 	 * @param $value
 	 * @param Relation $relation
 	 * @throws Exception
 	 */
-	public function __construct(mixed $model, $primaryId, $value, Relation $relation)
+	public function __construct(mixed $model, public string $primaryId, $value, Relation $relation)
 	{
 		if (!class_exists($model)) {
 			throw new Exception('Model must implement ' . $model);
@@ -60,10 +60,9 @@ abstract class HasBase implements \Database\Traits\Relation
 			$_model = $model::query()->where(['t1.' . $primaryId => $value]);
 		}
 
-		$this->_relation = $relation->bindIdentification($model . '_' . $primaryId . '_' . $value, $_model);
-
+		$this->value = is_array($value) ? json_encode($value,JSON_UNESCAPED_UNICODE) : $value;
+		$this->_relation = $relation->bindIdentification($model . '_' . $primaryId . '_' . $this->value, $_model);
 		$this->model = $model;
-		$this->value = $value;
 	}
 
 

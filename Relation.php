@@ -41,19 +41,16 @@ class Relation extends Component
 
 
 	/**
-	 * @param string $identification
-	 * @param $localValue
+	 * @param string $_identification
 	 * @return mixed
-	 * @throws Exception
 	 */
-	public function first(string $identification, $localValue): mixed
+	public function first(string $_identification): mixed
 	{
-		$_identification = $identification . '_first_' . $localValue;
 		if (isset($this->_relations[$_identification]) && $this->_relations[$_identification] !== null) {
 			return $this->_relations[$_identification];
 		}
 
-		$activeModel = $this->_query[$identification]->first();
+		$activeModel = $this->_query[$_identification]->first();
 		if (empty($activeModel)) {
 			return null;
 		}
@@ -63,19 +60,16 @@ class Relation extends Component
 
 
 	/**
-	 * @param string $identification
-	 * @param $localValue
+	 * @param string $_identification
 	 * @return mixed
-	 * @throws Exception
 	 */
-	public function count(string $identification, $localValue): mixed
+	public function count(string $_identification): mixed
 	{
-		$_identification = $identification . '_count_' . $localValue;
 		if (isset($this->_relations[$_identification]) && $this->_relations[$_identification] !== null) {
 			return $this->_relations[$_identification];
 		}
 
-		$activeModel = $this->_query[$identification]->count();
+		$activeModel = $this->_query[$_identification]->count();
 		if (empty($activeModel)) {
 			return null;
 		}
@@ -85,22 +79,16 @@ class Relation extends Component
 
 
 	/**
-	 * @param string $identification
-	 * @param $localValue
+	 * @param string $_identification
 	 * @return mixed
 	 */
-	public function get(string $identification, $localValue): mixed
+	public function get(string $_identification): mixed
 	{
-		if (is_array($localValue)) {
-			$_identification = $identification . '_get_' . implode('_', $localValue);
-		} else {
-			$_identification = $identification . '_get_' . $localValue;
-		}
 		if (isset($this->_relations[$_identification]) && $this->_relations[$_identification] !== null) {
 			return $this->_relations[$_identification];
 		}
 
-		$activeModel = $this->_query[$identification]->get();
+		$activeModel = $this->_query[$_identification]->get();
 		if (empty($activeModel)) {
 			return $activeModel;
 		}

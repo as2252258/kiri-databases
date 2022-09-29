@@ -34,7 +34,8 @@ class HasCount extends HasBase
 	 */
 	public function get(): array|ModelInterface|null
 	{
-		return $this->_relation->count($this->model::className(), $this->value);
+		$key = $this->model::className() . '_' . $this->primaryId . '_' . $this->value;
+		return $this->_relation->count($key);
 	}
 
 }
