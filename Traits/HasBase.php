@@ -22,21 +22,21 @@ use Exception;
  */
 abstract class HasBase implements \Database\Traits\Relation
 {
-
+	
 	/** @var ModelInterface|Collection */
 	protected Collection|ModelInterface $data;
-
+	
 	/**
 	 * @var ModelInterface
 	 */
 	protected mixed $model;
-
-	protected mixed $value = [];
-
-
+	
+	protected mixed $value = 0;
+	
+	
 	/** @var Relation $_relation */
 	protected Relation $_relation;
-
+	
 	/**
 	 * HasBase constructor.
 	 * @param ModelInterface $model
@@ -59,13 +59,30 @@ abstract class HasBase implements \Database\Traits\Relation
 		} else {
 			$_model = $model::query()->where(['t1.' . $primaryId => $value]);
 		}
-
-		$this->value = is_array($value) ? json_encode($value,JSON_UNESCAPED_UNICODE) : $value;
-		$this->_relation = $relation->bindIdentification($model . '_' . $primaryId . '_' . $this->value, $_model);
+		
+		$this->value = is_array($value) ? json_encode($value, JSON_UNESCAPED_UNICODE) : $value;
+		$this->_relation = $relation->bindIdentification(md5($model . '_' . $primaryId . '_' . $this->value), $_model);
 		$this->model = $model;
 	}
-
-
+	
+	/**
+	 * @param $name
+	 * @param $arguments
+	 * @return static
+	 */
+	public function __call($name, $arguments)
+	{
+		if (!method_exists($this, $name)) {
+			$key = $this->model::className() . '_' . $this->primaryId . '_' . $this->value;
+			var_dump($this->model, $this->primaryId, $this->value);
+			$this->_relation->getQuery(md5($key))->$name(...$arguments);
+		} else {
+			call_user_func([$this, $name], ...$arguments);
+		}
+		return $this;
+	}
+	
+	
 	/**
 	 * @param $name
 	 * @return mixed
