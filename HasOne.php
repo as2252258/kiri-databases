@@ -28,7 +28,8 @@ class HasOne extends HasBase
 	public function __call($name, $arguments)
 	{
 		if (!method_exists($this, $name)) {
-            $this->_relation->getQuery($this->model::className())->$name(...$arguments);
+			$key = $this->model::className() . '_' . $this->primaryId . '_' . $this->value;
+			$this->_relation->getQuery($key)->$name(...$arguments);
 		} else {
             call_user_func([$this, $name], ...$arguments);
         }
