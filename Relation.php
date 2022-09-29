@@ -6,6 +6,7 @@ namespace Database;
 
 use Exception;
 use Kiri\Abstracts\Component;
+use Kiri\Context;
 
 /**
  * Class Relation
@@ -46,16 +47,14 @@ class Relation extends Component
 	 */
 	public function first(string $_identification): mixed
 	{
-		if (isset($this->_relations[$_identification]) && $this->_relations[$_identification] !== null) {
-			return $this->_relations[$_identification];
+		if (Context::hasContext($_identification)) {
+			return Context::getContext($_identification);
 		}
-
 		$activeModel = $this->_query[$_identification]->first();
 		if (empty($activeModel)) {
 			return null;
 		}
-
-		return $this->_relations[$_identification] = $activeModel;
+		return Context::setContext($_identification, $activeModel);
 	}
 
 
@@ -65,16 +64,14 @@ class Relation extends Component
 	 */
 	public function count(string $_identification): mixed
 	{
-		if (isset($this->_relations[$_identification]) && $this->_relations[$_identification] !== null) {
-			return $this->_relations[$_identification];
+		if (Context::hasContext($_identification)) {
+			return Context::getContext($_identification);
 		}
-
 		$activeModel = $this->_query[$_identification]->count();
 		if (empty($activeModel)) {
 			return null;
 		}
-
-		return $this->_relations[$_identification] = $activeModel;
+		return Context::setContext($_identification, $activeModel);
 	}
 
 
@@ -84,16 +81,14 @@ class Relation extends Component
 	 */
 	public function get(string $_identification): mixed
 	{
-		if (isset($this->_relations[$_identification]) && $this->_relations[$_identification] !== null) {
-			return $this->_relations[$_identification];
+		if (Context::hasContext($_identification)) {
+			return Context::getContext($_identification);
 		}
-
 		$activeModel = $this->_query[$_identification]->get();
 		if (empty($activeModel)) {
 			return $activeModel;
 		}
-
-		return $this->_relations[$_identification] = $activeModel;
+		return Context::setContext($_identification, $activeModel);
 	}
 
 }

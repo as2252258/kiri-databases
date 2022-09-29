@@ -27,7 +27,6 @@ class HasMany extends HasBase
 	 */
 	public function get(): array|Collection|null
 	{
-		$key = $this->model . '_' . $this->primaryId . '_' . $this->value;
-		return $this->_relation->get(md5($key));
+		return $this->_relation->get($this->reKey());
 	}
 }

@@ -74,12 +74,20 @@ abstract class HasBase implements \Database\Traits\Relation
 	{
 		if (!method_exists($this, $name)) {
 			$key = $this->model . '_' . $this->primaryId . '_' . $this->value;
-			var_dump($this->model, $this->primaryId, $this->value);
-			$this->_relation->getQuery(md5($key))->$name(...$arguments);
+			$this->_relation->getQuery($this->reKey())->$name(...$arguments);
 		} else {
 			call_user_func([$this, $name], ...$arguments);
 		}
 		return $this;
+	}
+	
+	
+	/**
+	 * @return string
+	 */
+	protected function reKey(): string
+	{
+		return md5($this->model . '_' . $this->primaryId . '_' . $this->value);
 	}
 	
 	

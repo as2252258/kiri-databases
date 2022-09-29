@@ -26,7 +26,6 @@ class HasOne extends HasBase
 	 */
 	public function get(): array|ModelInterface|null
 	{
-		$key = $this->model . '_' . $this->primaryId . '_' . $this->value;
-		return $this->_relation->first(md5($key));
+		return $this->_relation->first($this->reKey());
 	}
 }
