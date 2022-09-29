@@ -37,14 +37,14 @@ abstract class HasBase implements \Database\Traits\Relation
 	/** @var Relation $_relation */
 	protected Relation $_relation;
 
-    /**
-     * HasBase constructor.
-     * @param ModelInterface $model
-     * @param $primaryId
-     * @param $value
-     * @param Relation $relation
-     * @throws Exception
-     */
+	/**
+	 * HasBase constructor.
+	 * @param ModelInterface $model
+	 * @param $primaryId
+	 * @param $value
+	 * @param Relation $relation
+	 * @throws Exception
+	 */
 	public function __construct(mixed $model, $primaryId, $value, Relation $relation)
 	{
 		if (!class_exists($model)) {
@@ -60,7 +60,7 @@ abstract class HasBase implements \Database\Traits\Relation
 			$_model = $model::query()->where(['t1.' . $primaryId => $value]);
 		}
 
-		$this->_relation = $relation->bindIdentification($model, $_model);
+		$this->_relation = $relation->bindIdentification($model . '_' . $primaryId . '_' . $value, $_model);
 
 		$this->model = $model;
 		$this->value = $value;
