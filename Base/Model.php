@@ -271,7 +271,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public static function findOne($param, $db = NULL): static|null
 	{
-		if (is_bool($param)) {
+		if (is_bool($param) || is_null($param)) {
 			return NULL;
 		}
 		if (is_numeric($param)) {
