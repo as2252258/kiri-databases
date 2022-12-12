@@ -4,9 +4,8 @@ declare(strict_types=1);
 namespace Database;
 
 
-use Exception;
 use Kiri\Abstracts\Component;
-use Kiri\Context;
+use Kiri\Di\Context;
 
 /**
  * Class Relation

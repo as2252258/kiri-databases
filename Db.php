@@ -14,7 +14,7 @@ use Database\Affair\Rollback;
 use Database\Traits\QueryTrait;
 use Exception;
 use Kiri\Abstracts\Config;
-use Kiri\Context;
+use Kiri\Di\Context;
 use Kiri\Events\EventDispatch;
 use Kiri\Exception\ConfigException;
 use Psr\Container\ContainerExceptionInterface;
