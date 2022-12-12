@@ -262,16 +262,16 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	}
 
 	/**
-	 * @param $param
+	 * @param int|array|string|null $param
 	 * @param null $db
 	 * @return Model|null
 	 * @throws NotFindClassException
 	 * @throws ReflectionException
 	 * @throws Exception
 	 */
-	public static function findOne($param, $db = NULL): static|null
+	public static function findOne(int|array|string|null $param, $db = NULL): static|null
 	{
-		if (is_bool($param) || is_null($param)) {
+		if (is_null($param)) {
 			return NULL;
 		}
 		if (is_numeric($param)) {
@@ -389,15 +389,9 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	protected static function deleteByCondition($condition = NULL, array $attributes = [], bool $if_condition_is_null = FALSE): bool
 	{
-		if (empty($condition)) {
-			if (!$if_condition_is_null) {
-				return FALSE;
-			}
-			return (bool)static::query()->delete();
-		}
-		$model = static::query()->ifNotWhere($if_condition_is_null)->where($condition);
-		if (!empty($attributes)) {
-			$model->bindParams($attributes);
+		$model = static::query();
+		if (!empty($condition)) {
+			$model->where($condition)->bindParams($attributes);
 		}
 		return (bool)$model->delete();
 	}

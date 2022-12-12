@@ -780,11 +780,11 @@ trait QueryTrait
 	}
 
 	/**
-	 * @param array $params
+	 * @param array|null $params
 	 *
 	 * @return $this
 	 */
-	public function bindParams(array $params = []): static
+	public function bindParams(?array $params = []): static
 	{
 		if (empty($params)) {
 			return $this;
