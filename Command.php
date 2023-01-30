@@ -12,6 +12,7 @@ namespace Database;
 
 use Exception;
 use Kiri\Abstracts\Component;
+use Kiri\Di\Context;
 use PDOStatement;
 
 /**
@@ -151,20 +152,26 @@ class Command extends Component
 			$result = (int)$pdo->lastInsertId();
 			$prepare->closeCursor();
 
-			$result = $result == 0 ? true : $result;
-		} catch (\Throwable $exception) {
-			$result = $this->logger->addError($this->sql . '. error: ' . $exception->getMessage(), 'mysql');
-		} finally {
 			$this->db->release($pdo, true);
-			return $result;
+
+			return $result == 0 ? true : $result;
+		} catch (\PDOException|\Throwable $throwable) {
+			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
+				Context::remove('master:client');
+
+				unset($pdo);
+				return $this->_execute();
+			}
+
+			$this->db->release($pdo, true);
+
+			return $this->logger->addError($this->sql . '. error: ' . $throwable->getMessage(), 'mysql');
 		}
 	}
 
 
 	/**
 	 * @param \PDO $pdo
-	 * @param string $sql
-	 * @param array $params
 	 * @return PDOStatement
 	 * @throws Exception
 	 */
