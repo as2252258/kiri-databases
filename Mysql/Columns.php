@@ -309,7 +309,6 @@ class Columns extends Component
 			if (empty($column)) {
 				throw new Exception("The table " . $table . " not exists.");
 			}
-			var_dump($column);
 			return $this->columns[$table] = $this->resolve($column, $table);
 		}
 		return $this->columns[$table];
