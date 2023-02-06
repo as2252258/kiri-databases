@@ -844,6 +844,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		}
 		$method = 'get' . ucfirst($name) . 'Attribute';
 		if (!method_exists($this, $method)) {
+			return $value;
 			return $this->_decode($name, $value);
 		}
 		return $this->{$method}($value);
