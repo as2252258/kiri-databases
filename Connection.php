@@ -264,7 +264,7 @@ class Connection extends Component
 	{
 		$connections = $this->connection;
 		$cds = ($this->slaveConfig['cds'] ?? $this->cds) . ($isMaster ? 'master' : 'slave');
-		if (!$pdo->inTransaction()) {
+		if ($isMaster && !$pdo->inTransaction()) {
 			$connections->addItem($cds, $pdo);
 		}
 	}
