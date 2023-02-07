@@ -63,11 +63,13 @@ class DatabasesProviders extends Providers
 				return;
 			}
 
-			$min = Config::get('databases.pool.min', 5);
-
 			$connection = Kiri::getDi()->get(PoolConnection::class);
 			foreach ($databases as $database) {
-				$connection->flush($database['cds'], $min);
+				$connection->flush($database['cds'] . 'master', $database['pool']['min'] ?? 1);
+
+				$slaveCds = ($database['slaveConfig']['cds'] ?? $database['cds']) . 'slave';
+
+				$connection->flush($slaveCds, $database['pool']['min'] ?? 1);
 			}
 
 			$this->logger->warning("database tick clear.");
