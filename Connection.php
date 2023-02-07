@@ -120,11 +120,11 @@ class Connection extends Component
 		if (!empty($this->slaveConfig) && $this->cds != $this->slaveConfig['cds']) {
 			$pool = $this->pool ?? ['max' => 10, 'min' => 1];
 
-			$this->connection->initConnections('Mysql:' . $this->slaveConfig['cds'], $pool);
+			$this->connection->initConnections('Mysql:' . $this->slaveConfig['cds'], $pool['max']);
 		} else {
 			$pool = $this->slaveConfig['pool'] ?? ['max' => 10, 'min' => 1];
 
-			$this->connection->initConnections('Mysql:' . $this->cds, $pool);
+			$this->connection->initConnections('Mysql:' . $this->cds, $pool['max']);
 		}
 	}
 
