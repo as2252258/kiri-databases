@@ -90,7 +90,11 @@ class DatabasesProviders extends Providers
 		if (!empty($databases)) {
 			$connection = Kiri::getDi()->get(PoolConnection::class);
 			foreach ($databases as $database) {
-				$connection->disconnect($database['cds']);
+				$connection->disconnect($database['cds'] . 'master');
+
+				$slaveCds = ($database['slaveConfig']['cds'] ?? $database['cds']) . 'slave';
+
+				$connection->disconnect($slaveCds);
 			}
 		}
 	}
