@@ -117,14 +117,14 @@ class Connection extends Component
 	 */
 	public function connectPoolInstance()
 	{
-		if (!empty($this->slaveConfig) && $this->cds != $this->slaveConfig['cds']) {
+		if (!empty($this->slaveConfig) && isset($this->slaveConfig['cds'])) {
 			$pool = $this->pool ?? ['max' => 10, 'min' => 1];
 
-			$this->connection->initConnections('Mysql:' . $this->slaveConfig['cds'], $pool['max']);
+			$this->connection->initConnections($this->slaveConfig['cds'] . 'slave', $pool['max']);
 		} else {
 			$pool = $this->slaveConfig['pool'] ?? ['max' => 10, 'min' => 1];
 
-			$this->connection->initConnections('Mysql:' . $this->cds, $pool['max']);
+			$this->connection->initConnections($this->cds . 'master', $pool['max']);
 		}
 	}
 
