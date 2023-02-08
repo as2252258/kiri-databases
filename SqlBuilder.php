@@ -191,6 +191,9 @@ class SqlBuilder extends Component
 	 */
 	private function resolveParams(string $key, mixed $value, int $order, array $params, array $keys): array
 	{
+		if (is_null($value)) {
+			return [$keys, $params];
+		}
 		if (
 			str_starts_with($value, '+ ') ||
 			str_starts_with($value, '- ')
