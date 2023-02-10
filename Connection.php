@@ -266,13 +266,12 @@ class Connection extends Component
 	public function release(PDO $pdo, bool $isMaster)
 	{
 		$connections = $this->connection;
-		$cds = ($this->slaveConfig['cds'] ?? $this->cds) . ($isMaster ? 'master' : 'slave');
-		if ($isMaster) {
-			if (!$pdo->inTransaction()) {
-				$connections->addItem($cds, $pdo);
-			}
+		if (!$isMaster) {
+			$connections->addItem(($this->slaveConfig['cds'] ?? $this->cds) . 'slave', $pdo);
 		} else {
-			$connections->addItem($cds, $pdo);
+			if (!$pdo->inTransaction()) {
+				$connections->addItem($this->cds . 'master', $pdo);
+			}
 		}
 	}
 
