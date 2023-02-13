@@ -271,9 +271,6 @@ class Connection extends Component
 	 */
 	public function release(PDO $pdo, bool $isMaster)
 	{
-		if (!Context::inCoroutine()) {
-			return;
-		}
 		$connections = $this->connection;
 		if (!$isMaster) {
 			$connections->addItem(($this->slaveConfig['cds'] ?? $this->cds) . 'slave', $pdo);
