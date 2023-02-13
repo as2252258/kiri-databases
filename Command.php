@@ -157,7 +157,7 @@ class Command extends Component
 			return $result == 0 ? true : $result;
 		} catch (\PDOException|\Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
-				Context::remove('master:client');
+				$this->db->restore(true);
 
 				unset($pdo);
 				return $this->_execute();
@@ -187,6 +187,8 @@ class Command extends Component
 			return $statement;
 		} catch (\PDOException|\Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
+				$this->db->restore(false);
+
 				unset($pdo);
 				return $this->queryPrev($this->db->getSlaveClient());
 			}

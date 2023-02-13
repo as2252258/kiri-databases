@@ -253,6 +253,17 @@ class Connection extends Component
 	}
 
 
+	public function restore($isMaster)
+	{
+		if ($isMaster) {
+			Context::remove($this->cds . 'master');
+		} else {
+			$slave = ($this->slaveConfig['cds'] ?? $this->cds) . 'slave';
+			Context::remove($slave);
+		}
+	}
+
+
 	/**
 	 *
 	 * 回收链接
