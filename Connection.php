@@ -201,10 +201,7 @@ class Connection extends Component
 	 */
 	public function getPdo(): PDO
 	{
-		if (!Context::hasContext('master:client')) {
-			Context::setContext('master:client', $this->getMasterClient());
-		}
-		return Context::getContext('master:client');
+		return $this->getMasterClient();
 	}
 
 	/**
@@ -227,7 +224,6 @@ class Connection extends Component
 			$pdo->rollback();
 		}
 		$this->release($pdo, true);
-		Context::remove('master:client');
 	}
 
 	/**
@@ -241,7 +237,6 @@ class Connection extends Component
 			$pdo->commit();
 		}
 		$this->release($pdo, true);
-		Context::remove('master:client');
 	}
 
 
@@ -265,6 +260,9 @@ class Connection extends Component
 	 */
 	public function release(PDO $pdo, bool $isMaster)
 	{
+		if (!Context::inCoroutine()) {
+			return;
+		}
 		$connections = $this->connection;
 		if (!$isMaster) {
 			$connections->addItem(($this->slaveConfig['cds'] ?? $this->cds) . 'slave', $pdo);
@@ -285,8 +283,8 @@ class Connection extends Component
 	{
 		$cds = $this->slaveConfig['cds'] ?? $this->cds;
 
-		$this->connection->connection_clear($cds.'master');
-		$this->connection->connection_clear($cds.'slave');
+		$this->connection->connection_clear($cds . 'master');
+		$this->connection->connection_clear($cds . 'slave');
 	}
 
 
@@ -297,8 +295,8 @@ class Connection extends Component
 	{
 		$cds = $this->slaveConfig['cds'] ?? $this->cds;
 
-		$this->connection->connection_clear($cds.'master');
-		$this->connection->connection_clear($cds.'slave');
+		$this->connection->connection_clear($cds . 'master');
+		$this->connection->connection_clear($cds . 'slave');
 	}
 
 }

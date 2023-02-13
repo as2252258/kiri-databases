@@ -57,6 +57,9 @@ class DatabasesProviders extends Providers
 
 	public function start(OnWorkerStart $start)
 	{
+		if (!Kiri\Di\Context::inCoroutine()) {
+			return;
+		}
 		Timer::tick(60000, function () {
 			$databases = Config::get('databases.connections', []);
 			if (empty($databases)) {
