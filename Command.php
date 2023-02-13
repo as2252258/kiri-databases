@@ -118,19 +118,9 @@ class Command extends Component
 
 		$result = $type !== static::EXECUTE ? $this->search($type) : $this->_execute();
 
-		$this->logger->debug('Mysql:' . $this->print_r($time));
+		$this->longExecuteTime($time);
 
 		return $result;
-	}
-
-
-	/**
-	 * @param $time
-	 * @return string
-	 */
-	private function print_r($time): string
-	{
-		return print_r(['time' => microtime(true) - $time, 'sql' => $this->sql, 'param' => $this->params], true);
 	}
 
 
@@ -159,7 +149,6 @@ class Command extends Component
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
 				$this->db->restore(true);
 
-				unset($pdo);
 				return $this->_execute();
 			}
 
@@ -168,34 +157,6 @@ class Command extends Component
 			return $this->logger->addError($this->sql . '. error: ' . $throwable->getMessage(), 'mysql');
 		}
 	}
-
-
-	/**
-	 * @param \PDO $pdo
-	 * @return PDOStatement
-	 * @throws Exception
-	 */
-	private function queryPrev(\PDO $pdo): PDOStatement
-	{
-		try {
-			if (($statement = $pdo->query($this->sql)) === false) {
-				throw new Exception($pdo->errorInfo()[1]);
-			}
-			foreach ($this->params as $key => $param) {
-				$statement->bindValue($key, $param);
-			}
-			return $statement;
-		} catch (\PDOException|\Throwable $throwable) {
-			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
-				$this->db->restore(false);
-
-				unset($pdo);
-				return $this->queryPrev($this->db->getSlaveClient());
-			}
-			throw new Exception($throwable->getMessage());
-		}
-	}
-
 
 	/**
 	 * @param string $type
@@ -206,22 +167,42 @@ class Command extends Component
 	{
 		$pdo = $this->db->getSlaveClient();
 		try {
-			if ($type == self::FETCH_ALL) {
-				$data = $this->queryPrev($pdo)->fetchAll(\PDO::FETCH_ASSOC);
-			} else if ($type == self::FETCH) {
-				$data = $this->queryPrev($pdo)->fetch(\PDO::FETCH_ASSOC);
-			} else if ($type == self::FETCH_COLUMN) {
-				$data = $this->queryPrev($pdo)->fetchColumn(\PDO::FETCH_ASSOC);
-			} else if ($type == self::ROW_COUNT) {
-				$data = $this->queryPrev($pdo)->rowCount();
-			} else {
-				$data = null;
+			if (($statement = $pdo->query($this->sql)) === false) {
+				throw new Exception($pdo->errorInfo()[1]);
 			}
-		} catch (\Throwable $throwable) {
-			$data = $this->logger->addError($this->sql . '. error: ' . $throwable->getMessage(), 'mysql');
-		} finally {
+			foreach ($this->params as $key => $param) {
+				$statement->bindValue($key, $param);
+			}
+			$data = null;
+			if ($type == self::FETCH_ALL) {
+				$data = $statement->fetchAll(\PDO::FETCH_ASSOC);
+			} else if ($type == self::FETCH) {
+				$data = $statement->fetch(\PDO::FETCH_ASSOC);
+			} else if ($type == self::FETCH_COLUMN) {
+				$data = $statement->fetchColumn(\PDO::FETCH_ASSOC);
+			} else if ($type == self::ROW_COUNT) {
+				$data = $statement->rowCount();
+			}
 			$this->db->release($pdo, false);
 			return $data;
+		} catch (\Throwable $throwable) {
+			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
+				$this->db->restore(false);
+
+				return $this->search($type);
+			}
+
+			$this->db->release($pdo, false);
+
+			return $this->logger->addError($this->sql . '. error: ' . $throwable->getMessage(), 'mysql');
+		}
+	}
+
+
+	private function longExecuteTime($time)
+	{
+		if (($over = microtime(true) - $time) >= 0.50) {
+			$this->logger->warning($this->sql . '. use time : ' . $over . 'ms');
 		}
 	}
 
