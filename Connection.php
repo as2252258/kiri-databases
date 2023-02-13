@@ -223,7 +223,7 @@ class Connection extends Component
 		if ($pdo->inTransaction()) {
 			$pdo->rollback();
 		}
-		$this->release($pdo, true);
+		$this->release(true);
 	}
 
 	/**
@@ -236,7 +236,7 @@ class Connection extends Component
 		if ($pdo->inTransaction()) {
 			$pdo->commit();
 		}
-		$this->release($pdo, true);
+		$this->release(true);
 	}
 
 
@@ -255,12 +255,7 @@ class Connection extends Component
 
 	public function restore($isMaster)
 	{
-		if ($isMaster) {
-			Context::remove($this->cds . 'master');
-		} else {
-			$slave = ($this->slaveConfig['cds'] ?? $this->cds) . 'slave';
-			Context::remove($slave);
-		}
+		Context::remove($this->alias($isMaster));
 	}
 
 
@@ -269,16 +264,27 @@ class Connection extends Component
 	 * 回收链接
 	 * @throws
 	 */
-	public function release(PDO $pdo, bool $isMaster)
+	public function release(bool $isMaster)
 	{
-		$connections = $this->connection;
-		if (!$isMaster) {
-			$connections->addItem(($this->slaveConfig['cds'] ?? $this->cds) . 'slave', $pdo);
-		} else {
-			if (!$pdo->inTransaction()) {
-				$connections->addItem($this->cds . 'master', $pdo);
-			}
+		$name = $this->alias($isMaster);
+		if (!Context::hasContext($name)) {
+			return;
 		}
+		$connections = $this->connection;
+		if (($pdo = Context::getContext($name)) instanceof PDO) {
+			$connections->addItem($name, $pdo);
+		}
+		Context::remove($name);
+	}
+
+
+	/**
+	 * @param bool $isMaster
+	 * @return string
+	 */
+	private function alias(bool $isMaster): string
+	{
+		return !$isMaster ? ($this->slaveConfig['cds'] ?? $this->cds) . 'slave' : $this->cds . 'master';
 	}
 
 
@@ -289,10 +295,8 @@ class Connection extends Component
 	 */
 	public function clear_connection()
 	{
-		$cds = $this->slaveConfig['cds'] ?? $this->cds;
-
-		$this->connection->connection_clear($cds . 'master');
-		$this->connection->connection_clear($cds . 'slave');
+		$this->connection->connection_clear($this->alias(true));
+		$this->connection->connection_clear($this->alias(false));
 	}
 
 
@@ -301,10 +305,8 @@ class Connection extends Component
 	 */
 	public function disconnect()
 	{
-		$cds = $this->slaveConfig['cds'] ?? $this->cds;
-
-		$this->connection->connection_clear($cds . 'master');
-		$this->connection->connection_clear($cds . 'slave');
+		$this->connection->connection_clear($this->alias(true));
+		$this->connection->connection_clear($this->alias(false));
 	}
 
 }
