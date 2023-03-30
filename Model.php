@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Database;
 
 
+use Database\Base\Getter;
 use Exception;
 use Kiri;
 use Kiri\Exception\NotFindClassException;
@@ -264,8 +265,9 @@ class Model extends Base\Model
 	public function toArray(): array
 	{
 		$data = $this->_attributes;
-		foreach ($data as $key => $datum) {
-			$data[$key] = $this->withPropertyOverride($key, $datum);
+		$keys = Kiri::getDi()->get(Getter::class);
+		foreach ($keys->getAll(static::class) as $key => $datum) {
+			$data[$key] = $this->{$datum}($data[$key]);
 		}
 		return $this->withRelates($data);
 	}
