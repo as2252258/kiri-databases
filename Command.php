@@ -118,7 +118,7 @@ class Command extends Component
 
 		$result = $type !== static::EXECUTE ? $this->search($type) : $this->_execute();
 
-//		$this->longExecuteTime($time);
+		$this->longExecuteTime($time);
 
 		return $result;
 	}
