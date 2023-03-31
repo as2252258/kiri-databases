@@ -117,15 +117,9 @@ class Connection extends Component
 	 */
 	public function connectPoolInstance()
 	{
-		if (!empty($this->slaveConfig) && isset($this->slaveConfig['cds'])) {
-			$pool = $this->pool ?? ['max' => 10, 'min' => 1];
-
-			$this->connection->initConnections($this->slaveConfig['cds'] . 'slave', $pool['max']);
-		} else {
-			$pool = $this->slaveConfig['pool'] ?? ['max' => 10, 'min' => 1];
-
-			$this->connection->initConnections($this->cds . 'master', $pool['max']);
-		}
+		$pool = $this->slaveConfig['pool'] ?? ['max' => 10, 'min' => 1];
+		
+		$this->connection->initConnections($this->cds, $pool['max']);
 	}
 
 
@@ -162,7 +156,7 @@ class Connection extends Component
 			'read_timeout'    => $this->read_timeout,
 			'dbname'          => $this->database,
 			'pool'            => $this->pool
-		], true);
+		]);
 	}
 
 	/**
@@ -171,16 +165,7 @@ class Connection extends Component
 	 */
 	public function getSlaveClient(): PDO
 	{
-		return $this->connection->get([
-			'cds'             => $this->slaveConfig['cds'] ?? $this->cds,
-			'username'        => $this->slaveConfig['username'] ?? $this->username,
-			'password'        => $this->slaveConfig['password'] ?? $this->password,
-			'attributes'      => $this->slaveConfig['attributes'] ?? $this->attributes,
-			'connect_timeout' => $this->connect_timeout,
-			'read_timeout'    => $this->read_timeout,
-			'dbname'          => $this->slaveConfig['database'] ?? $this->database,
-			'pool'            => $this->pool
-		], false);
+		return $this->getMasterClient();
 	}
 
 	/**
@@ -223,7 +208,7 @@ class Connection extends Component
 		if ($pdo->inTransaction()) {
 			$pdo->rollback();
 		}
-		$this->release($pdo,true);
+		$this->release($pdo);
 	}
 
 	/**
@@ -236,7 +221,7 @@ class Connection extends Component
 		if ($pdo->inTransaction()) {
 			$pdo->commit();
 		}
-		$this->release($pdo,true);
+		$this->release($pdo);
 	}
 
 
@@ -253,9 +238,9 @@ class Connection extends Component
 	}
 
 
-	public function restore($isMaster)
+	public function restore()
 	{
-		Context::remove($this->alias($isMaster));
+		Context::remove($this->cds);
 	}
 
 
@@ -264,16 +249,13 @@ class Connection extends Component
 	 * 回收链接
 	 * @throws
 	 */
-	public function release(PDO $PDO, bool $isMaster)
+	public function release(PDO $PDO)
 	{
-		$name = $this->alias($isMaster);
-		if ($isMaster && $PDO->inTransaction()) {
+		if ($PDO->inTransaction()) {
 			return;
 		}
-		$this->connection->addItem($name, $PDO);
-		if ($isMaster) {
-			Context::remove($name);
-		}
+		$this->connection->addItem($this->cds, $PDO);
+		Context::remove($this->cds);
 	}
 
 

@@ -142,17 +142,17 @@ class Command extends Component
 			$result = (int)$pdo->lastInsertId();
 			$prepare->closeCursor();
 
-			$this->db->release($pdo, true);
+			$this->db->release($pdo);
 
 			return $result == 0 ? true : $result;
 		} catch (\PDOException|\Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
-				$this->db->restore(true);
+				$this->db->restore();
 
 				return $this->_execute();
 			}
 
-			$this->db->release($pdo,true);
+			$this->db->release($pdo);
 
 			return $this->logger->addError($this->sql . '. error: ' . $throwable->getMessage(), 'mysql');
 		}
@@ -174,16 +174,16 @@ class Command extends Component
 				$statement->bindValue($key, $param);
 			}
 			$data = $statement->{$type}(\PDO::FETCH_ASSOC);
-			$this->db->release($pdo, false);
+			$this->db->release($pdo);
 			return $data;
 		} catch (\Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
-				$this->db->restore(false);
+				$this->db->restore();
 
 				return $this->search($type);
 			}
 
-			$this->db->release($pdo, false);
+			$this->db->release($pdo);
 
 			return $this->logger->addError($this->sql . '. error: ' . $throwable->getMessage(), 'mysql');
 		}
