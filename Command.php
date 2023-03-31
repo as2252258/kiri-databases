@@ -38,26 +38,23 @@ class Command extends Component
 	/** @var array */
 	public array $params = [];
 
-	/** @var string */
-	public string $dbname = '';
-
 
 	/**
-	 * @return mixed
+	 * @return int|bool
 	 * @throws Exception
 	 */
-	public function incrOrDecr(): mixed
+	public function incrOrDecr(): int|bool
 	{
-		return $this->execute(static::EXECUTE);
+		return $this->_execute();
 	}
 
 	/**
-	 * @return mixed
+	 * @return int|bool
 	 * @throws Exception
 	 */
-	public function save(): mixed
+	public function save(): int|bool
 	{
-		return $this->execute(static::EXECUTE);
+		return $this->_execute();
 	}
 
 
@@ -67,7 +64,7 @@ class Command extends Component
 	 */
 	public function all(): mixed
 	{
-		return $this->execute(static::FETCH_ALL);
+		return $this->search(static::FETCH_ALL);
 	}
 
 	/**
@@ -76,7 +73,7 @@ class Command extends Component
 	 */
 	public function one(): mixed
 	{
-		return $this->execute(static::FETCH);
+		return $this->search(static::FETCH);
 	}
 
 	/**
@@ -85,7 +82,7 @@ class Command extends Component
 	 */
 	public function fetchColumn(): mixed
 	{
-		return $this->execute(static::FETCH_COLUMN);
+		return $this->search(static::FETCH_COLUMN);
 	}
 
 	/**
@@ -94,35 +91,17 @@ class Command extends Component
 	 */
 	public function rowCount(): mixed
 	{
-		return $this->execute(static::ROW_COUNT);
+		return $this->search(static::ROW_COUNT);
 	}
 
 	/**
-	 * @return mixed
+	 * @return int|bool
 	 * @throws Exception
 	 */
-	public function flush(): mixed
+	public function flush(): int|bool
 	{
-		return $this->execute(static::EXECUTE);
+		return $this->_execute();
 	}
-
-
-	/**
-	 * @param string $type
-	 * @return mixed
-	 * @throws Exception
-	 */
-	private function execute(string $type): mixed
-	{
-		$time = microtime(true);
-
-		$result = $type !== static::EXECUTE ? $this->search($type) : $this->_execute();
-
-		$this->longExecuteTime($time);
-
-		return $result;
-	}
-
 
 	/**
 	 * @return bool|int
@@ -190,30 +169,22 @@ class Command extends Component
 	}
 
 
-	private function longExecuteTime($time)
-	{
-		if (($over = microtime(true) - $time) >= 0.05) {
-			$this->logger->warning($this->sql . '. use time : ' . $over . 'ms');
-		}
-	}
-
-
 	/**
-	 * @return mixed
+	 * @return int|bool
 	 * @throws Exception
 	 */
-	public function delete(): mixed
+	public function delete(): int|bool
 	{
-		return $this->execute(static::EXECUTE);
+		return $this->_execute();
 	}
 
 	/**
-	 * @return mixed
+	 * @return int|bool
 	 * @throws Exception
 	 */
-	public function exec(): mixed
+	public function exec(): int|bool
 	{
-		return $this->execute(static::EXECUTE);
+		return $this->_execute();
 	}
 
 	/**
@@ -222,7 +193,7 @@ class Command extends Component
 	 */
 	public function bindValues(array $data = []): static
 	{
-		if (!empty($data)) {
+		if (count($data) > 0) {
 			$this->params = array_merge($this->params, $data);
 		}
 		return $this;
