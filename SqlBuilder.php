@@ -256,7 +256,7 @@ class SqlBuilder extends Component
 		if ($this->query->group != "") {
 			$select .= ' GROUP BY ' . $this->query->group;
 		}
-		if ($this->query->order != "") {
+		if (count($this->query->order) > 0) {
 			$select .= ' ORDER BY ' . implode(',', $this->query->order);
 		}
 		return $select . $this->builderLimit($this->query);
