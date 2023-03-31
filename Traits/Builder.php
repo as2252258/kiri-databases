@@ -22,8 +22,8 @@ use ReflectionException;
  */
 trait Builder
 {
-
-
+	
+	
 	/**
 	 * @param $alias
 	 * @return string
@@ -32,7 +32,7 @@ trait Builder
 	{
 		return " AS " . $alias;
 	}
-
+	
 	/**
 	 * @param $table
 	 * @return string
@@ -45,7 +45,7 @@ trait Builder
 		}
 		return " FROM " . $table;
 	}
-
+	
 	/**
 	 * @param $join
 	 * @return string
@@ -57,29 +57,18 @@ trait Builder
 		}
 		return '';
 	}
-
-
+	
+	
 	/**
-	 * @param null $select
-	 * @param bool $isCount
+	 * @param string $select
 	 * @return string
 	 */
-	#[Pure] private function builderSelect($select = NULL, bool $isCount = false): string
+	#[Pure] private function builderSelect(string $select = "*"): string
 	{
-		if ($isCount) {
-			return "SELECT COUNT(*)";
-		}
-		if (empty($select)) {
-			return "SELECT *";
-		}
-		if (is_array($select)) {
-			return "SELECT " . implode(',', $select);
-		} else {
-			return "SELECT " . $select;
-		}
+		return "SELECT " . $select;
 	}
-
-
+	
+	
 	/**
 	 * @param $group
 	 * @return string
@@ -91,7 +80,7 @@ trait Builder
 		}
 		return ' GROUP BY ' . $group;
 	}
-
+	
 	/**
 	 * @param $order
 	 * @return string
@@ -104,7 +93,7 @@ trait Builder
 			return '';
 		}
 	}
-
+	
 	/**
 	 * @param ActiveQuery|Query $query
 	 * @param bool $hasLimit
@@ -112,16 +101,14 @@ trait Builder
 	 */
 	#[Pure] private function builderLimit(ActiveQuery|Query $query, bool $hasLimit = true): string
 	{
-		if (!is_numeric($query->limit) || $query->limit < 1) {
-			return "";
-		}
-		if ($query->offset !== null && $hasLimit) {
+		if ($hasLimit) {
 			return ' LIMIT ' . $query->offset . ',' . $query->limit;
+		} else {
+			return ' LIMIT ' . $query->limit;
 		}
-		return ' LIMIT ' . $query->limit;
 	}
-
-
+	
+	
 	/**
 	 * @param $where
 	 * @return string
@@ -134,19 +121,19 @@ trait Builder
 		if (is_string($where)) return $where;
 		foreach ($where as $key => $value) {
 			if (is_null($value)) continue;
-
-			$_value = $this->resolveCondition($key, $value, $_tmp);
-
-			if (empty($_value)) continue;
+			if (($_value = $this->resolveCondition($key, $value, $_tmp)) == '') {
+				continue;
+			}
 			$_tmp[] = $_value;
 		}
 		if (!empty($_tmp)) {
 			return implode(' AND ', $_tmp);
+		} else {
+			return '';
 		}
-		return '';
 	}
-
-
+	
+	
 	/**
 	 * @param $field
 	 * @param $condition
@@ -158,16 +145,15 @@ trait Builder
 	private function resolveCondition($field, $condition, $_tmp): string
 	{
 		if (is_string($field)) {
-			$_value = sprintf('%s = \'%s\'', $field, $condition);
+			return $field . ' = \'' . $condition . '\'';
 		} else if (is_string($condition)) {
-			$_value = $condition;
+			return $condition;
 		} else {
-			$_value = $this->_arrayMap($condition, $_tmp);
+			return $this->_arrayMap($condition, $_tmp);
 		}
-		return $_value;
 	}
-
-
+	
+	
 	/**
 	 * @param $condition
 	 * @param $array
@@ -190,10 +176,10 @@ trait Builder
 			$builder->oldParams = $array;
 		} else if (isset(ConditionClassMap::$conditionMap[$stroppier])) {
 			$defaultConfig = ConditionClassMap::$conditionMap[$stroppier];
-
+			
 			$class = $defaultConfig['class'];
 			unset($defaultConfig['class']);
-
+			
 			$builder = Kiri::getDi()->make($class, [], $defaultConfig);
 			$builder->setValue($condition[2]);
 			$builder->setColumn($condition[1]);
@@ -201,13 +187,13 @@ trait Builder
 			$builder = Kiri::getDi()->get(HashCondition::class);
 			$builder->setValue($condition);
 		}
-
+		
 		$array[] = $builder->builder();
-
+		
 		return implode(' AND ', $array);
 	}
-
-
+	
+	
 	/**
 	 * @param $condition
 	 * @return array
@@ -217,16 +203,15 @@ trait Builder
 		$_array = [];
 		foreach ($condition as $key => $value) {
 			if (is_null($value)) continue;
-
 			$value = is_numeric($value) ? $value : '\'' . $value . '\'';
 			if (!is_numeric($key)) {
-				$_array[] = sprintf('%s = %s', $key, $value);
+				$_array[] = $key . '=' . $value;
 			} else {
 				$_array[] = $value;
 			}
 		}
 		return $_array;
 	}
-
-
+	
+	
 }

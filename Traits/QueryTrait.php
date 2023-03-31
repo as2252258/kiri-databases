@@ -31,8 +31,8 @@ trait QueryTrait
 	public array $select = [];
 	public array $join = [];
 	public array $order = [];
-	public ?int $offset = NULL;
-	public ?int $limit = NULL;
+	public int $offset = 0;
+	public int $limit = 500;
 	public string $group = '';
 	public string|Closure|ActiveQuery|null $from = '';
 	public string $alias = 't1';
@@ -54,14 +54,14 @@ trait QueryTrait
 	/**
 	 * clear
 	 */
-	public function clear()
+	public function clear(): void
 	{
 		$this->where = [];
 		$this->select = [];
 		$this->join = [];
 		$this->order = [];
-		$this->offset = NULL;
-		$this->limit = NULL;
+		$this->offset = 0;
+		$this->limit = 500;
 		$this->group = '';
 		$this->from = '';
 		$this->alias = 't1';
@@ -480,7 +480,7 @@ trait QueryTrait
 	public function select(array|string $column = '*'): static
 	{
 		if ($column == '*') {
-			$this->select = $column;
+			$this->select = [$column];
 		} else {
 			if (!is_array($column)) {
 				$column = explode(',', $column);

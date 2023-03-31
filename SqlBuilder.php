@@ -16,13 +16,13 @@ use Kiri\Abstracts\Component;
  */
 class SqlBuilder extends Component
 {
-
+	
 	use Builder;
-
-
+	
+	
 	public ActiveQuery|Query|null $query;
-
-
+	
+	
 	/**
 	 * @param ISqlBuilder|null $query
 	 * @return $this
@@ -32,8 +32,8 @@ class SqlBuilder extends Component
 	{
 		return new static(['query' => $query]);
 	}
-
-
+	
+	
 	/**
 	 * @return string
 	 * @throws Exception
@@ -42,8 +42,8 @@ class SqlBuilder extends Component
 	{
 		return $this->conditionToString();
 	}
-
-
+	
+	
 	/**
 	 * @param array $compiler
 	 * @return string
@@ -53,8 +53,8 @@ class SqlBuilder extends Component
 	{
 		return $this->where($compiler);
 	}
-
-
+	
+	
 	/**
 	 * @param array $attributes
 	 * @return bool|array
@@ -63,11 +63,11 @@ class SqlBuilder extends Component
 	public function update(array $attributes): bool|array
 	{
 		[$string, $array] = $this->builderParams($attributes);
-
+		
 		return $this->__updateBuilder($string, $array);
 	}
-
-
+	
+	
 	/**
 	 * @param array $attributes
 	 * @param string $opera
@@ -82,8 +82,8 @@ class SqlBuilder extends Component
 		}
 		return $this->__updateBuilder($string, []);
 	}
-
-
+	
+	
 	/**
 	 * @param array $string
 	 * @param array $params
@@ -95,19 +95,14 @@ class SqlBuilder extends Component
 		if (empty($string)) {
 			return $this->logger->addError('None data update.');
 		}
-
-		$condition = $this->conditionToString();
-		if (!empty($condition)) {
-			$condition = ' WHERE ' . $condition;
-		}
-
-		$update = 'UPDATE ' . $this->tableName() . ' SET ' . implode(',', $string) . $condition;
+		
+		$update = 'UPDATE ' . $this->tableName() . ' SET ' . implode(',', $string) . $this->_prefix();
 		$update .= $this->builderLimit($this->query, false);
-
+		
 		return [$update, $params];
 	}
-
-
+	
+	
 	/**
 	 * @param array $attributes
 	 * @param false $isBatch
@@ -121,33 +116,29 @@ class SqlBuilder extends Component
 			$attributes = [$attributes];
 		}
 		$update .= '(' . implode(',', $this->getFields($attributes)) . ') VALUES ';
-
+		
 		$order = 0;
 		$keys = $params = [];
 		foreach ($attributes as $attribute) {
 			[$_keys, $params] = $this->builderParams($attribute, true, $params, $order);
-
+			
 			$keys[] = implode(',', $_keys);
 			$order++;
 		}
 		return [$update . '(' . implode('),(', $keys) . ')', $params];
 	}
-
-
+	
+	
 	/**
 	 * @return string
 	 * @throws Exception
 	 */
 	public function delete(): string
 	{
-		$delete = sprintf('DELETE FROM %s ', $this->query->modelClass->getTable());
-
-		$this->query->from = null;
-
-		return $delete . ' WHERE ' . $this->_prefix(true);
+		return 'DELETE FROM ' . $this->tableName() . ' WHERE ' . $this->_prefix();
 	}
-
-
+	
+	
 	/**
 	 * @param $attributes
 	 * @return array
@@ -156,8 +147,8 @@ class SqlBuilder extends Component
 	{
 		return array_keys(current($attributes));
 	}
-
-
+	
+	
 	/**
 	 * @param array $attributes
 	 * @param bool $isInsert
@@ -179,8 +170,8 @@ class SqlBuilder extends Component
 		}
 		return [$keys, $params];
 	}
-
-
+	
+	
 	/**
 	 * @param string $key
 	 * @param mixed $value
@@ -205,8 +196,8 @@ class SqlBuilder extends Component
 		}
 		return [$keys, $params];
 	}
-
-
+	
+	
 	/**
 	 * @return string
 	 * @throws Exception
@@ -214,39 +205,31 @@ class SqlBuilder extends Component
 	public function one(): string
 	{
 		$this->query->limit(0, 1);
-		if (empty($this->query->from) && !empty($this->query->modelClass)) {
-			$this->query->from($this->query->getTable());
-		}
-		return $this->_prefix(true);
+		return $this->_selectPrefix() . $this->_prefix();
 	}
-
-
+	
+	
 	/**
 	 * @return string
 	 * @throws Exception
 	 */
 	public function all(): string
 	{
-		if (empty($this->query->from) && !empty($this->query->modelClass)) {
-			$this->query->from($this->query->getTable());
-		}
-		return $this->_prefix(true);
+		return $this->_selectPrefix() . $this->_prefix();
 	}
-
-
+	
+	
 	/**
 	 * @return string
 	 * @throws Exception
 	 */
 	public function count(): string
 	{
-		if (empty($this->query->from) && !empty($this->query->modelClass)) {
-			$this->query->from($this->query->getTable());
-		}
-		return $this->_prefix(false, true);
+		$this->query->select('COUNT(*)');
+		return $this->_selectPrefix() . $this->_prefix();
 	}
-
-
+	
+	
 	/**
 	 * @param $table
 	 * @return string
@@ -255,74 +238,50 @@ class SqlBuilder extends Component
 	{
 		return 'SHOW FULL FIELDS FROM ' . $table;
 	}
-
-
+	
+	
 	/**
-	 * @param bool $hasOrder
-	 * @param bool $isCount
 	 * @return string
 	 * @throws Exception
 	 */
-	private function _prefix(bool $hasOrder = false, bool $isCount = false): string
+	private function _prefix(): string
 	{
 		$select = '';
-		if (!empty($this->query->from)) {
-			$select = $this->_selectPrefix($isCount);
+		if (($condition = $this->conditionToString()) != '') {
+			$select .= " WHERE ${$condition}";
 		}
-		$select = $this->_wherePrefix($select);
-		if (!empty($this->query->attributes) && is_array($this->query->attributes)) {
+		if (count($this->query->attributes) > 0) {
 			$select = strtr($select, $this->query->attributes);
 		}
-
-		if (!empty($this->query->group)) {
-			$select .= $this->builderGroup($this->query->group);
+		if ($this->query->group != "") {
+			$select .= ' GROUP BY ' . $this->query->group;
 		}
-		if ($hasOrder === true && !empty($this->query->order)) {
-			$select .= $this->builderOrder($this->query->order);
+		if ($this->query->order != "") {
+			$select .= ' ORDER BY ' . implode(',', $this->query->order);
 		}
-		$sql = $select . $this->builderLimit($this->query);
-		if ($this->query->lock) {
-			$sql .= ' FOR UPDATE';
-		}
-		return $sql;
+		return $select . $this->builderLimit($this->query);
 	}
-
-
+	
 	/**
-	 * @param $select
 	 * @return string
 	 * @throws Exception
 	 */
-	private function _wherePrefix($select): string
+	private function _selectPrefix(): string
 	{
-		$condition = $this->conditionToString();
-		if (empty($condition)) {
-			return $select;
-		} else if (empty($select)) {
-			return $condition;
+		if (count($this->query->select) < 1) {
+			$this->query->select = ['*'];
 		}
-		return sprintf('%s WHERE %s', $select, $condition);
-	}
-
-
-	/**
-	 * @param bool $isCount
-	 * @return string
-	 * @throws Exception
-	 */
-	private function _selectPrefix(bool $isCount): string
-	{
-		$select = $this->builderSelect($this->query->select, $isCount) . ' FROM ' . $this->tableName();
-		if (!empty($this->query->alias)) {
-			$select .= $this->builderAlias($this->query->alias);
+		$select = "SELECT " . implode(',', $this->query->select) . " FROM " . $this->tableName();
+		if ($this->query->alias != "") {
+			$select .= " AS " . $this->query->alias;
 		}
-		if (!empty($this->query->join)) {
-			$select .= $this->builderJoin($this->query->join);
+		if (count($this->query->join) > 0) {
+			$select .= ' ' . implode(' ', $this->query->join);
 		}
 		return $select;
 	}
-
-
+	
+	
 	/**
 	 * @param false $isCount
 	 * @return string
@@ -335,8 +294,8 @@ class SqlBuilder extends Component
 		}
 		return $this->count();
 	}
-
-
+	
+	
 	/**
 	 * @return string
 	 * @throws Exception
@@ -345,8 +304,8 @@ class SqlBuilder extends Component
 	{
 		return sprintf('TRUNCATE %s', $this->tableName());
 	}
-
-
+	
+	
 	/**
 	 * @return string
 	 * @throws Exception
@@ -355,8 +314,8 @@ class SqlBuilder extends Component
 	{
 		return $this->where($this->query->where);
 	}
-
-
+	
+	
 	/**
 	 * @return string
 	 * @throws Exception
@@ -364,15 +323,16 @@ class SqlBuilder extends Component
 	public function tableName(): string
 	{
 		if ($this->query->from instanceof \Closure) {
-			$this->query->from = sprintf('(%s)', $this->query->makeClosureFunction($this->query->from));
+			$this->query->from = '(' . $this->query->makeClosureFunction($this->query->from) . ')';
 		}
 		if ($this->query->from instanceof ActiveQuery) {
-			$this->query->from = sprintf('%s', SqlBuilder::builder($this->query->from)->get($this->query->from));
+			$this->query->from = '(' . SqlBuilder::builder($this->query->from)->get($this->query->from) . ')';
 		}
-		if (empty($this->query->from)) {
+		if ($this->query->from == "") {
 			return $this->query->modelClass->getTable();
+		} else {
+			return $this->query->from;
 		}
-		return $this->query->from;
 	}
-
+	
 }
