@@ -97,7 +97,6 @@ class SqlBuilder extends Component
 		}
 		
 		$update = 'UPDATE ' . $this->tableName() . ' SET ' . implode(',', $string) . $this->_prefix();
-		$update .= $this->builderLimit($this->query, false);
 		
 		return [$update, $params];
 	}
@@ -205,7 +204,7 @@ class SqlBuilder extends Component
 	public function one(): string
 	{
 		$this->query->limit(0, 1);
-		return $this->_selectPrefix() . $this->_prefix();
+		return $this->_selectPrefix() . $this->_prefix() . $this->builderLimit($this->query);
 	}
 	
 	
@@ -215,7 +214,7 @@ class SqlBuilder extends Component
 	 */
 	public function all(): string
 	{
-		return $this->_selectPrefix() . $this->_prefix();
+		return $this->_selectPrefix() . $this->_prefix() . $this->builderLimit($this->query);
 	}
 	
 	
@@ -226,7 +225,7 @@ class SqlBuilder extends Component
 	public function count(): string
 	{
 		$this->query->select('COUNT(*)');
-		return $this->_selectPrefix() . $this->_prefix();
+		return $this->_selectPrefix() . $this->_prefix() . $this->builderLimit($this->query);
 	}
 	
 	
@@ -259,7 +258,7 @@ class SqlBuilder extends Component
 		if (count($this->query->order) > 0) {
 			$select .= ' ORDER BY ' . implode(',', $this->query->order);
 		}
-		return $select . $this->builderLimit($this->query);
+		return $select;
 	}
 	
 	/**
