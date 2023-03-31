@@ -223,7 +223,7 @@ class Connection extends Component
 		if ($pdo->inTransaction()) {
 			$pdo->rollback();
 		}
-		$this->release(true);
+		$this->release($pdo,true);
 	}
 
 	/**
@@ -236,7 +236,7 @@ class Connection extends Component
 		if ($pdo->inTransaction()) {
 			$pdo->commit();
 		}
-		$this->release(true);
+		$this->release($pdo,true);
 	}
 
 
