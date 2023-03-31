@@ -108,25 +108,31 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	
 	
 	/**
-	 * @param $data
+	 * @param array $data
 	 * @return Model
 	 */
-	public function setWith($data): static
+	public function setWith(array $data): static
 	{
-		if (empty($data)) {
-			return $this;
-		}
 		$this->_with = $data;
 		return $this;
 	}
 	
 	
 	/**
-	 * @return array|null
+	 * @return array
 	 */
-	public function getWith(): array|null
+	public function getWith(): array
 	{
 		return $this->_with;
+	}
+	
+	
+	/**
+	 * @return bool
+	 */
+	public function hasWith(): bool
+	{
+		return count($this->_with) > 0;
 	}
 	
 	

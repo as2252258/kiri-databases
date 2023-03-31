@@ -265,8 +265,8 @@ class Model extends Base\Model
 	public function toArray(): array
 	{
 		$data = $this->_attributes;
-		$keys = Kiri::getDi()->get(Getter::class);
-		foreach ($keys->getAll(static::class) as $key => $datum) {
+		$keys = Kiri::getDi()->get(Getter::class)->getAll(static::class);
+		foreach ($keys as $key => $datum) {
 			$data[$key] = $this->{$datum}($data[$key]);
 		}
 		return $this->withRelates($data);
@@ -279,10 +279,10 @@ class Model extends Base\Model
 	 */
 	private function withRelates($relates): array
 	{
-		if (empty($with = $this->getWith())) {
+		if (!$this->hasWith()) {
 			return $relates;
 		}
-		foreach ($with as $val) {
+		foreach ($this->getWith() as $val) {
 			$relates[$val] = $this->withRelate($val);
 		}
 		return $relates;
