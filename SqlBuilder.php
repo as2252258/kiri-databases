@@ -248,7 +248,7 @@ class SqlBuilder extends Component
 	{
 		$select = '';
 		if (($condition = $this->conditionToString()) != '') {
-			$select .= " WHERE ${$condition}";
+			$select .= " WHERE $condition";
 		}
 		if (count($this->query->attributes) > 0) {
 			$select = strtr($select, $this->query->attributes);
