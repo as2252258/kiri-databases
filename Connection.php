@@ -264,17 +264,16 @@ class Connection extends Component
 	 * 回收链接
 	 * @throws
 	 */
-	public function release(bool $isMaster)
+	public function release(PDO $PDO, bool $isMaster)
 	{
 		$name = $this->alias($isMaster);
-		if (!Context::hasContext($name)) {
+		if ($isMaster && $PDO->inTransaction()) {
 			return;
 		}
-		$connections = $this->connection;
-		if (($pdo = Context::getContext($name)) instanceof PDO) {
-			$connections->addItem($name, $pdo);
+		$this->connection->addItem($name, $PDO);
+		if ($isMaster) {
+			Context::remove($name);
 		}
-		Context::remove($name);
 	}
 
 

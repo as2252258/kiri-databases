@@ -130,8 +130,8 @@ class Command extends Component
 	 */
 	private function _execute(): bool|int
 	{
+		$pdo = $this->db->getPdo();
 		try {
-			$pdo = $this->db->getPdo();
 			if (!(($prepare = $pdo->prepare($this->sql)) instanceof PDOStatement)) {
 				throw new Exception($prepare->errorInfo()[2] ?? static::DB_ERROR_MESSAGE);
 			}
@@ -142,7 +142,7 @@ class Command extends Component
 			$result = (int)$pdo->lastInsertId();
 			$prepare->closeCursor();
 
-			$this->db->release(true);
+			$this->db->release($pdo, true);
 
 			return $result == 0 ? true : $result;
 		} catch (\PDOException|\Throwable $throwable) {
@@ -152,7 +152,7 @@ class Command extends Component
 				return $this->_execute();
 			}
 
-			$this->db->release(true);
+			$this->db->release($pdo,true);
 
 			return $this->logger->addError($this->sql . '. error: ' . $throwable->getMessage(), 'mysql');
 		}
@@ -165,8 +165,8 @@ class Command extends Component
 	 */
 	private function search(string $type): mixed
 	{
+		$pdo = $this->db->getSlaveClient();
 		try {
-			$pdo = $this->db->getSlaveClient();
 			if (($statement = $pdo->query($this->sql)) === false) {
 				throw new Exception($pdo->errorInfo()[1]);
 			}
@@ -174,7 +174,7 @@ class Command extends Component
 				$statement->bindValue($key, $param);
 			}
 			$data = $statement->{$type}(\PDO::FETCH_ASSOC);
-			$this->db->release(false);
+			$this->db->release($pdo, false);
 			return $data;
 		} catch (\Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
@@ -183,7 +183,7 @@ class Command extends Component
 				return $this->search($type);
 			}
 
-			$this->db->release(false);
+			$this->db->release($pdo, false);
 
 			return $this->logger->addError($this->sql . '. error: ' . $throwable->getMessage(), 'mysql');
 		}
