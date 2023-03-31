@@ -75,7 +75,7 @@ class DatabasesProviders extends Providers
 				$connection->flush($slaveCds, $database['pool']['min'] ?? 1);
 			}
 
-			$this->logger->warning("database tick clear.");
+//			$this->logger->warning("database tick clear.");
 		});
 	}
 
