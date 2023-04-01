@@ -284,6 +284,28 @@ class Model extends Base\Model
 		}
 		return $relates;
 	}
+	
+	
+	/**
+	 * @param ModelInterface|string $modelName
+	 * @param $foreignKey
+	 * @param $localKey
+	 * @return string
+	 * @throws Exception
+	 */
+	private function _hasBase(ModelInterface|string $modelName, $foreignKey, $localKey):string {
+		if (($value = $this->{$localKey}) === null) {
+			throw new Exception("Need join table primary key.");
+		}
+		
+		$relation = $this->getRelation();
+		
+		$primaryKey = $modelName . $foreignKey . $value;
+		if (!$relation->hasIdentification($primaryKey)) {
+			$relation->bindIdentification($primaryKey, $modelName::query()->where([$foreignKey => $value]));
+		}
+		return $primaryKey;
+	}
 
 
 	/**
@@ -295,18 +317,7 @@ class Model extends Base\Model
 	 */
 	public function hasOne(ModelInterface|string $modelName, $foreignKey, $localKey): HasOne|ActiveQuery
 	{
-		if (($value = $this->{$localKey}) === null) {
-			throw new Exception("Need join table primary key.");
-		}
-
-		$relation = $this->getRelation();
-
-		$primaryKey = $modelName . $foreignKey . $value;
-		if (!$relation->hasIdentification($primaryKey)) {
-			$relation->bindIdentification($primaryKey, $modelName::query()->where([$foreignKey => $value]));
-		}
-
-		return new HasOne($primaryKey, $relation);
+		return new HasOne($this->_hasBase($modelName, $foreignKey, $localKey));
 	}
 
 
@@ -319,18 +330,7 @@ class Model extends Base\Model
 	 */
 	public function hasCount(ModelInterface|string $modelName, $foreignKey, $localKey): ActiveQuery|HasCount
 	{
-		if (($value = $this->{$localKey}) === null) {
-			throw new Exception("Need join table primary key.");
-		}
-
-		$relation = $this->getRelation();
-
-		$primaryKey = $modelName . $foreignKey . $value;
-		if (!$relation->hasIdentification($primaryKey)) {
-			$relation->bindIdentification($primaryKey, $modelName::query()->where([$foreignKey => $value]));
-		}
-
-		return new HasCount($primaryKey);
+		return new HasCount($this->_hasBase($modelName, $foreignKey, $localKey));
 	}
 
 
@@ -343,18 +343,7 @@ class Model extends Base\Model
 	 */
 	public function hasMany(ModelInterface|string $modelName, $foreignKey, $localKey): ActiveQuery|HasMany
 	{
-		if (($value = $this->{$localKey}) === null) {
-			throw new Exception("Need join table primary key.");
-		}
-
-		$relation = $this->getRelation();
-
-		$primaryKey = $modelName . $foreignKey . $value;
-		if (!$relation->hasIdentification($primaryKey)) {
-			$relation->bindIdentification($primaryKey, $modelName::query()->where([$foreignKey => $value]));
-		}
-
-		return new HasMany($primaryKey);
+		return new HasMany($this->_hasBase($modelName, $foreignKey, $localKey));
 	}
 
 	/**
