@@ -34,18 +34,17 @@ abstract class HasBase implements \Database\Traits\Relation
 	 * @var ModelInterface
 	 */
 	protected mixed $model;
-
-
+	
+	
 	protected mixed $value = 0;
-
-
+	
+	
 	/**
 	 * HasBase constructor.
 	 * @param string $name
 	 */
 	public function __construct(public string $name)
 	{
-		;
 	}
 	
 	/**
@@ -55,16 +54,14 @@ abstract class HasBase implements \Database\Traits\Relation
 	 */
 	public function __call($name, $arguments)
 	{
-		if (!method_exists($this, $name)) {
-			$relation = Kiri::getDi()->get(Relation::class);
-			$relation->getQuery($this->name)->$name(...$arguments);
+		if ($name !== 'get') {
+			return di(Relation::class)->getQuery($this->name)->$name(...$arguments);
 		} else {
-			call_user_func([$this, $name], ...$arguments);
+			return $this->get();
 		}
-		return $this;
 	}
 	
-
+	
 	/**
 	 * @param $name
 	 * @return mixed

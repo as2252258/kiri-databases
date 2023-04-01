@@ -108,6 +108,17 @@ class ActiveQuery extends Component implements ISqlBuilder
             'param' => $lists,
         ];
     }
+	
+	
+	/**
+	 * @param bool $asArray
+	 * @return static
+	 */
+	public function asArray(bool $asArray = true): static
+	{
+		$this->asArray = $asArray;
+		return $this;
+	}
 
 
     /**
