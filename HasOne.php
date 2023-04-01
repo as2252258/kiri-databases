@@ -11,6 +11,7 @@ namespace Database;
 
 use Database\Traits\HasBase;
 use Exception;
+use Kiri;
 
 /**
  * Class HasOne
@@ -26,6 +27,7 @@ class HasOne extends HasBase
 	 */
 	public function get(): array|ModelInterface|null
 	{
-		return $this->_relation->first($this->reKey());
+		$relation = Kiri::getDi()->get(Relation::class);
+		return $relation->first($this->name);
 	}
 }

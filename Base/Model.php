@@ -95,7 +95,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	/**
 	 * @var array
 	 */
-	private array $_with = [];
+	protected array $_with = [];
 	
 	
 	/**

@@ -110,7 +110,7 @@ class Model extends Base\Model
 		if (empty($attributes)) {
 			return $logger->addError(FIND_OR_CREATE_MESSAGE, 'mysql');
 		}
-		
+
 		/** @var static $select */
 		$select = static::query()->where($condition)->first();
 		if (!empty($select)) {
@@ -279,7 +279,7 @@ class Model extends Base\Model
 	 */
 	private function withRelates($relates): array
 	{
-		foreach ($this->getWith() as $val) {
+		foreach ($this->_with as $val) {
 			$relates[$val] = $this->withRelate($val);
 		}
 		return $relates;
@@ -287,13 +287,13 @@ class Model extends Base\Model
 
 
 	/**
-	 * @param string $modelName
+	 * @param ModelInterface|string $modelName
 	 * @param $foreignKey
 	 * @param $localKey
 	 * @return HasOne|ActiveQuery
 	 * @throws Exception
 	 */
-	public function hasOne(string $modelName, $foreignKey, $localKey): HasOne|ActiveQuery
+	public function hasOne(ModelInterface|string $modelName, $foreignKey, $localKey): HasOne|ActiveQuery
 	{
 		if (($value = $this->{$localKey}) === null) {
 			throw new Exception("Need join table primary key.");
@@ -301,18 +301,23 @@ class Model extends Base\Model
 
 		$relation = $this->getRelation();
 
-		return new HasOne($modelName, $foreignKey, $value, $relation);
+		$primaryKey = $modelName . $foreignKey . $value;
+		if (!$relation->hasIdentification($primaryKey)) {
+			$relation->bindIdentification($primaryKey, $modelName::query()->where([$foreignKey => $value]));
+		}
+
+		return new HasOne($primaryKey, $relation);
 	}
 
 
 	/**
-	 * @param $modelName
+	 * @param ModelInterface|string $modelName
 	 * @param $foreignKey
 	 * @param $localKey
 	 * @return ActiveQuery|HasCount
 	 * @throws Exception
 	 */
-	public function hasCount($modelName, $foreignKey, $localKey): ActiveQuery|HasCount
+	public function hasCount(ModelInterface|string $modelName, $foreignKey, $localKey): ActiveQuery|HasCount
 	{
 		if (($value = $this->{$localKey}) === null) {
 			throw new Exception("Need join table primary key.");
@@ -320,18 +325,23 @@ class Model extends Base\Model
 
 		$relation = $this->getRelation();
 
-		return new HasCount($modelName, $foreignKey, $value, $relation);
+		$primaryKey = $modelName . $foreignKey . $value;
+		if (!$relation->hasIdentification($primaryKey)) {
+			$relation->bindIdentification($primaryKey, $modelName::query()->where([$foreignKey => $value]));
+		}
+
+		return new HasCount($primaryKey);
 	}
 
 
 	/**
-	 * @param $modelName
+	 * @param ModelInterface|string $modelName
 	 * @param $foreignKey
 	 * @param $localKey
 	 * @return ActiveQuery|HasMany
 	 * @throws Exception
 	 */
-	public function hasMany($modelName, $foreignKey, $localKey): ActiveQuery|HasMany
+	public function hasMany(ModelInterface|string $modelName, $foreignKey, $localKey): ActiveQuery|HasMany
 	{
 		if (($value = $this->{$localKey}) === null) {
 			throw new Exception("Need join table primary key.");
@@ -339,17 +349,22 @@ class Model extends Base\Model
 
 		$relation = $this->getRelation();
 
-		return new HasMany($modelName, $foreignKey, $value, $relation);
+		$primaryKey = $modelName . $foreignKey . $value;
+		if (!$relation->hasIdentification($primaryKey)) {
+			$relation->bindIdentification($primaryKey, $modelName::query()->where([$foreignKey => $value]));
+		}
+
+		return new HasMany($primaryKey);
 	}
 
 	/**
-	 * @param $modelName
+	 * @param ModelInterface|string $modelName
 	 * @param $foreignKey
 	 * @param $localKey
 	 * @return ActiveQuery|HasMany
 	 * @throws Exception
 	 */
-	public function hasIn($modelName, $foreignKey, $localKey): ActiveQuery|HasMany
+	public function hasIn(ModelInterface|string $modelName, $foreignKey, $localKey): ActiveQuery|HasMany
 	{
 		if (($value = $this->{$localKey}) === null) {
 			throw new Exception("Need join table primary key.");
@@ -357,7 +372,12 @@ class Model extends Base\Model
 
 		$relation = $this->getRelation();
 
-		return new HasMany($modelName, $foreignKey, $value, $relation);
+		$primaryKey = $modelName . $foreignKey . json_encode($value, JSON_UNESCAPED_UNICODE);
+		if (!$relation->hasIdentification($primaryKey)) {
+			$relation->bindIdentification($primaryKey, $modelName::query()->whereIn($foreignKey, $value));
+		}
+
+		return new HasMany($primaryKey);
 	}
 
 	/**

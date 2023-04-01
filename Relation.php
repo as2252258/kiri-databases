@@ -31,6 +31,15 @@ class Relation extends Component
 	}
 
 	/**
+	 * @param string $identification
+	 * @return bool
+	 */
+	public function hasIdentification(string $identification): bool
+	{
+		return isset($this->_query[$identification]) && $this->_query[$identification] instanceof ActiveQuery;
+	}
+
+	/**
 	 * @param string $name
 	 * @return ActiveQuery|null
 	 */

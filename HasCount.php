@@ -5,6 +5,7 @@ namespace Database;
 
 use Database\Traits\HasBase;
 use Exception;
+use Kiri;
 
 /**
  * Class HasCount
@@ -19,7 +20,8 @@ class HasCount extends HasBase
 	 */
 	public function get(): array|ModelInterface|null
 	{
-		return $this->_relation->count($this->reKey());
+		$relation = Kiri::getDi()->get(Relation::class);
+		return $relation->count($this->name);
 	}
 
 }

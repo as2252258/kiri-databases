@@ -11,6 +11,7 @@ namespace Database;
 
 use Database\Traits\HasBase;
 use Exception;
+use Kiri;
 
 /**
  * Class HasMany
@@ -27,6 +28,7 @@ class HasMany extends HasBase
 	 */
 	public function get(): array|Collection|null
 	{
-		return $this->_relation->get($this->reKey());
+		$relation = Kiri::getDi()->get(Relation::class);
+		return $relation->get($this->name);
 	}
 }

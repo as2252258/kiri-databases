@@ -12,13 +12,17 @@ namespace Database\Traits;
 use Database\ModelInterface;
 use Database\Collection;
 use Database\Relation;
-use Exception;
+use Kiri;
 
 /**
  * Class HasBase
  * @package Database
  *
  * @include Query
+ *
+ * @method first($name)
+ * @method all($name)
+ * @method count($name)
  */
 abstract class HasBase implements \Database\Traits\Relation
 {
@@ -30,39 +34,18 @@ abstract class HasBase implements \Database\Traits\Relation
 	 * @var ModelInterface
 	 */
 	protected mixed $model;
-	
+
+
 	protected mixed $value = 0;
 	
-	
-	/** @var Relation $_relation */
-	protected Relation $_relation;
-	
+
 	/**
 	 * HasBase constructor.
-	 * @param ModelInterface $model
-	 * @param string $primaryId
-	 * @param $value
-	 * @param Relation $relation
-	 * @throws Exception
+	 * @param string $name
 	 */
-	public function __construct(mixed $model, public string $primaryId, $value, Relation $relation)
+	public function __construct(public string $name)
 	{
-		if (!class_exists($model)) {
-			throw new Exception('Model must implement ' . $model);
-		}
-		if (!in_array(ModelInterface::class, class_implements($model))) {
-			throw new Exception('Model must implement ' . $model);
-		}
-		if (is_array($value)) {
-			if (empty($value)) $value = [];
-			$_model = $model::query()->whereIn($primaryId, $value);
-		} else {
-			$_model = $model::query()->where(['t1.' . $primaryId => $value]);
-		}
-		
-		$this->value = is_array($value) ? json_encode($value, JSON_UNESCAPED_UNICODE) : $value;
-		$this->_relation = $relation->bindIdentification(md5($model . '_' . $primaryId . '_' . $this->value), $_model);
-		$this->model = $model;
+		;
 	}
 	
 	/**
@@ -73,33 +56,21 @@ abstract class HasBase implements \Database\Traits\Relation
 	public function __call($name, $arguments)
 	{
 		if (!method_exists($this, $name)) {
-			$key = $this->model . '_' . $this->primaryId . '_' . $this->value;
-			$this->_relation->getQuery($this->reKey())->$name(...$arguments);
+			$relation = Kiri::getDi()->get(Relation::class);
+			$relation->getQuery($this->name)->$name(...$arguments);
 		} else {
 			call_user_func([$this, $name], ...$arguments);
 		}
 		return $this;
 	}
 	
-	
-	/**
-	 * @return string
-	 */
-	protected function reKey(): string
-	{
-		return md5($this->model . '_' . $this->primaryId . '_' . $this->value);
-	}
-	
-	
+
 	/**
 	 * @param $name
 	 * @return mixed
 	 */
 	public function __get($name): mixed
 	{
-		if (empty($this->value)) {
-			return null;
-		}
 		return $this->get();
 	}
 }
