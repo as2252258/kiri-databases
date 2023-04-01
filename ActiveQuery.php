@@ -160,10 +160,11 @@ class ActiveQuery extends Component implements ISqlBuilder
     public function first(): ModelInterface|null
     {
         $data = $this->execute($this->builder->one())->one();
-        if (empty($data)) {
-            return NULL;
+        if (!is_null($data)) {
+	        return $this->populate($data);
+        } else {
+	        return NULL;
         }
-        return $this->populate($data);
     }
 
 
@@ -234,9 +235,8 @@ class ActiveQuery extends Component implements ISqlBuilder
         if (!($data = $this->execute($this->builder->all())->all())) {
             return new Collection($this, [], $this->modelClass);
         }
-        if (!empty($this->with)) {
-            $this->getWith($this->modelClass);
-        }
+
+        $this->getWith($this->modelClass);
         $collect = new Collection($this, $data, $this->modelClass);
         if ($this->asArray) {
             return $collect->toArray();
@@ -261,9 +261,6 @@ class ActiveQuery extends Component implements ISqlBuilder
      */
     public function getWith(ModelInterface $model): ModelInterface
     {
-        if (empty($this->with)) {
-            return $model;
-        }
         return $model->setWith($this->with);
     }
 
