@@ -279,9 +279,6 @@ class Model extends Base\Model
 	 */
 	private function withRelates($relates): array
 	{
-		if (!$this->hasWith()) {
-			return $relates;
-		}
 		foreach ($this->getWith() as $val) {
 			$relates[$val] = $this->withRelate($val);
 		}

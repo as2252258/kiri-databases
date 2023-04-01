@@ -238,10 +238,8 @@ class ActiveQuery extends Component implements ISqlBuilder
 
         $this->getWith($this->modelClass);
         $collect = new Collection($this, $data, $this->modelClass);
-        if ($this->asArray) {
-            return $collect->toArray();
-        }
-        return $collect;
+
+        return $this->asArray ? $collect->toArray() : $collect;
     }
 
     /**
