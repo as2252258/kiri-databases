@@ -66,7 +66,8 @@ class Command extends Component
 	public function all(): ?array
 	{
 		[$pdo, $statement] = $this->search();
-		
+
+		$statement->execute($this->params);
 		$data = $statement->fetchAll(PDO::FETCH_ASSOC);
 		
 		$this->db->release($pdo);
@@ -82,6 +83,7 @@ class Command extends Component
 	{
 		[$pdo, $statement] = $this->search();
 
+		$statement->execute($this->params);
 		$data = $statement->fetch(PDO::FETCH_ASSOC);
 		
 		$this->db->release($pdo);
@@ -96,7 +98,8 @@ class Command extends Component
 	public function fetchColumn(): mixed
 	{
 		[$pdo, $statement] = $this->search();
-		
+
+		$statement->execute($this->params);
 		$data = $statement->fetchColumn(PDO::FETCH_ASSOC);
 		
 		$this->db->release($pdo);
@@ -111,7 +114,8 @@ class Command extends Component
 	public function rowCount(): ?int
 	{
 		[$pdo, $statement] = $this->search();
-		
+
+		$statement->execute($this->params);
 		$data = $statement->rowCount();
 		
 		$this->db->release($pdo);
@@ -170,11 +174,8 @@ class Command extends Component
 	{
 		$pdo = $this->db->getSlaveClient();
 		try {
-			if (($statement = $pdo->query($this->sql)) === false) {
+			if (($statement = $pdo->prepare($this->sql)) === false) {
 				throw new Exception($pdo->errorInfo()[1]);
-			}
-			foreach ($this->params as $key => $param) {
-				$statement->bindValue($key, $param);
 			}
 			return [$pdo, $statement];
 		} catch (\Throwable $throwable) {
