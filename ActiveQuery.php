@@ -157,6 +157,7 @@ class ActiveQuery extends Component implements ISqlBuilder
         return $this->modelClass->getConnection()->createCommand($sql, $params);
     }
 
+	
 
     /**
      * @return ModelInterface|null
