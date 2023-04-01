@@ -28,6 +28,6 @@ class HasOne extends HasBase
 	public function get(): array|ModelInterface|null
 	{
 		$relation = Kiri::getDi()->get(Relation::class);
-		return $relation->first($this->name);
+		return $relation->getQuery($this->name)->first();
 	}
 }

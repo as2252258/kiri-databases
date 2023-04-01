@@ -21,7 +21,7 @@ class HasCount extends HasBase
 	public function get(): array|ModelInterface|null
 	{
 		$relation = Kiri::getDi()->get(Relation::class);
-		return $relation->count($this->name);
+		return $relation->getQuery($this->name)->count();
 	}
 
 }

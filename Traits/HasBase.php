@@ -28,7 +28,7 @@ abstract class HasBase implements \Database\Traits\Relation
 {
 	
 	/** @var ModelInterface|Collection */
-	protected Collection|ModelInterface $data;
+	protected mixed $data = null;
 	
 	/**
 	 * @var ModelInterface
@@ -37,7 +37,7 @@ abstract class HasBase implements \Database\Traits\Relation
 
 
 	protected mixed $value = 0;
-	
+
 
 	/**
 	 * HasBase constructor.
@@ -71,6 +71,9 @@ abstract class HasBase implements \Database\Traits\Relation
 	 */
 	public function __get($name): mixed
 	{
-		return $this->get();
+		if ($this->data === null) {
+			$this->data = $this->get();
+		}
+		return $this->data;
 	}
 }
