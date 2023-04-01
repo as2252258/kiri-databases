@@ -170,7 +170,7 @@ class Command extends Component
 	{
 		$pdo = $this->db->getSlaveClient();
 		try {
-			if (($statement = $pdo->prepare($this->sql)) === false) {
+			if (($statement = $pdo->query($this->sql)) === false) {
 				throw new Exception($pdo->errorInfo()[1]);
 			}
 			foreach ($this->params as $key => $param) {
