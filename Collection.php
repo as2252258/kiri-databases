@@ -171,9 +171,6 @@ class Collection extends AbstractCollection
 		$array = [];
 		/** @var Model $value */
 		foreach ($this as $value) {
-			if (!is_object($value)) {
-				continue;
-			}
 			$array[] = $value->setWith($this->query->with)->toArray();
 		}
 		$this->_item = [];
