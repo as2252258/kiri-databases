@@ -122,18 +122,12 @@ class ActiveQuery extends Component implements ISqlBuilder
         return $this;
     }
 
-    /**
-     * @param $name
-     * @return $this
-     */
-    public function with($name): static
+	/**
+	 * @param array $name
+	 * @return $this
+	 */
+    public function with(array $name): static
     {
-        if (empty($name)) {
-            return $this;
-        }
-        if (is_string($name)) {
-            $name = explode(',', $name);
-        }
         foreach ($name as $val) {
 	        $this->with[] = $val;
         }
