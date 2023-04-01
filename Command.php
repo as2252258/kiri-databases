@@ -13,6 +13,7 @@ namespace Database;
 use Exception;
 use Kiri\Abstracts\Component;
 use Kiri\Di\Context;
+use PDO;
 use PDOStatement;
 
 /**
@@ -56,24 +57,36 @@ class Command extends Component
 	{
 		return $this->_execute();
 	}
-
-
+	
+	
 	/**
-	 * @return mixed
+	 * @return array|null
 	 * @throws Exception
 	 */
-	public function all(): mixed
+	public function all(): ?array
 	{
-		return $this->search(static::FETCH_ALL);
+		[$pdo, $statement] = $this->search();
+		
+		$data = $statement->fetchAll(PDO::FETCH_ASSOC);
+		
+		$this->db->release($pdo);
+		
+		return $data;
 	}
-
+	
 	/**
-	 * @return mixed
+	 * @return array|null
 	 * @throws Exception
 	 */
-	public function one(): mixed
+	public function one(): ?array
 	{
-		return $this->search(static::FETCH);
+		[$pdo, $statement] = $this->search();
+		
+		$data = $statement->fetch(PDO::FETCH_ASSOC);
+		
+		$this->db->release($pdo);
+		
+		return $data;
 	}
 
 	/**
@@ -82,16 +95,28 @@ class Command extends Component
 	 */
 	public function fetchColumn(): mixed
 	{
-		return $this->search(static::FETCH_COLUMN);
+		[$pdo, $statement] = $this->search();
+		
+		$data = $statement->fetchColumn(PDO::FETCH_ASSOC);
+		
+		$this->db->release($pdo);
+		
+		return $data;
 	}
 
 	/**
-	 * @return mixed
+	 * @return ?int
 	 * @throws Exception
 	 */
-	public function rowCount(): mixed
+	public function rowCount(): ?int
 	{
-		return $this->search(static::ROW_COUNT);
+		[$pdo, $statement] = $this->search();
+		
+		$data = $statement->rowCount();
+		
+		$this->db->release($pdo);
+		
+		return $data;
 	}
 
 	/**
@@ -136,13 +161,12 @@ class Command extends Component
 			return $this->logger->addError($this->sql . '. error: ' . $throwable->getMessage(), 'mysql');
 		}
 	}
-
+	
 	/**
-	 * @param string $type
-	 * @return array|int|bool|null
+	 * @return array<PDO, PDOStatement>|bool
 	 * @throws Exception
 	 */
-	private function search(string $type): mixed
+	private function search(): bool|array
 	{
 		$pdo = $this->db->getSlaveClient();
 		try {
@@ -152,14 +176,12 @@ class Command extends Component
 			foreach ($this->params as $key => $param) {
 				$statement->bindValue($key, $param);
 			}
-			$data = $statement->{$type}(\PDO::FETCH_ASSOC);
-			$this->db->release($pdo);
-			return $data;
+			return [$pdo, $statement];
 		} catch (\Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
 				$this->db->restore();
 
-				return $this->search($type);
+				return $this->search();
 			}
 
 			$this->db->release($pdo);
