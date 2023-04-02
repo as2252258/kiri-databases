@@ -22,6 +22,7 @@ use Kiri\Abstracts\Config;
 use Kiri\Di\ContainerInterface;
 use Kiri\Di\Context;
 use Kiri\Events\EventProvider;
+use Kiri\Exception\ConfigException;
 use Kiri\Exception\NotFindClassException;
 use Kiri\Pool\Connection as PoolConnection;
 use Kiri\Server\Events\OnWorkerExit;
@@ -142,8 +143,8 @@ class Connection extends Component
 
 
 	/**
-	 * @return PDO
-	 * @throws Exception
+	 * @return Mysql\PDO
+	 * @throws ConfigException
 	 */
 	public function getMasterClient(): Mysql\PDO
 	{
@@ -251,7 +252,7 @@ class Connection extends Component
 	 * 回收链接
 	 * @throws
 	 */
-	public function release(PDO $PDO)
+	public function release(Mysql\PDO $PDO)
 	{
 		if ($PDO->inTransaction()) {
 			return;
