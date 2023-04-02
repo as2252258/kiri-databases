@@ -180,10 +180,10 @@ class Command extends Component
 	 * @return bool|int
 	 * @throws Exception
 	 */
-	private function _execute(): bool|int
+	private function _execute($restore = false): bool|int
 	{
 		try {
-			$pdo = $this->db->getPdo();
+			$pdo = $this->db->getPdo($restore);
 			if (!(($prepare = $pdo->prepare($this->sql)) instanceof PDOStatement)) {
 				throw new Exception($prepare->errorInfo()[2] ?? static::DB_ERROR_MESSAGE);
 			}
@@ -197,7 +197,7 @@ class Command extends Component
 			return $result == 0 ? true : $result;
 		} catch (\PDOException|\Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
-				return $this->_execute();
+				return $this->_execute(true);
 			} else {
 				return $this->printErrorMessage($throwable);
 			}

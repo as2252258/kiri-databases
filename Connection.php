@@ -118,7 +118,7 @@ class Connection extends Component
 	public function connectPoolInstance()
 	{
 		$pool = $this->slaveConfig['pool'] ?? ['max' => 10, 'min' => 1];
-		
+
 		$this->connection->initConnections($this->cds, $pool['max']);
 	}
 
@@ -181,14 +181,16 @@ class Connection extends Component
 
 
 	/**
+	 * @param bool $restore
 	 * @return PDO
 	 * @throws Exception
 	 */
-	public function getPdo(): PDO
+	public function getPdo(bool $restore = false): PDO
 	{
-		if (!Db::inTransactionsActive()) {
-			return $this->getMasterClient();
+		if ($restore === true) {
+			return Context::setContext($this->cds, $this->getMasterClient());
 		}
+		if (!Db::inTransactionsActive()) return $this->getMasterClient();
 		if (!Context::hasContext($this->cds)) {
 			return Context::setContext($this->cds, $this->getMasterClient());
 		} else {
@@ -242,12 +244,6 @@ class Connection extends Component
 	{
 		$command = new Command(['db' => $this, 'sql' => $sql]);
 		return $command->bindValues($attributes);
-	}
-
-
-	public function restore()
-	{
-		Context::remove($this->cds);
 	}
 
 
