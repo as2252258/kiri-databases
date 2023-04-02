@@ -254,9 +254,9 @@ class Connection extends Component
 	 */
 	public function release(Mysql\PDO $PDO)
 	{
-		if ($PDO->inTransaction()) {
-			return;
-		}
+//		if ($PDO->inTransaction()) {
+//			return;
+//		}
 		$this->connection->addItem($this->cds, $PDO);
 		Context::remove($this->cds);
 	}
