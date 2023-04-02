@@ -145,7 +145,7 @@ class Connection extends Component
 	 * @return PDO
 	 * @throws Exception
 	 */
-	public function getMasterClient(): PDO
+	public function getMasterClient(): Mysql\PDO
 	{
 		return $this->connection->get([
 			'cds'             => $this->cds,
@@ -163,7 +163,7 @@ class Connection extends Component
 	 * @return PDO
 	 * @throws Exception
 	 */
-	public function getSlaveClient(): PDO
+	public function getSlaveClient(): Mysql\PDO
 	{
 		return $this->getMasterClient();
 	}
@@ -185,13 +185,10 @@ class Connection extends Component
 	 * @return PDO
 	 * @throws Exception
 	 */
-	public function getPdo(bool $restore = false): PDO
+	public function getPdo(bool $restore = false): Mysql\PDO
 	{
 		if ($restore === true) {
 			return Context::setContext($this->cds, $this->getMasterClient());
-		}
-		if (!Db::inTransactionsActive()) {
-			return $this->getMasterClient();
 		}
 		if (!Context::hasContext($this->cds)) {
 			return Context::setContext($this->cds, $this->getMasterClient());
