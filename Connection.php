@@ -186,7 +186,14 @@ class Connection extends Component
 	 */
 	public function getPdo(): PDO
 	{
-		return $this->getMasterClient();
+		if (!Db::inTransactionsActive()) {
+			return $this->getMasterClient();
+		}
+		if (!Context::hasContext($this->cds)) {
+			return Context::setContext($this->cds, $this->getMasterClient());
+		} else {
+			return Context::getContext($this->cds);
+		}
 	}
 
 	/**
