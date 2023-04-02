@@ -57,38 +57,62 @@ class Command extends Component
 	{
 		return $this->_execute();
 	}
-	
-	
+
+
 	/**
 	 * @return array|null
 	 * @throws Exception
 	 */
 	public function all(): ?array
 	{
-		[$pdo, $statement] = $this->search();
+		try {
+			[$pdo, $statement] = $this->search();
 
-		$statement->execute($this->params);
-		$data = $statement->fetchAll(PDO::FETCH_ASSOC);
-		
-		$this->db->release($pdo);
-		
-		return $data;
+			$statement->execute($this->params);
+			$data = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+			$this->db->release($pdo);
+
+			return $data;
+		} catch (\Throwable $throwable) {
+			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
+				$this->db->restore();
+
+				return $this->one();
+			}
+			if (isset($pdo)) {
+				$this->db->release($pdo);
+			}
+			return $this->printErrorMessage($throwable);
+		}
 	}
-	
+
 	/**
 	 * @return array|null
 	 * @throws Exception
 	 */
 	public function one(): ?array
 	{
-		[$pdo, $statement] = $this->search();
+		try {
+			[$pdo, $statement] = $this->search();
 
-		$statement->execute($this->params);
-		$data = $statement->fetch(PDO::FETCH_ASSOC);
-		
-		$this->db->release($pdo);
-		
-		return $data;
+			$statement->execute($this->params);
+			$data = $statement->fetch(PDO::FETCH_ASSOC);
+
+			$this->db->release($pdo);
+
+			return $data;
+		} catch (\Throwable $throwable) {
+			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
+				$this->db->restore();
+
+				return $this->one();
+			}
+			if (isset($pdo)) {
+				$this->db->release($pdo);
+			}
+			return $this->printErrorMessage($throwable);
+		}
 	}
 
 	/**
@@ -97,30 +121,62 @@ class Command extends Component
 	 */
 	public function fetchColumn(): mixed
 	{
-		[$pdo, $statement] = $this->search();
+		try {
+			[$pdo, $statement] = $this->search();
 
-		$statement->execute($this->params);
-		$data = $statement->fetchColumn(PDO::FETCH_ASSOC);
-		
-		$this->db->release($pdo);
-		
-		return $data;
+			$statement->execute($this->params);
+			$data = $statement->fetchColumn(PDO::FETCH_ASSOC);
+
+			$this->db->release($pdo);
+
+			return $data;
+		} catch (\Throwable $throwable) {
+			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
+				$this->db->restore();
+
+				return $this->fetchColumn();
+			}
+			if (isset($pdo)) {
+				$this->db->release($pdo);
+			}
+			return $this->printErrorMessage($throwable);
+		}
 	}
 
 	/**
-	 * @return ?int
+	 * @return int|null
 	 * @throws Exception
 	 */
 	public function rowCount(): ?int
 	{
-		[$pdo, $statement] = $this->search();
+		try {
+			[$pdo, $statement] = $this->search();
 
-		$statement->execute($this->params);
-		$data = $statement->rowCount();
-		
-		$this->db->release($pdo);
-		
-		return $data;
+			$statement->execute($this->params);
+			$data = $statement->rowCount();
+
+			$this->db->release($pdo);
+
+			return $data;
+		} catch (\Throwable $throwable) {
+			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
+				$this->db->restore();
+
+				return $this->rowCount();
+			}
+			if (isset($pdo)) {
+				$this->db->release($pdo);
+			}
+			return $this->printErrorMessage($throwable);
+		}
+	}
+
+
+	private function printErrorMessage(\Throwable $throwable): mixed
+	{
+		$this->logger->addError($this->sql . '. error: ' . $throwable->getMessage(), 'mysql');
+
+		return null;
 	}
 
 	/**
@@ -165,7 +221,7 @@ class Command extends Component
 			return $this->logger->addError($this->sql . '. error: ' . $throwable->getMessage(), 'mysql');
 		}
 	}
-	
+
 	/**
 	 * @return array<PDO, PDOStatement>|bool
 	 * @throws Exception
@@ -173,22 +229,11 @@ class Command extends Component
 	private function search(): bool|array
 	{
 		$pdo = $this->db->getSlaveClient();
-		try {
-			if (($statement = $pdo->prepare($this->sql)) === false) {
-				throw new Exception($pdo->errorInfo()[1]);
-			}
-			return [$pdo, $statement];
-		} catch (\Throwable $throwable) {
-			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
-				$this->db->restore();
 
-				return $this->search();
-			}
-
-			$this->db->release($pdo);
-
-			return $this->logger->addError($this->sql . '. error: ' . $throwable->getMessage(), 'mysql');
+		if (($statement = $pdo->prepare($this->sql)) === false) {
+			throw new Exception($pdo->errorInfo()[1]);
 		}
+		return [$pdo, $statement];
 	}
 
 
