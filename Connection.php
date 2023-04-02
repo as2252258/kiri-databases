@@ -160,7 +160,7 @@ class Connection extends Component
 	}
 
 	/**
-	 * @return PDO
+	 * @return Mysql\PDO
 	 * @throws Exception
 	 */
 	public function getSlaveClient(): Mysql\PDO

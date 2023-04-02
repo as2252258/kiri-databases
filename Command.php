@@ -208,7 +208,7 @@ class Command extends Component
 	}
 
 	/**
-	 * @return array<PDO, PDOStatement>|bool
+	 * @return array<Mysql\PDO, PDOStatement>|bool
 	 * @throws Exception
 	 */
 	private function search(): bool|array

@@ -13,7 +13,7 @@ use Kiri\Server\Abstracts\StatusEnum;
 use Swoole\Timer;
 
 /**
- *
+ * @mixin \PDO
  */
 class PDO implements StopHeartbeatCheck
 {
@@ -86,6 +86,27 @@ class PDO implements StopHeartbeatCheck
 	public function onWorkerExit(OnWorkerExit $exit): void
 	{
 		$this->stopHeartbeatCheck();
+	}
+
+
+	/**
+	 * @param string $name
+	 * @param array $arguments
+	 * @return mixed
+	 */
+	public function __call(string $name, array $arguments)
+	{
+		return $this->_pdo()->{$name}(...$arguments);
+	}
+
+
+	/**
+	 * @param string $sql
+	 * @return PDOStatement|bool
+	 */
+	public function prepare(string $sql): PDOStatement|bool
+	{
+		return $this->_pdo()->prepare($sql);
 	}
 
 
