@@ -65,23 +65,12 @@ class Command extends Component
 	 */
 	public function all(): ?array
 	{
-		try {
-			[$pdo, $statement] = $this->search();
+		$pdo = $this->db->getSlaveClient();
 
-			$statement->execute($this->params);
+		$result = $pdo->fetchAll($this->sql, $this->params);
 
-			return $statement->fetchAll(PDO::FETCH_ASSOC);
-		} catch (\Throwable $throwable) {
-			if (!str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
-				return $this->all();
-			} else {
-				return $this->printErrorMessage($throwable);
-			}
-		} finally {
-			if (isset($pdo)) {
-				$this->db->release($pdo);
-			}
-		}
+		$this->db->release($pdo);
+		return $result;
 	}
 
 	/**
@@ -90,23 +79,12 @@ class Command extends Component
 	 */
 	public function one(): ?array
 	{
-		try {
-			[$pdo, $statement] = $this->search();
+		$pdo = $this->db->getSlaveClient();
 
-			$statement->execute($this->params);
+		$result = $pdo->fetch($this->sql, $this->params);
 
-			return $statement->fetch(PDO::FETCH_ASSOC);
-		} catch (\Throwable $throwable) {
-			if (!str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
-				return $this->printErrorMessage($throwable);
-			} else {
-				return $this->one();
-			}
-		} finally {
-			if (isset($pdo)) {
-				$this->db->release($pdo);
-			}
-		}
+		$this->db->release($pdo);
+		return $result;
 	}
 
 	/**
@@ -115,23 +93,12 @@ class Command extends Component
 	 */
 	public function fetchColumn(): mixed
 	{
-		try {
-			[$pdo, $statement] = $this->search();
+		$pdo = $this->db->getSlaveClient();
 
-			$statement->execute($this->params);
+		$result = $pdo->fetchColumn($this->sql, $this->params);
 
-			return $statement->fetchColumn(PDO::FETCH_ASSOC);
-		} catch (\Throwable $throwable) {
-			if (!str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
-				return $this->printErrorMessage($throwable);
-			} else {
-				return $this->fetchColumn();
-			}
-		} finally {
-			if (isset($pdo)) {
-				$this->db->release($pdo);
-			}
-		}
+		$this->db->release($pdo);
+		return $result;
 	}
 
 	/**
@@ -140,23 +107,12 @@ class Command extends Component
 	 */
 	public function rowCount(): ?int
 	{
-		try {
-			[$pdo, $statement] = $this->search();
+		$pdo = $this->db->getSlaveClient();
 
-			$statement->execute($this->params);
+		$result = $pdo->rowCount($this->sql, $this->params);
 
-			return $statement->rowCount();
-		} catch (\Throwable $throwable) {
-			if (!str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
-				return $this->printErrorMessage($throwable);
-			} else {
-				return $this->rowCount();
-			}
-		} finally {
-			if (isset($pdo)) {
-				$this->db->release($pdo);
-			}
-		}
+		$this->db->release($pdo);
+		return $result;
 	}
 
 
@@ -181,30 +137,15 @@ class Command extends Component
 	 * @return bool|int
 	 * @throws Exception
 	 */
-	private function _execute(bool $restore = false): bool|int
+	private function _execute(): bool|int
 	{
-		try {
-			$pdo = $this->db->getPdo($restore);
-			if (!(($prepare = $pdo->prepare($this->sql)) instanceof PDOStatement)) {
-				throw new Exception($prepare->errorInfo()[2] ?? static::DB_ERROR_MESSAGE);
-			}
-			if ($prepare->execute($this->params) === false) {
-				throw new Exception($prepare->errorInfo()[2] ?? static::DB_ERROR_MESSAGE);
-			}
+		$pdo = $this->db->getPdo();
 
-			$result = (int)$pdo->lastInsertId();
-			$prepare->closeCursor();
+		$result = $pdo->execute($this->sql, $this->params);
 
-			return $result == 0 ? true : $result;
-		} catch (\PDOException|\Throwable $throwable) {
-			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
-				return $this->_execute(true);
-			} else {
-				return $this->printErrorMessage($throwable);
-			}
-		} finally {
-			isset($pdo) && $this->db->release($pdo);
-		}
+		$this->db->release($pdo);
+
+		return $result == 0 ? true : $result;
 	}
 
 	/**
@@ -214,11 +155,7 @@ class Command extends Component
 	private function search(): bool|array
 	{
 		$pdo = $this->db->getSlaveClient();
-
-		if (($statement = $pdo->prepare($this->sql)) === false) {
-			throw new Exception($pdo->errorInfo()[1]);
-		}
-		return [$pdo, $statement];
+		return [$pdo, null];
 	}
 
 

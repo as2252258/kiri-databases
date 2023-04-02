@@ -183,8 +183,8 @@ class Connection extends Component
 
 	/**
 	 * @param bool $restore
-	 * @return PDO
-	 * @throws Exception
+	 * @return Mysql\PDO
+	 * @throws ConfigException
 	 */
 	public function getPdo(bool $restore = false): Mysql\PDO
 	{

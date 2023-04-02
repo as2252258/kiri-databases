@@ -13,7 +13,6 @@ use Kiri\Server\Abstracts\StatusEnum;
 use Swoole\Timer;
 
 /**
- * @mixin \PDO
  */
 class PDO implements StopHeartbeatCheck
 {
