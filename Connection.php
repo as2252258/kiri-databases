@@ -190,7 +190,9 @@ class Connection extends Component
 		if ($restore === true) {
 			return Context::setContext($this->cds, $this->getMasterClient());
 		}
-		if (!Db::inTransactionsActive()) return $this->getMasterClient();
+		if (!Db::inTransactionsActive()) {
+			return $this->getMasterClient();
+		}
 		if (!Context::hasContext($this->cds)) {
 			return Context::setContext($this->cds, $this->getMasterClient());
 		} else {
