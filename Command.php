@@ -13,6 +13,7 @@ namespace Database;
 use Exception;
 use Kiri\Abstracts\Component;
 use Kiri\Di\Context;
+use Kiri\Exception\ConfigException;
 use PDO;
 use PDOStatement;
 
@@ -133,8 +134,8 @@ class Command extends Component
 	}
 
 	/**
-	 * @param bool $restore
 	 * @return bool|int
+	 * @throws ConfigException
 	 * @throws Exception
 	 */
 	private function _execute(): bool|int
