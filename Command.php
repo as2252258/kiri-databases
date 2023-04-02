@@ -177,10 +177,11 @@ class Command extends Component
 	}
 
 	/**
+	 * @param bool $restore
 	 * @return bool|int
 	 * @throws Exception
 	 */
-	private function _execute($restore = false): bool|int
+	private function _execute(bool $restore = false): bool|int
 	{
 		try {
 			$pdo = $this->db->getPdo($restore);
