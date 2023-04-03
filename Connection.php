@@ -189,12 +189,12 @@ class Connection extends Component
 	public function getPdo(bool $restore = false): Mysql\PDO
 	{
 		if ($restore === true) {
-			return Context::setContext($this->cds, $this->getMasterClient());
+			return Context::set($this->cds, $this->getMasterClient());
 		}
-		if (!Context::hasContext($this->cds)) {
-			return Context::setContext($this->cds, $this->getMasterClient());
+		if (!Context::exists($this->cds)) {
+			return Context::set($this->cds, $this->getMasterClient());
 		} else {
-			return Context::getContext($this->cds);
+			return Context::get($this->cds);
 		}
 	}
 
@@ -254,11 +254,10 @@ class Connection extends Component
 	 */
 	public function release(Mysql\PDO $PDO)
 	{
-//		if ($PDO->inTransaction()) {
-//			return;
-//		}
-		$this->connection->addItem($this->cds, $PDO);
-		Context::remove($this->cds);
+		if ($PDO->inTransaction() === false) {
+			$this->connection->addItem($this->cds, $PDO);
+			Context::remove($this->cds);
+		}
 	}
 
 

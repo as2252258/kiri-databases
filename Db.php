@@ -37,7 +37,7 @@ class Db implements ISqlBuilder
 	 */
 	public static function inTransactionsActive(): bool
 	{
-		return Context::hasContext('transactions::status') && Context::getContext('transactions::status') === true;
+		return Context::exists('transactions::status') && Context::get('transactions::status') === true;
 	}
 
 
@@ -46,7 +46,7 @@ class Db implements ISqlBuilder
 	 */
 	public static function beginTransaction(): void
 	{
-		Context::setContext('transactions::status', true);
+		Context::set('transactions::status', true);
 	}
 
 

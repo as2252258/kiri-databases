@@ -55,14 +55,14 @@ class Relation extends Component
 	 */
 	public function first(string $_identification): mixed
 	{
-		if (Context::hasContext($_identification)) {
-			return Context::getContext($_identification);
+		if (Context::exists($_identification)) {
+			return Context::get($_identification);
 		}
 		$activeModel = $this->_query[$_identification]->first();
 		if (empty($activeModel)) {
 			return null;
 		}
-		return Context::setContext($_identification, $activeModel);
+		return Context::set($_identification, $activeModel);
 	}
 
 
@@ -72,14 +72,14 @@ class Relation extends Component
 	 */
 	public function count(string $_identification): mixed
 	{
-		if (Context::hasContext($_identification)) {
-			return Context::getContext($_identification);
+		if (Context::exists($_identification)) {
+			return Context::get($_identification);
 		}
 		$activeModel = $this->_query[$_identification]->count();
 		if (empty($activeModel)) {
 			return null;
 		}
-		return Context::setContext($_identification, $activeModel);
+		return Context::set($_identification, $activeModel);
 	}
 
 
@@ -89,14 +89,14 @@ class Relation extends Component
 	 */
 	public function get(string $_identification): mixed
 	{
-		if (Context::hasContext($_identification)) {
-			return Context::getContext($_identification);
+		if (Context::exists($_identification)) {
+			return Context::get($_identification);
 		}
 		$activeModel = $this->_query[$_identification]->get();
 		if (empty($activeModel)) {
 			return $activeModel;
 		}
-		return Context::setContext($_identification, $activeModel);
+		return Context::set($_identification, $activeModel);
 	}
 
 }
