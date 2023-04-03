@@ -169,9 +169,8 @@ class PDO implements StopHeartbeatCheck
 	{
 		$pdo = $this->queryPrev($sql, $params);
 
-		$result = $pdo->fetchAll(\PDO::FETCH_ASSOC);
-		$pdo->closeCursor();
-		return $result;
+		//		$pdo->closeCursor();
+		return $pdo->fetchAll(\PDO::FETCH_ASSOC);
 	}
 
 
@@ -185,9 +184,8 @@ class PDO implements StopHeartbeatCheck
 	{
 		$pdo = $this->queryPrev($sql, $params);
 
-		$result = $pdo->fetch(\PDO::FETCH_ASSOC);
-		$pdo->closeCursor();
-		return $result;
+		//		$pdo->closeCursor();
+		return $pdo->fetch(\PDO::FETCH_ASSOC);
 	}
 
 
@@ -201,9 +199,8 @@ class PDO implements StopHeartbeatCheck
 	{
 		$pdo = $this->queryPrev($sql, $params);
 
-		$result = $pdo->fetchColumn(\PDO::FETCH_ASSOC);
-		$pdo->closeCursor();
-		return $result;
+		//		$pdo->closeCursor();
+		return $pdo->fetchColumn(\PDO::FETCH_ASSOC);
 	}
 
 
@@ -217,9 +214,8 @@ class PDO implements StopHeartbeatCheck
 	{
 		$pdo = $this->queryPrev($sql, $params);
 
-		$result = $pdo->rowCount();
-		$pdo->closeCursor();
-		return $result;
+		//		$pdo->closeCursor();
+		return $pdo->rowCount();
 	}
 
 
@@ -300,10 +296,11 @@ class PDO implements StopHeartbeatCheck
 	 */
 	private function bindValue(PDOStatement $statement, array $params = []): PDOStatement
 	{
-		if (empty($params)) return $statement;
-		foreach ($params as $key => $param) {
-			$statement->bindValue($key, $param);
-		}
+//		if (empty($params)) return $statement;
+//		foreach ($params as $key => $param) {
+//			$statement->bindValue($key, $param);
+//		}
+		$statement->execute($params);
 		return $statement;
 	}
 
