@@ -52,7 +52,7 @@ class Connection extends Component
 
 	public int $read_timeout = 10;
 
-	public array $pool;
+	public array $pool = ['max' => 10, 'min' => 1];
 
 
 	private PoolConnection $connection;
@@ -118,9 +118,16 @@ class Connection extends Component
 	 */
 	public function connectPoolInstance()
 	{
-		$pool = $this->slaveConfig['pool'] ?? ['max' => 10, 'min' => 1];
-
-		$this->connection->initConnections($this->cds, $pool['max']);
+		$this->connection->initConnections([
+			'cds'             => $this->cds,
+			'username'        => $this->username,
+			'password'        => $this->password,
+			'attributes'      => $this->attributes,
+			'connect_timeout' => $this->connect_timeout,
+			'read_timeout'    => $this->read_timeout,
+			'dbname'          => $this->database,
+			'pool'            => $this->pool
+		], $this->pool['max']);
 	}
 
 
@@ -148,16 +155,7 @@ class Connection extends Component
 	 */
 	public function getMasterClient(): Mysql\PDO
 	{
-		return $this->connection->get([
-			'cds'             => $this->cds,
-			'username'        => $this->username,
-			'password'        => $this->password,
-			'attributes'      => $this->attributes,
-			'connect_timeout' => $this->connect_timeout,
-			'read_timeout'    => $this->read_timeout,
-			'dbname'          => $this->database,
-			'pool'            => $this->pool
-		]);
+		return $this->connection->get($this->cds);
 	}
 
 	/**

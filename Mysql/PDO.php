@@ -2,6 +2,7 @@
 
 namespace Database\Mysql;
 
+use Database\Db;
 use Exception;
 use Kiri;
 use Kiri\Events\EventProvider;
@@ -362,6 +363,7 @@ class PDO implements StopHeartbeatCheck
 		$link = new \PDO('mysql:dbname=' . $this->dbname . ';host=' . $this->cds, $this->username, $this->password, [
 			\PDO::ATTR_EMULATE_PREPARES   => false,
 			\PDO::ATTR_CASE               => \PDO::CASE_NATURAL,
+			\PDO::ATTR_PERSISTENT         => true,
 			\PDO::ATTR_TIMEOUT            => $this->connect_timeout,
 			\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $this->charset
 		]);
@@ -370,6 +372,9 @@ class PDO implements StopHeartbeatCheck
 		$link->setAttribute(\PDO::ATTR_ORACLE_NULLS, \PDO::NULL_EMPTY_STRING);
 		foreach ($this->attributes as $key => $attribute) {
 			$link->setAttribute($key, $attribute);
+		}
+		if (Db::inTransactionsActive()) {
+			$link->beginTransaction();
 		}
 		return $link;
 	}
