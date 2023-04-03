@@ -232,10 +232,10 @@ class PDO implements StopHeartbeatCheck
 	private function queryPrev(string $sql, array $params = []): PDOStatement
 	{
 		try {
-			if ($this->_timerId === -1) {
-				$this->_timerId = Timer::tick(6000, [$this, 'check']);
-			}
-			$this->_last = time();
+//			if ($this->_timerId === -1) {
+//				$this->_timerId = Timer::tick(6000, [$this, 'check']);
+//			}
+//			$this->_last = time();
 			if (($statement = $this->_pdo()->query($sql)) === false) {
 				throw new Exception($this->_pdo()->errorInfo()[1]);
 			}
@@ -256,6 +256,7 @@ class PDO implements StopHeartbeatCheck
 	 */
 	public function check(): bool
 	{
+		return true;
 		try {
 			if ($this->_last == 0) $this->_last = time();
 			if (time() - $this->_last >= 600) {
@@ -263,7 +264,7 @@ class PDO implements StopHeartbeatCheck
 			} else if (!($this->pdo instanceof \PDO)) {
 				return $result = false;
 			}
-			$this->pdo->getAttribute(\PDO::ATTR_SERVER_INFO);
+			$this->_pdo()->getAttribute(\PDO::ATTR_SERVER_INFO);
 			$result = true;
 		} catch (\Throwable $throwable) {
 			if (!str_contains($throwable->getMessage(), 'Idle dis')) {
