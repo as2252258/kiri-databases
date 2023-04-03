@@ -236,7 +236,7 @@ class PDO implements StopHeartbeatCheck
 //				$this->_timerId = Timer::tick(6000, [$this, 'check']);
 //			}
 //			$this->_last = time();
-			if (($statement = $this->_pdo()->query($sql)) === false) {
+			if (($statement = $this->_pdo()->query($sql, \PDO::FETCH_ASSOC)) === false) {
 				throw new Exception($this->_pdo()->errorInfo()[1]);
 			}
 			return $this->bindValue($statement, $params);
