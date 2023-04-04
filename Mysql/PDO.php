@@ -2,6 +2,7 @@
 
 namespace Database\Mysql;
 
+use Co\WaitGroup;
 use Database\Db;
 use Exception;
 use Kiri;
@@ -11,6 +12,7 @@ use Kiri\Server\Events\OnWorkerExit;
 use PDOStatement;
 use Kiri\Server\WorkerStatus;
 use Kiri\Server\Abstracts\StatusEnum;
+use Swoole\Coroutine;
 use Swoole\Timer;
 
 /**
@@ -26,8 +28,6 @@ class PDO implements StopHeartbeatCheck
 
 	private int $_transaction = 0;
 
-	private int $_last = 0;
-
 	public string $dbname;
 	public string $cds;
 	public string $username;
@@ -35,6 +35,10 @@ class PDO implements StopHeartbeatCheck
 	public string $charset;
 	public int $connect_timeout;
 	public int $read_timeout;
+
+
+	/** @var WaitGroup */
+	private WaitGroup $group;
 
 	private int $_timerId = -1;
 
@@ -67,6 +71,8 @@ class PDO implements StopHeartbeatCheck
 		$eventProvider = Kiri::getDi()->get(EventProvider::class);
 		$eventProvider->on(OnWorkerExit::class, [$this, 'onWorkerExit']);
 		$this->_timerId = Timer::tick(60000, [$this, 'check']);
+
+		$this->group = new WaitGroup();
 	}
 
 
@@ -253,23 +259,23 @@ class PDO implements StopHeartbeatCheck
 	public function check(): bool
 	{
 		return true;
-		try {
-			if ($this->_last == 0) $this->_last = time();
-			if (time() - $this->_last >= 600) {
-				return $result = false;
-			} else if (!($this->pdo instanceof \PDO)) {
-				return $result = false;
-			}
-			$this->_pdo()->getAttribute(\PDO::ATTR_SERVER_INFO);
-			$result = true;
-		} catch (\Throwable $throwable) {
-			if (!str_contains($throwable->getMessage(), 'Idle dis')) {
-				Kiri::getLogger()->error($throwable->getMessage());
-			}
-			$result = false;
-		} finally {
-			return $this->afterCheck($result);
-		}
+//		try {
+//			if ($this->_last == 0) $this->_last = time();
+//			if (time() - $this->_last >= 600) {
+//				return $result = false;
+//			} else if (!($this->pdo instanceof \PDO)) {
+//				return $result = false;
+//			}
+//			$this->_pdo()->getAttribute(\PDO::ATTR_SERVER_INFO);
+//			$result = true;
+//		} catch (\Throwable $throwable) {
+//			if (!str_contains($throwable->getMessage(), 'Idle dis')) {
+//				Kiri::getLogger()->error($throwable->getMessage());
+//			}
+//			$result = false;
+//		} finally {
+//			return $this->afterCheck($result);
+//		}
 	}
 
 
@@ -358,23 +364,30 @@ class PDO implements StopHeartbeatCheck
 	 */
 	private function newClient(): \PDO
 	{
-		$link = new \PDO('mysql:dbname=' . $this->dbname . ';host=' . $this->cds, $this->username, $this->password, [
-			\PDO::ATTR_EMULATE_PREPARES   => false,
-			\PDO::ATTR_CASE               => \PDO::CASE_NATURAL,
-			\PDO::ATTR_PERSISTENT         => true,
-			\PDO::ATTR_TIMEOUT            => $this->connect_timeout,
-			\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $this->charset
-		]);
-		$link->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-		$link->setAttribute(\PDO::ATTR_STRINGIFY_FETCHES, false);
-		$link->setAttribute(\PDO::ATTR_ORACLE_NULLS, \PDO::NULL_EMPTY_STRING);
-		foreach ($this->attributes as $key => $attribute) {
-			$link->setAttribute($key, $attribute);
-		}
-		if (Db::inTransactionsActive()) {
-			$link->beginTransaction();
-		}
-		return $link;
+		$this->group->add();
+		Coroutine::create(function () {
+			$link = new \PDO('mysql:dbname=' . $this->dbname . ';host=' . $this->cds, $this->username, $this->password, [
+				\PDO::ATTR_EMULATE_PREPARES   => false,
+				\PDO::ATTR_CASE               => \PDO::CASE_NATURAL,
+				\PDO::ATTR_PERSISTENT         => true,
+				\PDO::ATTR_TIMEOUT            => $this->connect_timeout,
+				\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $this->charset
+			]);
+			$link->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+			$link->setAttribute(\PDO::ATTR_STRINGIFY_FETCHES, false);
+			$link->setAttribute(\PDO::ATTR_ORACLE_NULLS, \PDO::NULL_EMPTY_STRING);
+			foreach ($this->attributes as $key => $attribute) {
+				$link->setAttribute($key, $attribute);
+			}
+			if (Db::inTransactionsActive()) {
+				$link->beginTransaction();
+			}
+
+			$this->pdo = $link;
+		});
+		$this->group->done();
+
+		return $this->pdo;
 	}
 
 }
