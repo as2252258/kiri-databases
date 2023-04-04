@@ -59,6 +59,8 @@ class PDO implements StopHeartbeatCheck
 		$this->read_timeout = $config['read_timeout'] ?? 10;
 		$this->charset = $config['charset'] ?? 'utf8mb4';
 		$this->attributes = $config['attributes'] ?? [];
+
+		$this->group = new WaitGroup();
 	}
 
 
@@ -71,8 +73,6 @@ class PDO implements StopHeartbeatCheck
 		$eventProvider = Kiri::getDi()->get(EventProvider::class);
 		$eventProvider->on(OnWorkerExit::class, [$this, 'onWorkerExit']);
 		$this->_timerId = Timer::tick(60000, [$this, 'check']);
-
-		$this->group = new WaitGroup();
 	}
 
 
