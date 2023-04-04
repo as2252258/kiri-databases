@@ -360,9 +360,9 @@ class PDO implements StopHeartbeatCheck
 
 
 	/**
-	 * @return \PDO
+	 * @return void
 	 */
-	private function newClient(): \PDO
+	private function newClient(): void
 	{
 		$link = new \PDO('mysql:dbname=' . $this->dbname . ';host=' . $this->cds, $this->username, $this->password, [
 			\PDO::ATTR_EMULATE_PREPARES   => false,
@@ -380,7 +380,7 @@ class PDO implements StopHeartbeatCheck
 		if (Db::inTransactionsActive()) {
 			$link->beginTransaction();
 		}
-		return $this->pdo = $link;
+		$this->pdo = $link;
 	}
 
 }
