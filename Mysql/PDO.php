@@ -353,7 +353,7 @@ class PDO implements StopHeartbeatCheck
 	public function _pdo(): \PDO
 	{
 		if (!($this->pdo instanceof \PDO)) {
-			$this->pdo = $this->newClient();
+			$this->newClient();
 		}
 		return $this->pdo;
 	}
@@ -364,36 +364,23 @@ class PDO implements StopHeartbeatCheck
 	 */
 	private function newClient(): \PDO
 	{
-		while ($this->group->count() > 0) {
-			Coroutine::sleep(0.0001);
+		$link = new \PDO('mysql:dbname=' . $this->dbname . ';host=' . $this->cds, $this->username, $this->password, [
+			\PDO::ATTR_EMULATE_PREPARES   => false,
+			\PDO::ATTR_CASE               => \PDO::CASE_NATURAL,
+			\PDO::ATTR_PERSISTENT         => true,
+			\PDO::ATTR_TIMEOUT            => $this->connect_timeout,
+			\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $this->charset
+		]);
+		$link->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+		$link->setAttribute(\PDO::ATTR_STRINGIFY_FETCHES, false);
+		$link->setAttribute(\PDO::ATTR_ORACLE_NULLS, \PDO::NULL_EMPTY_STRING);
+		foreach ($this->attributes as $key => $attribute) {
+			$link->setAttribute($key, $attribute);
 		}
-		$this->group->add();
-		Coroutine::create(function () {
-			Coroutine::defer(function () {
-				$this->group->done();
-			});
-			$link = new \PDO('mysql:dbname=' . $this->dbname . ';host=' . $this->cds, $this->username, $this->password, [
-				\PDO::ATTR_EMULATE_PREPARES   => false,
-				\PDO::ATTR_CASE               => \PDO::CASE_NATURAL,
-				\PDO::ATTR_PERSISTENT         => true,
-				\PDO::ATTR_TIMEOUT            => $this->connect_timeout,
-				\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $this->charset
-			]);
-			$link->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-			$link->setAttribute(\PDO::ATTR_STRINGIFY_FETCHES, false);
-			$link->setAttribute(\PDO::ATTR_ORACLE_NULLS, \PDO::NULL_EMPTY_STRING);
-			foreach ($this->attributes as $key => $attribute) {
-				$link->setAttribute($key, $attribute);
-			}
-			if (Db::inTransactionsActive()) {
-				$link->beginTransaction();
-			}
-
-			$this->pdo = $link;
-		});
-		$this->group->wait();
-
-		return $this->pdo;
+		if (Db::inTransactionsActive()) {
+			$link->beginTransaction();
+		}
+		return $this->pdo = $link;
 	}
 
 }
