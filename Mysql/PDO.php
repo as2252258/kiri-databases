@@ -288,8 +288,8 @@ class PDO implements StopHeartbeatCheck
 		$container = Kiri::getDi()->get(WorkerStatus::class);
 		if (!$result || $container->is(StatusEnum::EXIT)) {
 			$this->pdo = null;
-			$result = Timer::clear($this->_timerId);
-			$this->_timerId = -1;
+//			$result = Timer::clear($this->_timerId);
+//			$this->_timerId = -1;
 		}
 		return $result;
 	}
@@ -320,10 +320,10 @@ class PDO implements StopHeartbeatCheck
 	public function execute(string $sql, array $params = []): int
 	{
 		$pdo = $this->_pdo();
-		if ($this->_timerId === -1) {
-			$this->_timerId = Timer::tick(6000, [$this, 'check']);
-		}
-		$this->_last = time();
+//		if ($this->_timerId === -1) {
+//			$this->_timerId = Timer::tick(6000, [$this, 'check']);
+//		}
+//		$this->_last = time();
 		if (!(($prepare = $pdo->prepare($sql)) instanceof PDOStatement)) {
 			throw new Exception($prepare->errorInfo()[2] ?? static::DB_ERROR_MESSAGE);
 		}
@@ -366,6 +366,9 @@ class PDO implements StopHeartbeatCheck
 	{
 		$this->group->add();
 		Coroutine::create(function () {
+			\Co\defer(function () {
+				$this->group->done();
+			});
 			$link = new \PDO('mysql:dbname=' . $this->dbname . ';host=' . $this->cds, $this->username, $this->password, [
 				\PDO::ATTR_EMULATE_PREPARES   => false,
 				\PDO::ATTR_CASE               => \PDO::CASE_NATURAL,
@@ -385,7 +388,7 @@ class PDO implements StopHeartbeatCheck
 
 			$this->pdo = $link;
 		});
-		$this->group->done();
+		$this->group->wait();
 
 		return $this->pdo;
 	}
