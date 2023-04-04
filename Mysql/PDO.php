@@ -364,9 +364,12 @@ class PDO implements StopHeartbeatCheck
 	 */
 	private function newClient(): \PDO
 	{
+		while ($this->group->count() > 0) {
+			Coroutine::sleep(0.0001);
+		}
 		$this->group->add();
 		Coroutine::create(function () {
-			\Co\defer(function () {
+			Coroutine::defer(function () {
 				$this->group->done();
 			});
 			$link = new \PDO('mysql:dbname=' . $this->dbname . ';host=' . $this->cds, $this->username, $this->password, [
