@@ -68,10 +68,10 @@ class Command extends Component
 	{
 		$pdo = $this->db->getPdo();
 		try {
-			$prepare = $pdo->query($this->sql);
-			if ($prepare === false || $prepare->execute($this->params) === false) {
-				throw new Exception(($prepare ?? $pdo)->errorInfo()[1]);
+			if (($prepare = $pdo->query($this->sql)) === false) {
+				throw new Exception($pdo->errorInfo()[1]);
 			}
+			$prepare->execute($this->params);
 			return $prepare->fetchAll(PDO::FETCH_ASSOC);
 		} catch (\Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
@@ -91,10 +91,10 @@ class Command extends Component
 	{
 		$pdo = $this->db->getPdo();
 		try {
-			$prepare = $pdo->query($this->sql);
-			if ($prepare === false || $prepare->execute($this->params) === false) {
-				throw new Exception(($prepare ?? $pdo)->errorInfo()[1]);
+			if (($prepare = $pdo->query($this->sql)) === false) {
+				throw new Exception($pdo->errorInfo()[1]);
 			}
+			$prepare->execute($this->params);
 			return $prepare->fetch(PDO::FETCH_ASSOC);
 		} catch (\Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
@@ -114,10 +114,10 @@ class Command extends Component
 	{
 		$pdo = $this->db->getPdo();
 		try {
-			$prepare = $pdo->query($this->sql);
-			if ($prepare === false || $prepare->execute($this->params) === false) {
-				throw new Exception(($prepare ?? $pdo)->errorInfo()[1]);
+			if (($prepare = $pdo->query($this->sql)) === false) {
+				throw new Exception($pdo->errorInfo()[1]);
 			}
+			$prepare->execute($this->params);
 			return $prepare->fetchColumn(PDO::FETCH_ASSOC);
 		} catch (\Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
@@ -137,10 +137,10 @@ class Command extends Component
 	{
 		$pdo = $this->db->getPdo();
 		try {
-			$prepare = $pdo->query($this->sql);
-			if ($prepare === false || $prepare->execute($this->params) === false) {
-				throw new Exception(($prepare ?? $pdo)->errorInfo()[1]);
+			if (($prepare = $pdo->query($this->sql)) === false) {
+				throw new Exception($pdo->errorInfo()[1]);
 			}
+			$prepare->execute($this->params);
 			return $prepare->rowCount();
 		} catch (\Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
@@ -152,13 +152,6 @@ class Command extends Component
 		}
 	}
 
-
-	private function printErrorMessage(\Throwable $throwable): mixed
-	{
-		$this->logger->addError($this->sql . '. error: ' . $throwable->getMessage(), 'mysql');
-
-		return null;
-	}
 
 	/**
 	 * @return int|bool
@@ -204,17 +197,6 @@ class Command extends Component
 	{
 		$message = $this->sql . '(' . json_encode($this->params, JSON_UNESCAPED_UNICODE) . ');';
 		return $this->logger->addError($message . $throwable->getMessage(), 'mysql');
-	}
-
-
-	/**
-	 * @return array<Mysql\PDO, PDOStatement>|bool
-	 * @throws Exception
-	 */
-	private function search(): bool|array
-	{
-		$pdo = $this->db->getSlaveClient();
-		return [$pdo, null];
 	}
 
 
