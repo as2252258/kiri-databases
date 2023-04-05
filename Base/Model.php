@@ -99,17 +99,22 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	protected array $_with = [];
 
 
-	/**
-	 * @var Getter
-	 */
-	#[Inject(Getter::class, [self::class])]
 	protected Getter $overrideGetter;
 
-	/**
-	 * @var Setter
-	 */
-	#[Inject(Setter::class, [self::class])]
 	protected Setter $overrideSetter;
+
+
+	/**
+	 * @param array $config
+	 * @throws Exception
+	 */
+	public function __construct(array $config = [])
+	{
+		parent::__construct($config);
+
+		$this->overrideGetter = Kiri::getDi()->get(Getter::class);
+		$this->overrideSetter = Kiri::getDi()->get(Setter::class);
+	}
 
 
 	/**
@@ -118,24 +123,6 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	public function rules(): array
 	{
 		return [];
-	}
-
-
-	/**
-	 * @param Getter $overrideGetter
-	 */
-	public function setOverrideGetter(Getter $overrideGetter): void
-	{
-		$this->overrideGetter = $overrideGetter;
-	}
-
-
-	/**
-	 * @param Setter $overrideSetter
-	 */
-	public function setOverrideSetter(Setter $overrideSetter): void
-	{
-		$this->overrideSetter = $overrideSetter;
 	}
 
 
