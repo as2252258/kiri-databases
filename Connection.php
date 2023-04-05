@@ -155,11 +155,10 @@ class Connection extends Component
 	 */
 	public function getMasterClient(): PDO
 	{
-		$client = $this->connection->get($this->cds);
-		if ($client === false) {
-			throw new Exception('waite db client timeout.');
+		if (($client = $this->connection->get($this->cds)) instanceof PDO) {
+			return $client;
 		}
-		return $client;
+		throw new Exception('waite db client timeout.');
 	}
 
 	/**
