@@ -24,6 +24,7 @@ use Database\SqlBuilder;
 use Database\Traits\HasBase;
 use Exception;
 use Kiri;
+use Kiri\Annotation\Inject;
 use Kiri\Abstracts\Component;
 use Kiri\Annotation\Annotation;
 use Kiri\Error\StdoutLoggerInterface;
@@ -96,6 +97,18 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 * @var array
 	 */
 	protected array $_with = [];
+	
+	
+	/**
+	 * @var array
+	 */
+	protected array $overrideGetter = [];
+	
+	/**
+	 * @var array
+	 */
+	#[Inject(Setter::class, [self::class])]
+	protected array $overrideSetter = [];
 	
 	
 	/**
