@@ -151,11 +151,15 @@ class Connection extends Component
 
 	/**
 	 * @return Mysql\PDO
-	 * @throws ConfigException
+	 * @throws Exception
 	 */
 	public function getMasterClient(): Mysql\PDO
 	{
-		return $this->connection->get($this->cds);
+		$client = $this->connection->get($this->cds);
+		if ($client === false) {
+			throw new Exception('waite db client timeout.');
+		}
+		return $client;
 	}
 
 	/**
@@ -164,7 +168,11 @@ class Connection extends Component
 	 */
 	public function getSlaveClient(): Mysql\PDO
 	{
-		return $this->getMasterClient();
+		$client = $this->connection->get($this->cds);
+		if ($client === false) {
+			throw new Exception('waite db client timeout.');
+		}
+		return $client;
 	}
 
 	/**
