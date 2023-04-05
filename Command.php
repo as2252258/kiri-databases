@@ -120,9 +120,9 @@ class Command extends Component
 	 */
 	private function _execute(): bool|int
 	{
-		return $this->result(static function (PDO $pdo) {
-			$prepare = $pdo->prepare($this->sql);
-			if ($prepare === false || $prepare->execute($this->params) === false) {
+		return $this->result(static function (PDO $pdo, string $sql, array $params) {
+			$prepare = $pdo->prepare($sql);
+			if ($prepare === false || $prepare->execute($params) === false) {
 				throw new Exception(($prepare ?? $pdo)->errorInfo()[1]);
 			}
 
@@ -140,9 +140,9 @@ class Command extends Component
 	 */
 	private function _query(string $type): bool|array|int|null
 	{
-		return $this->result(static function (PDO $pdo) use ($type) {
-			$prepare = $pdo->query($this->sql);
-			if ($prepare === false || $prepare->execute($this->params) === false) {
+		return $this->result(static function (PDO $pdo, string $sql, array $params) use ($type) {
+			$prepare = $pdo->query($sql);
+			if ($prepare === false || $prepare->execute($params) === false) {
 				throw new Exception(($prepare ?? $pdo)->errorInfo()[1]);
 			}
 			$result = match ($type) {
@@ -166,7 +166,7 @@ class Command extends Component
 	{
 		$pdo = $this->db->getPdo();
 		try {
-			return $callback($pdo);
+			return $callback($pdo, $this->sql, $this->params);
 		} catch (\Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
 				return $this->result($callback);
@@ -185,7 +185,7 @@ class Command extends Component
 	private function error(\Throwable $throwable): bool
 	{
 		$message = $this->sql . '(' . json_encode($this->params, JSON_UNESCAPED_UNICODE) . ');';
-		return $this->logger->addError($message . PHP_EOL . $throwable->getMessage(), 'mysql');
+		return $this->logger->addError($message . $throwable->getMessage(), 'mysql');
 	}
 
 
