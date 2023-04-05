@@ -99,21 +99,6 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	protected array $_with = [];
 
 
-	protected Getter $overrideGetter;
-
-	protected Setter $overrideSetter;
-
-
-	/**
-	 * @param array $config
-	 * @throws Exception
-	 */
-//	public function __construct(array $config = [])
-//	{
-//		parent::__construct($config);
-//	}
-
-
 	/**
 	 * @return array
 	 */
