@@ -194,6 +194,7 @@ class Connection extends Component
 	 */
 	public function getPdo(bool $restore = false): PDO
 	{
+		return $this->getMasterClient();
 		if ($restore === true) {
 			return Context::set($this->cds, $this->getMasterClient());
 		}
