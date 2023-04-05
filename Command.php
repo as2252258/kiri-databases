@@ -145,14 +145,13 @@ class Command extends Component
 			if ($prepare === false || $prepare->execute($params) === false) {
 				throw new Exception(($prepare ?? $pdo)->errorInfo()[1]);
 			}
-			$result = match ($type) {
+			//			$prepare->closeCursor();
+			return match ($type) {
 				Command::FETCH_COLUMN => $prepare->fetchColumn(PDO::FETCH_ASSOC),
 				Command::ROW_COUNT => $prepare->rowCount(),
 				Command::FETCH_ALL => $prepare->fetchAll(PDO::FETCH_ASSOC),
 				Command::FETCH => $prepare->fetch(PDO::FETCH_ASSOC),
 			};
-			$prepare->closeCursor();
-			return $result;
 		});
 	}
 
