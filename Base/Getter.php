@@ -42,8 +42,28 @@ class Getter
 	{
 		return isset($this->getter[$className]) && isset($this->getter[$className][$name]);
 	}
-	
-	
+
+
+	/**
+	 * @param ModelInterface $class
+	 * @param string $key
+	 * @param mixed $value
+	 * @return mixed
+	 */
+	public function override(ModelInterface $class, string $key, mixed $value): mixed
+	{
+		$method = $this->getter[$class::class][$key] ?? null;
+		if ($method !== null) {
+			return $class->{$method}($value);
+		}
+		return $value;
+	}
+
+	/**
+	 * @param string $className
+	 * @param string $name
+	 * @return string|null
+	 */
 	public function get(string $className, string $name): ?string
 	{
 		if (!$this->has($className,$name)) {

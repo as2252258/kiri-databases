@@ -45,72 +45,73 @@ use validator\Validator;
  */
 abstract class Model extends Component implements ModelInterface, ArrayAccess, ToArray
 {
-	
+
 	const GET = 'get';
-	
-	
+
+
 	const SET = 'set';
-	
+
 	/** @var array */
 	protected array $_attributes = [];
-	
+
 	/** @var array */
 	protected array $_oldAttributes = [];
-	
+
 	/** @var array */
 	protected array $_relate = [];
-	
+
 	/** @var null|string */
 	protected ?string $primary = NULL;
-	
+
 	/**
 	 * @var array
 	 */
 	private array $_annotations = [];
-	
-	
+
+
 	/**
 	 * @var bool
 	 */
 	protected bool $isNewExample = TRUE;
-	
-	
+
+
 	/**
 	 * @var array
 	 */
 	protected array $actions = [];
-	
-	
+
+
 	/**
 	 * @var string
 	 */
 	protected string $table = '';
-	
-	
+
+
 	/**
 	 * @var string
 	 */
 	protected string $connection = 'db';
-	
-	
+
+
 	/**
 	 * @var array
 	 */
 	protected array $_with = [];
-	
-	
+
+
 	/**
-	 * @var array
+	 * @var Getter
 	 */
-	protected array $overrideGetter = [];
-	
+	#[Inject(Getter::class, [self::class])]
+	protected Getter $overrideGetter;
+
 	/**
-	 * @var array
+	 * @var Setter
 	 */
 	#[Inject(Setter::class, [self::class])]
-	protected array $overrideSetter = [];
-	
-	
+	protected Setter $overrideSetter;
+
+
 	/**
 	 * @return array
 	 */
@@ -118,8 +119,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return [];
 	}
-	
-	
+
+
 	/**
 	 * @param array $data
 	 * @return Model
@@ -129,8 +130,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		$this->_with = $data;
 		return $this;
 	}
-	
-	
+
+
 	/**
 	 * @return array
 	 */
@@ -138,8 +139,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return $this->_with;
 	}
-	
-	
+
+
 	/**
 	 * @return bool
 	 */
@@ -147,8 +148,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return count($this->_with) > 0;
 	}
-	
-	
+
+
 	/**
 	 * object init
 	 */
@@ -157,8 +158,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		$this->_attributes = [];
 		$this->_oldAttributes = [];
 	}
-	
-	
+
+
 	/**
 	 * @throws Exception
 	 */
@@ -167,8 +168,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		$an = Kiri::getDi()->get(Annotation::class);
 		$an->injectProperty($this);
 	}
-	
-	
+
+
 	/**
 	 * @return array
 	 */
@@ -176,8 +177,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return $this->actions;
 	}
-	
-	
+
+
 	/**
 	 * @return bool
 	 */
@@ -185,8 +186,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return $this->isNewExample === TRUE;
 	}
-	
-	
+
+
 	/**
 	 * @param bool $bool
 	 * @return $this
@@ -196,7 +197,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		$this->isNewExample = $bool;
 		return $this;
 	}
-	
+
 	/**
 	 * @return string
 	 * @throws Exception
@@ -207,8 +208,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		$logger = Kiri::getDi()->get(StdoutLoggerInterface::class);
 		return $logger->getLastError('mysql');
 	}
-	
-	
+
+
 	/**
 	 * @return bool
 	 * @throws Exception
@@ -224,8 +225,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		}
 		return FALSE;
 	}
-	
-	
+
+
 	/**
 	 * @throws Exception
 	 */
@@ -233,7 +234,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return $this->getAutoIncrement() !== NULL;
 	}
-	
+
 	/**
 	 * @throws Exception
 	 */
@@ -241,7 +242,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return $this->getColumns()->getAutoIncrement();
 	}
-	
+
 	/**
 	 * @return null|string
 	 * @throws Exception
@@ -253,8 +254,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		}
 		return $this->primary;
 	}
-	
-	
+
+
 	/**
 	 * @return bool
 	 * @throws Exception
@@ -266,8 +267,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		}
 		return false;
 	}
-	
-	
+
+
 	/**
 	 * @return int|null
 	 * @throws Exception
@@ -279,7 +280,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		}
 		return null;
 	}
-	
+
 	/**
 	 * @param int|array|string|null $param
 	 * @param null $db
@@ -298,8 +299,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		}
 		return static::query()->where($param)->first();
 	}
-	
-	
+
+
 	/**
 	 * @param $param
 	 * @return array
@@ -316,8 +317,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		}
 		return [$primary => $param];
 	}
-	
-	
+
+
 	/**
 	 * @param null $field
 	 * @return ModelInterface|null
@@ -340,8 +341,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		}
 		return $first[$field];
 	}
-	
-	
+
+
 	/**
 	 * @param string|int $param
 	 * @return Model|null
@@ -357,8 +358,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		}
 		return static::query()->where([$columns => $param])->first();
 	}
-	
-	
+
+
 	/**
 	 * @return static
 	 */
@@ -366,8 +367,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return new static();
 	}
-	
-	
+
+
 	/**
 	 * @param $condition
 	 * @return static|null
@@ -377,8 +378,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return static::query()->where($condition)->first();
 	}
-	
-	
+
+
 	/**
 	 * @return ActiveQuery
 	 */
@@ -386,8 +387,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return new ActiveQuery(new static());
 	}
-	
-	
+
+
 	/**
 	 * @return Connection
 	 * @throws Exception
@@ -396,8 +397,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return Kiri::service()->get($this->connection);
 	}
-	
-	
+
+
 	/**
 	 * @param null $condition
 	 * @param array $attributes
@@ -414,8 +415,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		}
 		return (bool)$model->delete();
 	}
-	
-	
+
+
 	/**
 	 * @return array
 	 * @throws Exception
@@ -424,7 +425,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return $this->toArray();
 	}
-	
+
 	/**
 	 * @return array
 	 */
@@ -432,7 +433,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return $this->_oldAttributes;
 	}
-	
+
 	/**
 	 * @param $name
 	 * @param $value
@@ -448,7 +449,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		}
 		return $this->_attributes[$name] = $value;
 	}
-	
+
 	/**
 	 * @param $name
 	 * @param $value
@@ -462,7 +463,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		}
 		return $this->_oldAttributes[$name] = $value;
 	}
-	
+
 	/**
 	 * @param array $param
 	 * @return $this
@@ -478,8 +479,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		}
 		return $this;
 	}
-	
-	
+
+
 	/**
 	 * @param $param
 	 * @return $this
@@ -495,8 +496,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		}
 		return $this;
 	}
-	
-	
+
+
 	/**
 	 * @param $attributes
 	 * @param $param
@@ -507,22 +508,22 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		[$sql, $param] = SqlBuilder::builder(static::query())->insert($param);
 		$dbConnection = $this->getConnection()->createCommand($sql, $param);
-		
+
 		$lastId = $dbConnection->save();
 		if ($this->isAutoIncrement()) {
 			$lastId = $this->setPrimary((int)$lastId, $param);
 		} else {
 			$lastId = $this;
 		}
-		
+
 		$this->setIsNowExample(false);
-		
+
 		$this->refresh()->afterSave($attributes, $param);
-		
+
 		return $lastId;
 	}
-	
-	
+
+
 	/**
 	 * @param $lastId
 	 * @param $param
@@ -535,19 +536,19 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 			$this->setAttribute($this->getAutoIncrement(), (int)$lastId);
 			return $this;
 		}
-		
+
 		if (!$this->hasPrimary()) {
 			return $this;
 		}
-		
+
 		$primary = $this->getPrimary();
 		if (empty($param[$primary])) {
 			$this->setAttribute($primary, (int)$lastId);
 		}
 		return $this;
 	}
-	
-	
+
+
 	/**
 	 * @param $fields
 	 * @param $condition
@@ -573,7 +574,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		}
 		return FALSE;
 	}
-	
+
 	/**
 	 * @param null $data
 	 * @return bool|$this
@@ -594,8 +595,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 			return $this->insert($change, $fields);
 		}
 	}
-	
-	
+
+
 	/**
 	 * @param $value
 	 * @return $this
@@ -607,8 +608,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		$this->setIsNowExample(FALSE);
 		return $this;
 	}
-	
-	
+
+
 	/**
 	 * @param array|null $rule
 	 * @return bool
@@ -624,7 +625,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 			return TRUE;
 		}
 	}
-	
+
 	/**
 	 * @param $rule
 	 * @return Validator
@@ -644,7 +645,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		}
 		return $validate;
 	}
-	
+
 	/**
 	 * @param string $name
 	 * @return null
@@ -654,8 +655,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return $this->_attributes[$name] ?? NULL;
 	}
-	
-	
+
+
 	/**
 	 * @param string $name
 	 * @param mixed $value
@@ -666,8 +667,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return call_user_func($this->_annotations[$type][$name], $value);
 	}
-	
-	
+
+
 	/**
 	 * @return array
 	 * @throws Exception
@@ -675,9 +676,9 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	private function separation(): array
 	{
 		$assoc = array_diff_assoc($this->_attributes, $this->_oldAttributes);
-		
+
 		$column = $this->getColumns();
-		
+
 		$uassoc = array_intersect_assoc($this->_attributes, $this->_oldAttributes);
 		foreach ($assoc as $key => $item) {
 			$encode = $column->get_fields($key);
@@ -687,8 +688,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		}
 		return [$assoc, $uassoc, array_keys($assoc)];
 	}
-	
-	
+
+
 	/**
 	 * @param $columns
 	 * @param $format
@@ -703,8 +704,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		}
 		return $value;
 	}
-	
-	
+
+
 	/**
 	 * @param $name
 	 * @param $value
@@ -713,8 +714,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		$this->_relate[$name] = $value;
 	}
-	
-	
+
+
 	/**
 	 * @param $name
 	 * @return bool
@@ -723,8 +724,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return isset($this->_relate[$name]);
 	}
-	
-	
+
+
 	/**
 	 * @param array $relates
 	 */
@@ -737,7 +738,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 			$this->setRelate($key, $val);
 		}
 	}
-	
+
 	/**
 	 * @return array
 	 */
@@ -745,8 +746,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return $this->_relate;
 	}
-	
-	
+
+
 	/**
 	 * @return Relation|null
 	 */
@@ -754,8 +755,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return Kiri::getDi()->get(Relation::class);
 	}
-	
-	
+
+
 	/**
 	 * @param $attribute
 	 * @return bool
@@ -765,7 +766,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return static::makeNewInstance()->getColumns()->hasField($attribute);
 	}
-	
+
 	/**ƒ
 	 * @return string
 	 * @throws Exception
@@ -773,7 +774,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	public function getTable(): string
 	{
 		$connection = static::getConnection();
-		
+
 		$tablePrefix = $connection->tablePrefix;
 		if (empty($this->table)) {
 			throw new Exception('You need add static method `tableName` and return table name.');
@@ -784,8 +785,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		}
 		return '`' . $connection->database . '`.' . $table;
 	}
-	
-	
+
+
 	/**
 	 * @param $attributes
 	 * @param $changeAttributes
@@ -796,8 +797,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return TRUE;
 	}
-	
-	
+
+
 	/**
 	 * @param $model
 	 * @return bool
@@ -806,8 +807,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return TRUE;
 	}
-	
-	
+
+
 	/**
 	 * @return static
 	 */
@@ -816,7 +817,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		$this->_oldAttributes = $this->_attributes;
 		return $this;
 	}
-	
+
 	/**
 	 * @param $name
 	 * @param $value
@@ -827,17 +828,14 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		$method = 'set' . ucfirst($name);
 		if (method_exists($this, $method)) {
 			$this->{$method}($value);
-			return;
-		}
-		$method = $method . 'Attribute';
-		if (method_exists($this, $method)) {
-			$this->_attributes[$name] = $this->{$method}($value);
 		} else {
+			$value = $this->overrideSetter->override($this, $name, $value);
+
 			$this->_attributes[$name] = $value;
 		}
 	}
-	
-	
+
+
 	/**
 	 * @param $name
 	 * @return mixed
@@ -847,11 +845,12 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		if (isset($this->_attributes[$name])) {
 			return $this->withPropertyOverride($name);
+		} else {
+			return $this->getRelateValue($name);
 		}
-		return $this->getRelateValue($name);
 	}
-	
-	
+
+
 	/**
 	 * @param $name
 	 * @param null $value
@@ -863,15 +862,11 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		if (is_null($value)) {
 			$value = $this->_attributes[$name] ?? NULL;
 		}
-		$getter = Kiri::getDi()->get(Getter::class);
-		if ($getter->has(static::class, $name)) {
-			return $this->{$getter->get(static::class, $name)}($value);
-		} else {
-			return $value;
-		}
+
+		return $this->overrideGetter->override($this, $name, $value);
 	}
-	
-	
+
+
 	/**
 	 * @param $name
 	 * @return bool
@@ -880,8 +875,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return method_exists($this, 'get' . ucfirst($name));
 	}
-	
-	
+
+
 	/**
 	 * @param $name
 	 * @return mixed|null
@@ -894,8 +889,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		}
 		return $response;
 	}
-	
-	
+
+
 	/**
 	 * @param $name
 	 * @return mixed
@@ -911,8 +906,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		}
 		return $response;
 	}
-	
-	
+
+
 	/**
 	 * @param $name
 	 * @param $value
@@ -923,8 +918,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return $this->getColumns()->_decode($name, $value);
 	}
-	
-	
+
+
 	/**
 	 * @param $name
 	 * @return mixed
@@ -937,8 +932,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		}
 		return $data;
 	}
-	
-	
+
+
 	/**
 	 * @param $item
 	 * @param $data
@@ -948,7 +943,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return call_user_func($item, $data);
 	}
-	
+
 	/**
 	 * @param $name
 	 * @return bool
@@ -957,8 +952,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return isset($this->_attributes[$name]);
 	}
-	
-	
+
+
 	/**
 	 * @param mixed $offset
 	 * @return bool
@@ -968,7 +963,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return isset($this->_attributes[$offset]) || isset($this->_oldAttributes[$offset]);
 	}
-	
+
 	/**
 	 * @param mixed $offset
 	 * @return mixed
@@ -978,7 +973,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return $this->__get($offset);
 	}
-	
+
 	/**
 	 * @param mixed $offset
 	 * @param mixed $value
@@ -988,7 +983,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		$this->__set($offset, $value);
 	}
-	
+
 	/**
 	 * @param mixed $offset
 	 * @throws Exception
@@ -1005,7 +1000,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 			unset($this->_relate[$offset]);
 		}
 	}
-	
+
 	/**
 	 * @param string ...$params
 	 * @return array
@@ -1014,8 +1009,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return array_diff_assoc($params, $this->_attributes);
 	}
-	
-	
+
+
 	/**
 	 * @return Columns
 	 * @throws Exception
@@ -1025,7 +1020,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		return $this->getConnection()->getSchema()->getColumns()
 			->table($this->getTable());
 	}
-	
+
 	/**
 	 * @param array $data
 	 * @return static
@@ -1039,8 +1034,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		$model->setIsNowExample(FALSE);
 		return $model;
 	}
-	
-	
+
+
 	/**
 	 * @param $method
 	 * @param $value
@@ -1052,8 +1047,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 			return $this->{$method}($value);
 		};
 	}
-	
-	
+
+
 	/**
 	 * @param string $name
 	 * @param array $arguments
@@ -1063,5 +1058,5 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		return (new static())->{$name}(...$arguments);
 	}
-	
+
 }
