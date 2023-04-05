@@ -108,13 +108,10 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 * @param array $config
 	 * @throws Exception
 	 */
-	public function __construct(array $config = [])
-	{
-		parent::__construct($config);
-
-		$this->overrideGetter = Kiri::getDi()->get(Getter::class);
-		$this->overrideSetter = Kiri::getDi()->get(Setter::class);
-	}
+//	public function __construct(array $config = [])
+//	{
+//		parent::__construct($config);
+//	}
 
 
 	/**
@@ -834,9 +831,9 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		if (method_exists($this, $method)) {
 			$this->{$method}($value);
 		} else {
-			$value = $this->overrideSetter->override($this, $name, $value);
+			$overrideSetter = Kiri::getDi()->get(Setter::class);
 
-			$this->_attributes[$name] = $value;
+			$this->_attributes[$name] = $overrideSetter->override($this, $name, $value);
 		}
 	}
 
@@ -868,7 +865,9 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 			$value = $this->_attributes[$name] ?? NULL;
 		}
 
-		return $this->overrideGetter->override($this, $name, $value);
+		$overrideGetter = Kiri::getDi()->get(Getter::class);
+
+		return $overrideGetter->override($this, $name, $value);
 	}
 
 
