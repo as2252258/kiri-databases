@@ -122,6 +122,24 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 
 
 	/**
+	 * @param Getter $overrideGetter
+	 */
+	public function setOverrideGetter(Getter $overrideGetter): void
+	{
+		$this->overrideGetter = $overrideGetter;
+	}
+
+
+	/**
+	 * @param Setter $overrideSetter
+	 */
+	public function setOverrideSetter(Setter $overrideSetter): void
+	{
+		$this->overrideSetter = $overrideSetter;
+	}
+
+
+	/**
 	 * @param array $data
 	 * @return Model
 	 */
