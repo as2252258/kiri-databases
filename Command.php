@@ -72,9 +72,7 @@ class Command extends Component
 			if ($prepare === false || $prepare->execute($this->params) === false) {
 				throw new Exception(($prepare ?? $pdo)->errorInfo()[1]);
 			}
-			$count = $prepare->fetchAll(PDO::FETCH_ASSOC);
-			$prepare->closeCursor();
-			return $count;
+			return $prepare->fetchAll(PDO::FETCH_ASSOC);
 		} catch (\Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
 				return $this->all();
@@ -97,9 +95,7 @@ class Command extends Component
 			if ($prepare === false || $prepare->execute($this->params) === false) {
 				throw new Exception(($prepare ?? $pdo)->errorInfo()[1]);
 			}
-			$count = $prepare->fetch(PDO::FETCH_ASSOC);
-			$prepare->closeCursor();
-			return $count;
+			return $prepare->fetch(PDO::FETCH_ASSOC);
 		} catch (\Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
 				return $this->one();
@@ -122,9 +118,7 @@ class Command extends Component
 			if ($prepare === false || $prepare->execute($this->params) === false) {
 				throw new Exception(($prepare ?? $pdo)->errorInfo()[1]);
 			}
-			$count = $prepare->fetchColumn(PDO::FETCH_ASSOC);
-			$prepare->closeCursor();
-			return $count;
+			return $prepare->fetchColumn(PDO::FETCH_ASSOC);
 		} catch (\Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
 				return $this->fetchColumn();
@@ -147,9 +141,7 @@ class Command extends Component
 			if ($prepare === false || $prepare->execute($this->params) === false) {
 				throw new Exception(($prepare ?? $pdo)->errorInfo()[1]);
 			}
-			$count = $prepare->rowCount();
-			$prepare->closeCursor();
-			return $count;
+			return $prepare->rowCount();
 		} catch (\Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
 				return $this->rowCount();
