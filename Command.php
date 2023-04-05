@@ -184,67 +184,18 @@ class Command extends Component
 	 */
 	private function _execute(): bool|int
 	{
-		return $this->result(static function (PDO $pdo, string $sql, array $params) {
-			$prepare = $pdo->prepare($sql);
-			if ($prepare === false || $prepare->execute($params) === false) {
-				throw new Exception(($prepare ?? $pdo)->errorInfo()[1]);
-			}
-
-			$result = (int)$pdo->lastInsertId();
-			$prepare->closeCursor();
-
-			return $result == 0 ? true : $result;
-		});
-	}
-
-	/**
-	 * @param string $type
-	 * @return bool|array|int|null
-	 * @throws Exception
-	 */
-	private function _query(string $type): bool|array|int|null
-	{
-		return $this->result(static function (PDO $pdo, string $sql, array $params) use ($type) {
-			$prepare = $pdo->query($sql);
-			if ($prepare === false || $prepare->execute($params) === false) {
-				throw new Exception(($prepare ?? $pdo)->errorInfo()[1]);
-			}
-			$data = match ($type) {
-				Command::FETCH_COLUMN => $prepare->fetchColumn(PDO::FETCH_ASSOC),
-				Command::ROW_COUNT => $prepare->rowCount(),
-				Command::FETCH_ALL => $prepare->fetchAll(PDO::FETCH_ASSOC),
-				Command::FETCH => $prepare->fetch(PDO::FETCH_ASSOC),
-			};
-			$prepare->closeCursor();
-			return $data;
-		});
-	}
-
-
-	/**
-	 * @param \Closure $callback
-	 * @return bool|mixed
-	 * @throws Exception
-	 */
-	private function result(\Closure $callback): mixed
-	{
 		$pdo = $this->db->getPdo();
 		try {
-			$prepare = $pdo->query($this->sql);
+			$prepare = $pdo->prepare($this->sql);
 			if ($prepare === false || $prepare->execute($this->params) === false) {
 				throw new Exception(($prepare ?? $pdo)->errorInfo()[1]);
 			}
-			$data = match ($type) {
-				Command::FETCH_COLUMN => $prepare->fetchColumn(PDO::FETCH_ASSOC),
-				Command::ROW_COUNT => $prepare->rowCount(),
-				Command::FETCH_ALL => $prepare->fetchAll(PDO::FETCH_ASSOC),
-				Command::FETCH => $prepare->fetch(PDO::FETCH_ASSOC),
-			};
+			$result = $pdo->lastInsertId();
 			$prepare->closeCursor();
-			return $data;
+			return $result == 0 ? true : $result;
 		} catch (\Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
-				return $this->result($callback);
+				return $this->_execute();
 			}
 			return $this->error($throwable);
 		} finally {
