@@ -150,10 +150,10 @@ class Connection extends Component
 
 
 	/**
-	 * @return Mysql\PDO
+	 * @return PDO
 	 * @throws Exception
 	 */
-	public function getMasterClient(): Mysql\PDO
+	public function getMasterClient(): PDO
 	{
 		$client = $this->connection->get($this->cds);
 		if ($client === false) {
@@ -163,10 +163,10 @@ class Connection extends Component
 	}
 
 	/**
-	 * @return Mysql\PDO
+	 * @return PDO
 	 * @throws Exception
 	 */
-	public function getSlaveClient(): Mysql\PDO
+	public function getSlaveClient(): PDO
 	{
 		$client = $this->connection->get($this->cds);
 		if ($client === false) {
@@ -189,10 +189,10 @@ class Connection extends Component
 
 	/**
 	 * @param bool $restore
-	 * @return Mysql\PDO
-	 * @throws ConfigException
+	 * @return PDO
+	 * @throws Exception
 	 */
-	public function getPdo(bool $restore = false): Mysql\PDO
+	public function getPdo(bool $restore = false): PDO
 	{
 		if ($restore === true) {
 			return Context::set($this->cds, $this->getMasterClient());
@@ -258,22 +258,12 @@ class Connection extends Component
 	 * 回收链接
 	 * @throws
 	 */
-	public function release(Mysql\PDO $PDO)
+	public function release(PDO $PDO)
 	{
 		if ($PDO->inTransaction() === false) {
 			$this->connection->addItem($this->cds, $PDO);
 			Context::remove($this->cds);
 		}
-	}
-
-
-	/**
-	 * @param bool $isMaster
-	 * @return string
-	 */
-	private function alias(bool $isMaster): string
-	{
-		return !$isMaster ? ($this->slaveConfig['cds'] ?? $this->cds) . 'slave' : $this->cds . 'master';
 	}
 
 
@@ -284,8 +274,7 @@ class Connection extends Component
 	 */
 	public function clear_connection()
 	{
-		$this->connection->connection_clear($this->alias(true));
-		$this->connection->connection_clear($this->alias(false));
+		$this->connection->connection_clear($this->cds);
 	}
 
 
@@ -294,8 +283,7 @@ class Connection extends Component
 	 */
 	public function disconnect()
 	{
-		$this->connection->connection_clear($this->alias(true));
-		$this->connection->connection_clear($this->alias(false));
+		$this->connection->connection_clear($this->cds);
 	}
 
 }

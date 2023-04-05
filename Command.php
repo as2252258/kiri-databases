@@ -61,59 +61,39 @@ class Command extends Component
 
 
 	/**
-	 * @return array|null
+	 * @return bool|array|null
 	 * @throws Exception
 	 */
-	public function all(): ?array
+	public function all(): null|bool|array
 	{
-		$pdo = $this->db->getSlaveClient();
-
-		$result = $pdo->fetchAll($this->sql, $this->params);
-
-		$this->db->release($pdo);
-		return $result;
+		return $this->_query(self::FETCH_ALL);
 	}
 
 	/**
-	 * @return array|null
+	 * @return bool|array|null
 	 * @throws Exception
 	 */
-	public function one(): ?array
+	public function one(): null|bool|array
 	{
-		$pdo = $this->db->getSlaveClient();
-
-		$result = $pdo->fetch($this->sql, $this->params);
-
-		$this->db->release($pdo);
-		return $result;
+		return $this->_query(self::FETCH);
 	}
 
 	/**
-	 * @return mixed
+	 * @return bool|array|null
 	 * @throws Exception
 	 */
-	public function fetchColumn(): mixed
+	public function fetchColumn(): null|bool|array
 	{
-		$pdo = $this->db->getSlaveClient();
-
-		$result = $pdo->fetchColumn($this->sql, $this->params);
-
-		$this->db->release($pdo);
-		return $result;
+		return $this->_query(self::FETCH_COLUMN);
 	}
 
 	/**
-	 * @return int|null
+	 * @return int|bool
 	 * @throws Exception
 	 */
-	public function rowCount(): ?int
+	public function rowCount(): int|bool
 	{
-		$pdo = $this->db->getSlaveClient();
-
-		$result = $pdo->rowCount($this->sql, $this->params);
-
-		$this->db->release($pdo);
-		return $result;
+		return $this->_query(self::ROW_COUNT);
 	}
 
 
@@ -140,14 +120,74 @@ class Command extends Component
 	 */
 	private function _execute(): bool|int
 	{
-		$pdo = $this->db->getPdo();
+		return $this->result(static function (PDO $pdo) {
+			$prepare = $pdo->prepare($this->sql);
+			if ($prepare === false || $prepare->execute($this->params) === false) {
+				throw new Exception(($prepare ?? $pdo)->errorInfo()[1]);
+			}
 
-		$result = $pdo->execute($this->sql, $this->params);
+			$result = (int)$pdo->lastInsertId();
+			$prepare->closeCursor();
 
-		$this->db->release($pdo);
-
-		return $result == 0 ? true : $result;
+			return $result == 0 ? true : $result;
+		});
 	}
+
+	/**
+	 * @param string $type
+	 * @return bool|array|int|null
+	 * @throws Exception
+	 */
+	private function _query(string $type): bool|array|int|null
+	{
+		return $this->result(static function (PDO $pdo) use ($type) {
+			$prepare = $pdo->query($this->sql);
+			if ($prepare === false || $prepare->execute($this->params) === false) {
+				throw new Exception(($prepare ?? $pdo)->errorInfo()[1]);
+			}
+			$result = match ($type) {
+				Command::FETCH_COLUMN => $prepare->fetchColumn(PDO::FETCH_ASSOC),
+				Command::ROW_COUNT => $prepare->rowCount(),
+				Command::FETCH_ALL => $prepare->fetchAll(PDO::FETCH_ASSOC),
+				Command::FETCH => $prepare->fetch(PDO::FETCH_ASSOC),
+			};
+			$prepare->closeCursor();
+			return $result;
+		});
+	}
+
+
+	/**
+	 * @param \Closure $callback
+	 * @return bool|mixed
+	 * @throws Exception
+	 */
+	private function result(\Closure $callback): mixed
+	{
+		$pdo = $this->db->getPdo();
+		try {
+			return $callback($pdo);
+		} catch (\Throwable $throwable) {
+			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
+				return $this->result($callback);
+			}
+			return $this->error($throwable);
+		} finally {
+			$this->db->release($pdo);
+		}
+	}
+
+
+	/**
+	 * @param \Throwable $throwable
+	 * @return bool
+	 */
+	private function error(\Throwable $throwable): bool
+	{
+		$message = $this->sql . '(' . json_encode($this->params, JSON_UNESCAPED_UNICODE) . ');';
+		return $this->logger->addError($message . PHP_EOL . $throwable->getMessage(), 'mysql');
+	}
+
 
 	/**
 	 * @return array<Mysql\PDO, PDOStatement>|bool
