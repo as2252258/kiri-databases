@@ -66,7 +66,23 @@ class Command extends Component
 	 */
 	public function all(): null|bool|array
 	{
-		return $this->_query(self::FETCH_ALL);
+		$pdo = $this->db->getPdo();
+		try {
+			$prepare = $pdo->query($this->sql);
+			if ($prepare === false || $prepare->execute($this->params) === false) {
+				throw new Exception(($prepare ?? $pdo)->errorInfo()[1]);
+			}
+			$count = $prepare->fetchAll(PDO::FETCH_ASSOC);
+			$prepare->closeCursor();
+			return $count;
+		} catch (\Throwable $throwable) {
+			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
+				return $this->all();
+			}
+			return $this->error($throwable);
+		} finally {
+			$this->db->release($pdo);
+		}
 	}
 
 	/**
@@ -75,7 +91,23 @@ class Command extends Component
 	 */
 	public function one(): null|bool|array
 	{
-		return $this->_query(self::FETCH);
+		$pdo = $this->db->getPdo();
+		try {
+			$prepare = $pdo->query($this->sql);
+			if ($prepare === false || $prepare->execute($this->params) === false) {
+				throw new Exception(($prepare ?? $pdo)->errorInfo()[1]);
+			}
+			$count = $prepare->fetch(PDO::FETCH_ASSOC);
+			$prepare->closeCursor();
+			return $count;
+		} catch (\Throwable $throwable) {
+			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
+				return $this->one();
+			}
+			return $this->error($throwable);
+		} finally {
+			$this->db->release($pdo);
+		}
 	}
 
 	/**
@@ -84,7 +116,23 @@ class Command extends Component
 	 */
 	public function fetchColumn(): null|bool|array
 	{
-		return $this->_query(self::FETCH_COLUMN);
+		$pdo = $this->db->getPdo();
+		try {
+			$prepare = $pdo->query($this->sql);
+			if ($prepare === false || $prepare->execute($this->params) === false) {
+				throw new Exception(($prepare ?? $pdo)->errorInfo()[1]);
+			}
+			$count = $prepare->fetchColumn(PDO::FETCH_ASSOC);
+			$prepare->closeCursor();
+			return $count;
+		} catch (\Throwable $throwable) {
+			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
+				return $this->fetchColumn();
+			}
+			return $this->error($throwable);
+		} finally {
+			$this->db->release($pdo);
+		}
 	}
 
 	/**
@@ -93,7 +141,23 @@ class Command extends Component
 	 */
 	public function rowCount(): int|bool
 	{
-		return $this->_query(self::ROW_COUNT);
+		$pdo = $this->db->getPdo();
+		try {
+			$prepare = $pdo->query($this->sql);
+			if ($prepare === false || $prepare->execute($this->params) === false) {
+				throw new Exception(($prepare ?? $pdo)->errorInfo()[1]);
+			}
+			$count = $prepare->rowCount();
+			$prepare->closeCursor();
+			return $count;
+		} catch (\Throwable $throwable) {
+			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
+				return $this->rowCount();
+			}
+			return $this->error($throwable);
+		} finally {
+			$this->db->release($pdo);
+		}
 	}
 
 
@@ -166,7 +230,18 @@ class Command extends Component
 	{
 		$pdo = $this->db->getPdo();
 		try {
-			return $callback($pdo, $this->sql, $this->params);
+			$prepare = $pdo->query($this->sql);
+			if ($prepare === false || $prepare->execute($this->params) === false) {
+				throw new Exception(($prepare ?? $pdo)->errorInfo()[1]);
+			}
+			$data = match ($type) {
+				Command::FETCH_COLUMN => $prepare->fetchColumn(PDO::FETCH_ASSOC),
+				Command::ROW_COUNT => $prepare->rowCount(),
+				Command::FETCH_ALL => $prepare->fetchAll(PDO::FETCH_ASSOC),
+				Command::FETCH => $prepare->fetch(PDO::FETCH_ASSOC),
+			};
+			$prepare->closeCursor();
+			return $data;
 		} catch (\Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
 				return $this->result($callback);
