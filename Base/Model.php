@@ -625,9 +625,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		$validate->setModel($this);
 		foreach ($rule as $val) {
 			$field = array_shift($val);
-			if (empty($val)) {
-				continue;
-			}
+
 			$validate->make($field, $val);
 		}
 		return $validate;
