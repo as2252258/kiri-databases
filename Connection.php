@@ -183,7 +183,7 @@ class Connection extends Component
 	 */
 	public function getConnection(): PDO
 	{
-		$client = $this->connections->get($this->cds);
+		return $this->connections->get($this->cds);
 		if ($client === false) {
 			throw new Exception('waite db client timeout.');
 		}
