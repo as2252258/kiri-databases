@@ -190,18 +190,6 @@ class Connection extends Component
 		return $client;
 	}
 	
-	/**
-	 * @return PDO
-	 * @throws Exception
-	 */
-	public function getSlaveClient(): PDO
-	{
-		$client = $this->connections->get($this->cds);
-		if ($client === false) {
-			throw new Exception('waite db client timeout.');
-		}
-		return $client;
-	}
 	
 	/**
 	 * @return $this
