@@ -206,12 +206,26 @@ class Connection extends Component
 	 */
 	public function beginTransaction(): static
 	{
-		$pdo = Context::get($this->cds);
-		if ($pdo === null) {
-			$pdo = $this->getConnection();
-		}
+		$pdo = $this->getTransactionClient();
 		$pdo->beginTransaction();
 		return $this;
+	}
+	
+	
+	/**
+	 * @return PDO
+	 * @throws Exception
+	 */
+	public function getTransactionClient(): PDO
+	{
+		if (!Db::inTransactionsActive()) {
+			return $this->getConnection();
+		}
+		$pdo = Context::get($this->cds);
+		if ($pdo === null) {
+			$pdo = Context::set($this->cds, $this->getConnection());
+		}
+		return $pdo;
 	}
 	
 	/**
@@ -220,7 +234,8 @@ class Connection extends Component
 	 */
 	public function inTransaction(): bool|static
 	{
-		return Context::get($this->cds)->inTransaction();
+		$pdo = $this->getTransactionClient();
+		return $pdo->inTransaction();
 	}
 	
 	/**
@@ -229,11 +244,12 @@ class Connection extends Component
 	 */
 	public function rollback()
 	{
-		$pdo = Context::get($this->cds);
+		$pdo = $this->getTransactionClient();
 		if ($pdo->inTransaction()) {
 			$pdo->rollback();
 		}
-		$this->release($pdo);
+		$this->connections->push($this->cds, $pdo);
+		Context::remove($this->cds);
 	}
 	
 	/**
@@ -242,11 +258,12 @@ class Connection extends Component
 	 */
 	public function commit()
 	{
-		$pdo = Context::get($this->cds);
+		$pdo = $this->getTransactionClient();
 		if ($pdo->inTransaction()) {
 			$pdo->commit();
 		}
-		$this->release($pdo);
+		$this->connections->push($this->cds, $pdo);
+		Context::remove($this->cds);
 	}
 	
 	
@@ -270,9 +287,7 @@ class Connection extends Component
 	 */
 	public function release(PDO $PDO)
 	{
-		if ($PDO->inTransaction() === false) {
-			$this->connections->push($this->cds, $PDO);
-		}
+		$this->connections->push($this->cds, $PDO);
 	}
 	
 	
