@@ -56,6 +56,9 @@ class Connection extends Component
 	
 	public array $pool = ['max' => 10, 'min' => 1];
 	
+	
+	private int $storey = 0;
+	
 	/**
 	 * @var bool
 	 * enable database cache
@@ -207,7 +210,10 @@ class Connection extends Component
 	public function beginTransaction(): static
 	{
 		$pdo = $this->getTransactionClient();
-		$pdo->beginTransaction();
+		if ($this->storey == 0) {
+			$pdo->beginTransaction();
+		}
+		$this->storey++;
 		return $this;
 	}
 	
@@ -223,6 +229,7 @@ class Connection extends Component
 		}
 		$pdo = Context::get($this->cds);
 		if ($pdo === null) {
+			/** @var PDO $pdo */
 			$pdo = Context::set($this->cds, $this->getConnection());
 		}
 		return $pdo;
@@ -244,12 +251,15 @@ class Connection extends Component
 	 */
 	public function rollback()
 	{
-		$pdo = $this->getTransactionClient();
-		if ($pdo->inTransaction()) {
-			$pdo->rollback();
+		$this->storey--;
+		if ($this->storey == 0) {
+			$pdo = $this->getTransactionClient();
+			if ($pdo->inTransaction()) {
+				$pdo->rollback();
+			}
+			$this->connections->push($this->cds, $pdo);
+			Context::remove($this->cds);
 		}
-		$this->connections->push($this->cds, $pdo);
-		Context::remove($this->cds);
 	}
 	
 	/**
@@ -258,12 +268,15 @@ class Connection extends Component
 	 */
 	public function commit()
 	{
-		$pdo = $this->getTransactionClient();
-		if ($pdo->inTransaction()) {
-			$pdo->commit();
+		$this->storey--;
+		if ($this->storey == 0) {
+			$pdo = $this->getTransactionClient();
+			if ($pdo->inTransaction()) {
+				$pdo->commit();
+			}
+			$this->connections->push($this->cds, $pdo);
+			Context::remove($this->cds);
 		}
-		$this->connections->push($this->cds, $pdo);
-		Context::remove($this->cds);
 	}
 	
 	
