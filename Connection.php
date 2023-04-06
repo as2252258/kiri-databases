@@ -178,7 +178,7 @@ class Connection extends Component
 	 * @return PDO
 	 * @throws Exception
 	 */
-	public function getMasterClient(): PDO
+	public function getConnection(): PDO
 	{
 		$client = $this->connections->get($this->cds);
 		if ($client === false) {
@@ -208,7 +208,7 @@ class Connection extends Component
 	{
 		$pdo = Context::get($this->cds);
 		if ($pdo === null) {
-			$pdo = $this->getMasterClient();
+			$pdo = $this->getConnection();
 		}
 		$pdo->beginTransaction();
 		return $this;

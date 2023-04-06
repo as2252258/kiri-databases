@@ -32,10 +32,7 @@ class Command extends Component
 	const DB_ERROR_MESSAGE = 'The system is busy, please try again later.';
 
 	/** @var Connection */
-	public Connection $db;
-	
-	
-	public PDO $pdo;
+	public Connection $connection;
 
 	/** @var ?string */
 	public ?string $sql = '';
@@ -70,8 +67,9 @@ class Command extends Component
 	public function all(): null|bool|array
 	{
 		try {
-			if (($prepare = $this->pdo->query($this->sql)) === false) {
-				throw new Exception($this->pdo->errorInfo()[1]);
+			$pdo = $this->connection->getConnection();
+			if (($prepare = $pdo->query($this->sql)) === false) {
+				throw new Exception($pdo->errorInfo()[1]);
 			}
 			$prepare->execute($this->params);
 			return $prepare->fetchAll(PDO::FETCH_ASSOC);
@@ -81,7 +79,7 @@ class Command extends Component
 			}
 			return $this->error($throwable);
 		} finally {
-			$this->db->release($this->pdo);
+			$this->connection->release($pdo ?? null);
 		}
 	}
 
@@ -92,8 +90,9 @@ class Command extends Component
 	public function one(): null|bool|array
 	{
 		try {
-			if (($prepare = $this->pdo->query($this->sql)) === false) {
-				throw new Exception($this->pdo->errorInfo()[1]);
+			$client = $this->connection->getConnection();
+			if (($prepare = $client->query($this->sql)) === false) {
+				throw new Exception($client->errorInfo()[1]);
 			}
 			$prepare->execute($this->params);
 			return $prepare->fetch(PDO::FETCH_ASSOC);
@@ -103,7 +102,7 @@ class Command extends Component
 			}
 			return $this->error($throwable);
 		} finally {
-			$this->db->release($this->pdo);
+			$this->connection->release($client ?? null);
 		}
 	}
 
@@ -114,8 +113,9 @@ class Command extends Component
 	public function fetchColumn(): null|bool|array
 	{
 		try {
-			if (($prepare = $this->pdo->query($this->sql)) === false) {
-				throw new Exception($this->pdo->errorInfo()[1]);
+			$client = $this->connection->getConnection();
+			if (($prepare = $client->query($this->sql)) === false) {
+				throw new Exception($client->errorInfo()[1]);
 			}
 			$prepare->execute($this->params);
 			return $prepare->fetchColumn(PDO::FETCH_ASSOC);
@@ -125,7 +125,7 @@ class Command extends Component
 			}
 			return $this->error($throwable);
 		} finally {
-			$this->db->release($this->pdo);
+			$this->connection->release($client ?? null);
 		}
 	}
 
@@ -136,8 +136,9 @@ class Command extends Component
 	public function rowCount(): int|bool
 	{
 		try {
-			if (($prepare = $this->pdo->query($this->sql)) === false) {
-				throw new Exception($this->pdo->errorInfo()[1]);
+			$client = $this->connection->getConnection();
+			if (($prepare = $client->query($this->sql)) === false) {
+				throw new Exception($client->errorInfo()[1]);
 			}
 			$prepare->execute($this->params);
 			return $prepare->rowCount();
@@ -147,7 +148,7 @@ class Command extends Component
 			}
 			return $this->error($throwable);
 		} finally {
-			$this->db->release($this->pdo);
+			$this->connection->release($client ?? null);
 		}
 	}
 
@@ -169,14 +170,14 @@ class Command extends Component
 	private function _execute(): bool|int
 	{
 		try {
-			$prepare = $this->pdo->prepare($this->sql);
-			if ($prepare === false) {
-				throw new Exception($this->pdo->errorInfo()[1]);
+			$client = $this->connection->getConnection();
+			if (($prepare = $client->prepare($this->sql)) === false) {
+				throw new Exception($client->errorInfo()[1]);
 			}
 			if ($prepare->execute($this->params) === false) {
 				throw new Exception($prepare->errorInfo()[1]);
 			}
-			$result = $this->pdo->lastInsertId();
+			$result = $client->lastInsertId();
 			$prepare->closeCursor();
 			return $result == 0 ? true : $result;
 		} catch (\Throwable $throwable) {
@@ -185,7 +186,7 @@ class Command extends Component
 			}
 			return $this->error($throwable);
 		} finally {
-			$this->db->release($this->pdo);
+			$this->connection->release($client ?? null);
 		}
 	}
 
