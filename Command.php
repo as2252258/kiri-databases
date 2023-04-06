@@ -33,6 +33,9 @@ class Command extends Component
 
 	/** @var Connection */
 	public Connection $db;
+	
+	
+	public PDO $pdo;
 
 	/** @var ?string */
 	public ?string $sql = '';
@@ -66,10 +69,9 @@ class Command extends Component
 	 */
 	public function all(): null|bool|array
 	{
-		$pdo = $this->db->getPdo();
 		try {
-			if (($prepare = $pdo->query($this->sql)) === false) {
-				throw new Exception($pdo->errorInfo()[1]);
+			if (($prepare = $this->pdo->query($this->sql)) === false) {
+				throw new Exception($this->pdo->errorInfo()[1]);
 			}
 			$prepare->execute($this->params);
 			return $prepare->fetchAll(PDO::FETCH_ASSOC);
@@ -79,7 +81,7 @@ class Command extends Component
 			}
 			return $this->error($throwable);
 		} finally {
-			$this->db->release($pdo);
+			$this->db->release($this->pdo);
 		}
 	}
 
@@ -89,10 +91,9 @@ class Command extends Component
 	 */
 	public function one(): null|bool|array
 	{
-		$pdo = $this->db->getPdo();
 		try {
-			if (($prepare = $pdo->query($this->sql)) === false) {
-				throw new Exception($pdo->errorInfo()[1]);
+			if (($prepare = $this->pdo->query($this->sql)) === false) {
+				throw new Exception($this->pdo->errorInfo()[1]);
 			}
 			$prepare->execute($this->params);
 			return $prepare->fetch(PDO::FETCH_ASSOC);
@@ -102,7 +103,7 @@ class Command extends Component
 			}
 			return $this->error($throwable);
 		} finally {
-			$this->db->release($pdo);
+			$this->db->release($this->pdo);
 		}
 	}
 
@@ -112,10 +113,9 @@ class Command extends Component
 	 */
 	public function fetchColumn(): null|bool|array
 	{
-		$pdo = $this->db->getPdo();
 		try {
-			if (($prepare = $pdo->query($this->sql)) === false) {
-				throw new Exception($pdo->errorInfo()[1]);
+			if (($prepare = $this->pdo->query($this->sql)) === false) {
+				throw new Exception($this->pdo->errorInfo()[1]);
 			}
 			$prepare->execute($this->params);
 			return $prepare->fetchColumn(PDO::FETCH_ASSOC);
@@ -125,7 +125,7 @@ class Command extends Component
 			}
 			return $this->error($throwable);
 		} finally {
-			$this->db->release($pdo);
+			$this->db->release($this->pdo);
 		}
 	}
 
@@ -135,10 +135,9 @@ class Command extends Component
 	 */
 	public function rowCount(): int|bool
 	{
-		$pdo = $this->db->getPdo();
 		try {
-			if (($prepare = $pdo->query($this->sql)) === false) {
-				throw new Exception($pdo->errorInfo()[1]);
+			if (($prepare = $this->pdo->query($this->sql)) === false) {
+				throw new Exception($this->pdo->errorInfo()[1]);
 			}
 			$prepare->execute($this->params);
 			return $prepare->rowCount();
@@ -148,7 +147,7 @@ class Command extends Component
 			}
 			return $this->error($throwable);
 		} finally {
-			$this->db->release($pdo);
+			$this->db->release($this->pdo);
 		}
 	}
 
@@ -169,13 +168,15 @@ class Command extends Component
 	 */
 	private function _execute(): bool|int
 	{
-		$pdo = $this->db->getPdo();
 		try {
-			$prepare = $pdo->prepare($this->sql);
-			if ($prepare === false || $prepare->execute($this->params) === false) {
-				throw new Exception(($prepare ?? $pdo)->errorInfo()[1]);
+			$prepare = $this->pdo->prepare($this->sql);
+			if ($prepare === false) {
+				throw new Exception($this->pdo->errorInfo()[1]);
 			}
-			$result = $pdo->lastInsertId();
+			if ($prepare->execute($this->params) === false) {
+				throw new Exception($prepare->errorInfo()[1]);
+			}
+			$result = $this->pdo->lastInsertId();
 			$prepare->closeCursor();
 			return $result == 0 ? true : $result;
 		} catch (\Throwable $throwable) {
@@ -184,7 +185,7 @@ class Command extends Component
 			}
 			return $this->error($throwable);
 		} finally {
-			$this->db->release($pdo);
+			$this->db->release($this->pdo);
 		}
 	}
 

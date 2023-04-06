@@ -248,7 +248,7 @@ class Connection extends Component
 	 */
 	public function createCommand($sql = null, array $attributes = []): Command
 	{
-		$command = new Command(['db' => $this, 'sql' => $sql]);
+		$command = new Command(['db' => $this, 'pdo' => $this->getMasterClient(), 'sql' => $sql]);
 		return $command->bindValues($attributes);
 	}
 
