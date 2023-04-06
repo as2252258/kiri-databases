@@ -91,8 +91,6 @@ class Connection extends Component
 	public function __construct(public EventProvider $eventProvider, public Pool $connections, public ContainerInterface $container, array $config = [])
 	{
 		parent::__construct($config);
-		
-		$this->initConnections();
 	}
 	
 	
@@ -106,6 +104,8 @@ class Connection extends Component
 		$this->eventProvider->on(BeginTransaction::class, [$this, 'beginTransaction'], 0);
 		$this->eventProvider->on(Rollback::class, [$this, 'rollback'], 0);
 		$this->eventProvider->on(Commit::class, [$this, 'commit'], 0);
+		
+		$this->initConnections();
 	}
 	
 	
