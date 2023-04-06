@@ -21,6 +21,8 @@ use Kiri\Abstracts\Component;
 use Kiri\Abstracts\Config;
 use Kiri\Di\ContainerInterface;
 use Kiri\Di\Context;
+use Kiri\Annotation\Inject;
+use Kiri\Pool\Pool;
 use Kiri\Events\EventProvider;
 use Kiri\Exception\ConfigException;
 use Kiri\Exception\NotFindClassException;
@@ -37,67 +39,63 @@ use ReflectionException;
  */
 class Connection extends Component
 {
-
+	
 	public string $id = 'db';
 	public string $cds = '';
 	public string $password = '';
 	public string $username = '';
 	public string $charset = 'utf-8';
-
+	
 	public string $tablePrefix = '';
-
+	
 	public string $database = '';
-
+	
 	public int $connect_timeout = 30;
-
+	
 	public int $read_timeout = 10;
-
+	
 	public array $pool = ['max' => 10, 'min' => 1];
-
-
-	private PoolConnection $connection;
-
+	
 	/**
 	 * @var bool
 	 * enable database cache
 	 */
 	public bool $enableCache = false;
-
-
+	
+	
 	private ?PDO $_pdo = null;
-
-
+	
+	
 	/**
 	 * @var string
 	 */
 	public string $cacheDriver = 'redis';
-
+	
 	/**
 	 * @var array
 	 */
 	public array $slaveConfig = [];
 	public array $attributes = [];
-
-
+	
+	
 	private ?Schema $_schema = null;
-
-
+	
+	
 	/**
 	 * @param EventProvider $eventProvider
-	 * @param Kiri\Di\ContainerInterface $container
+	 * @param Pool $connections
+	 * @param ContainerInterface $container
 	 * @param array $config
-	 * @throws ContainerExceptionInterface
-	 * @throws NotFoundExceptionInterface
 	 * @throws Exception
 	 */
-	public function __construct(public EventProvider $eventProvider, public ContainerInterface $container, array $config = [])
+	public function __construct(public EventProvider $eventProvider, public Pool $connections, public ContainerInterface $container, array $config = [])
 	{
 		parent::__construct($config);
-
-		$this->connection = $this->container->get(PoolConnection::class);
+		
+		$this->initConnections();
 	}
-
-
+	
+	
 	/**
 	 * @return void
 	 * @throws Exception
@@ -108,17 +106,15 @@ class Connection extends Component
 		$this->eventProvider->on(BeginTransaction::class, [$this, 'beginTransaction'], 0);
 		$this->eventProvider->on(Rollback::class, [$this, 'rollback'], 0);
 		$this->eventProvider->on(Commit::class, [$this, 'commit'], 0);
-
-		$this->connectPoolInstance();
 	}
-
-
+	
+	
 	/**
-	 * @throws Exception
+	 * @return void
 	 */
-	public function connectPoolInstance()
+	public function initConnections(): void
 	{
-		$this->connection->initConnections([
+		$this->connections->initConnections($this->cds, $this->pool['max'] ?? 1, $this->gender([
 			'cds'             => $this->cds,
 			'username'        => $this->username,
 			'password'        => $this->password,
@@ -127,10 +123,39 @@ class Connection extends Component
 			'read_timeout'    => $this->read_timeout,
 			'dbname'          => $this->database,
 			'pool'            => $this->pool
-		], $this->pool['max']);
+		]));
 	}
-
-
+	
+	
+	/**
+	 * @param array $config
+	 * @return \Closure
+	 */
+	public function gender(array $config): \Closure
+	{
+		return static function () use ($config) {
+			$options = [
+				PDO::ATTR_CASE               => PDO::CASE_NATURAL,
+				PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+				PDO::ATTR_ORACLE_NULLS       => PDO::NULL_NATURAL,
+				PDO::ATTR_STRINGIFY_FETCHES  => false,
+				PDO::ATTR_EMULATE_PREPARES   => false,
+				PDO::ATTR_TIMEOUT            => $config['connect_timeout'],
+				PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . ($config['charset'] ?? 'utf8mb4')
+			];
+			if (!Context::inCoroutine()) {
+				$options[PDO::ATTR_PERSISTENT] = true;
+			}
+			$link = new PDO('mysql:dbname=' . $config['dbname'] . ';host=' . $config['cds'],
+				$config['username'], $config['password'], $options);
+			foreach ($config['attributes'] as $key => $attribute) {
+				$link->setAttribute($key, $attribute);
+			}
+			return $link;
+		};
+	}
+	
+	
 	/**
 	 * @return mixed
 	 * @throws ReflectionException
@@ -147,99 +172,84 @@ class Connection extends Component
 		}
 		return $this->_schema;
 	}
-
-
+	
+	
 	/**
 	 * @return PDO
 	 * @throws Exception
 	 */
 	public function getMasterClient(): PDO
 	{
-		if (($client = $this->connection->get($this->cds)) instanceof PDO) {
-			return $client;
+		$client = $this->connections->get($this->cds);
+		if ($client === false) {
+			throw new Exception('waite db client timeout.');
 		}
-		throw new Exception('waite db client timeout.');
+		return $client;
 	}
-
+	
 	/**
 	 * @return PDO
 	 * @throws Exception
 	 */
 	public function getSlaveClient(): PDO
 	{
-		$client = $this->connection->get($this->cds);
+		$client = $this->connections->get($this->cds);
 		if ($client === false) {
 			throw new Exception('waite db client timeout.');
 		}
 		return $client;
 	}
-
+	
 	/**
 	 * @return $this
 	 * @throws Exception
 	 */
 	public function beginTransaction(): static
 	{
-		$pdo = $this->getPdo();
+		$pdo = Context::get($this->cds);
+		if ($pdo === null) {
+			$pdo = $this->getMasterClient();
+		}
 		$pdo->beginTransaction();
 		return $this;
 	}
-
-
-	/**
-	 * @param bool $restore
-	 * @return PDO
-	 * @throws Exception
-	 */
-	public function getPdo(bool $restore = false): PDO
-	{
-		return $this->getMasterClient();
-		if ($restore === true) {
-			return Context::set($this->cds, $this->getMasterClient());
-		}
-		if (!Context::exists($this->cds)) {
-			return Context::set($this->cds, $this->getMasterClient());
-		} else {
-			return Context::get($this->cds);
-		}
-	}
-
+	
 	/**
 	 * @return $this|bool
 	 * @throws Exception
 	 */
 	public function inTransaction(): bool|static
 	{
-		return $this->getPdo()->inTransaction();
+		return Context::get($this->cds)->inTransaction();
 	}
-
+	
 	/**
 	 * @throws Exception
 	 * 事务回滚
 	 */
 	public function rollback()
 	{
-		$pdo = $this->getPdo();
+		$pdo = Context::get($this->cds);
 		if ($pdo->inTransaction()) {
 			$pdo->rollback();
 		}
 		$this->release($pdo);
 	}
-
+	
 	/**
 	 * @throws Exception
 	 * 事务提交
 	 */
 	public function commit()
 	{
-		$pdo = $this->getPdo();
+		$pdo = Context::get($this->cds);
 		if ($pdo->inTransaction()) {
 			$pdo->commit();
 		}
 		$this->release($pdo);
 	}
-
-
+	
+	
 	/**
 	 * @param null $sql
 	 * @param array $attributes
@@ -248,11 +258,11 @@ class Connection extends Component
 	 */
 	public function createCommand($sql = null, array $attributes = []): Command
 	{
-		$command = new Command(['db' => $this, 'pdo' => $this->getMasterClient(), 'sql' => $sql]);
+		$command = new Command(['db' => $this, 'sql' => $sql]);
 		return $command->bindValues($attributes);
 	}
-
-
+	
+	
 	/**
 	 *
 	 * 回收链接
@@ -261,11 +271,11 @@ class Connection extends Component
 	public function release(PDO $PDO)
 	{
 		if ($PDO->inTransaction() === false) {
-			$this->connection->addItem($this->cds, $PDO);
+			$this->connections->push($this->cds, $PDO);
 		}
 	}
-
-
+	
+	
 	/**
 	 *
 	 * 回收链接
@@ -273,16 +283,16 @@ class Connection extends Component
 	 */
 	public function clear_connection()
 	{
-		$this->connection->connection_clear($this->cds);
+		$this->connections->clean($this->cds);
 	}
-
-
+	
+	
 	/**
 	 * @throws Exception
 	 */
 	public function disconnect()
 	{
-		$this->connection->connection_clear($this->cds);
+		$this->connections->clean($this->cds);
 	}
-
+	
 }
