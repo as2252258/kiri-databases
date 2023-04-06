@@ -262,7 +262,6 @@ class Connection extends Component
 	{
 		if ($PDO->inTransaction() === false) {
 			$this->connection->addItem($this->cds, $PDO);
-			Context::remove($this->cds);
 		}
 	}
 
