@@ -166,7 +166,7 @@ class ActiveQuery extends Component implements ISqlBuilder
     public function first(): ModelInterface|null
     {
         $data = $this->execute($this->builder->one())->one();
-        if (!is_null($data)) {
+        if (!is_array($data)) {
 	        return $this->populate($data);
         } else {
 	        return NULL;
