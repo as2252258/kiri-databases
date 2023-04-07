@@ -93,11 +93,10 @@ class Command extends Component
 	{
 		try {
 			$client = $this->connection->getConnection();
-			if (($prepare = $client->query($this->sql)) === false) {
+			if (($prepare = $client->prepare($this->sql)) === false) {
 				throw new Exception($client->errorInfo()[1]);
 			}
 			foreach ($this->params as $key => $param) {
-				var_dump($this->sql, $key, $param);
 				$prepare->bindParam($key, $param, PDO::PARAM_STR | PDO::PARAM_INT);
 			}
 			return $prepare->fetch(PDO::FETCH_ASSOC);
