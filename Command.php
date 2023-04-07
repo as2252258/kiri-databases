@@ -67,13 +67,11 @@ class Command extends Component
 	public function all(): null|bool|array
 	{
 		try {
-			$pdo = $this->connection->getConnection();
-			if (($prepare = $pdo->query($this->sql)) === false) {
-				throw new Exception($pdo->errorInfo()[1]);
+			$client = $this->connection->getConnection();
+			if (($prepare = $client->prepare($this->sql)) === false) {
+				throw new Exception($client->errorInfo()[1]);
 			}
-			foreach ($this->params as $key => $param) {
-				$prepare->bindParam($key, $param);
-			}
+			$prepare->execute($this->params);
 			return $prepare->fetchAll(PDO::FETCH_ASSOC);
 		} catch (\Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
@@ -81,7 +79,7 @@ class Command extends Component
 			}
 			return $this->error($throwable);
 		} finally {
-			$this->connection->release($pdo ?? null);
+			$this->connection->release($client ?? null);
 		}
 	}
 	
@@ -116,12 +114,10 @@ class Command extends Component
 	{
 		try {
 			$client = $this->connection->getConnection();
-			if (($prepare = $client->query($this->sql)) === false) {
+			if (($prepare = $client->prepare($this->sql)) === false) {
 				throw new Exception($client->errorInfo()[1]);
 			}
-			foreach ($this->params as $key => $param) {
-				$prepare->bindParam($key, $param, PDO::PARAM_STR | PDO::PARAM_INT);
-			}
+			$prepare->execute($this->params);
 			return $prepare->fetchColumn(PDO::FETCH_ASSOC);
 		} catch (\Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
@@ -141,12 +137,10 @@ class Command extends Component
 	{
 		try {
 			$client = $this->connection->getConnection();
-			if (($prepare = $client->query($this->sql)) === false) {
+			if (($prepare = $client->prepare($this->sql)) === false) {
 				throw new Exception($client->errorInfo()[1]);
 			}
-			foreach ($this->params as $key => $param) {
-				$prepare->bindParam($key, $param, PDO::PARAM_STR | PDO::PARAM_INT);
-			}
+			$prepare->execute($this->params);
 			return $prepare->rowCount();
 		} catch (\Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
