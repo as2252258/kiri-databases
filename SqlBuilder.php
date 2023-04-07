@@ -248,9 +248,6 @@ class SqlBuilder extends Component
 		if (($condition = $this->conditionToString()) != '') {
 			$select .= " WHERE $condition";
 		}
-//		if (count($this->query->attributes) > 0) {
-//			$select = strtr($select, $this->query->attributes);
-//		}
 		if ($this->query->group != "") {
 			$select .= ' GROUP BY ' . $this->query->group;
 		}
