@@ -551,10 +551,14 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		if ($this->hasPrimary()) {
 			$condition = [$this->getPrimary() => $this->getPrimaryValue()];
 		}
-		$generate = SqlBuilder::builder(static::query()->where($condition))->update($param);
+
+		$query = static::query()->where($condition);
+		$generate = SqlBuilder::builder($query)->update($param);
 		if (is_bool($generate)) {
 			return $generate;
 		}
+
+		$generate[1] = array_merge($query->attributes, $generate[1]);
 		$command = $this->getConnection()->createCommand($generate[0], $generate[1]);
 		if ($command->save()) {
 			return $this->refresh()->afterSave($fields, $param);
