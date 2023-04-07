@@ -162,7 +162,7 @@ class SqlBuilder extends Component
 		foreach ($attributes as $key => $value) {
 			if ($isInsert === true) {
 				$keys[] = ':save' . $key . $order;
-				$params['save' . $key . $order] = $value;
+				$params[':save' . $key . $order] = $value;
 			} else {
 				[$keys, $params] = $this->resolveParams($key, $value, $order, $params, $keys);
 			}
@@ -190,7 +190,7 @@ class SqlBuilder extends Component
 		) {
 			$keys[] = $key . '=' . $key . ' ' . $value;
 		} else {
-			$params['update' . $key . $order] = $value;
+			$params[':update' . $key . $order] = $value;
 			$keys[] = $key . '=:update' . $key . $order;
 		}
 		return [$keys, $params];

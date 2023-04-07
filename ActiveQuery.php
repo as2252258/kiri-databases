@@ -292,6 +292,9 @@ class ActiveQuery extends Component implements ISqlBuilder
 			return $generate;
 		}
 
+		var_dump($this->attributes, $generate[1]);
+		var_dump(array_merge($this->attributes, $generate[1]));
+
 		$generate[1] = array_merge($this->attributes, $generate[1]);
 
 		return (bool)$this->execute(...$generate)->exec();
