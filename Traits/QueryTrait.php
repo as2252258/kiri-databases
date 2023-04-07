@@ -446,7 +446,7 @@ trait QueryTrait
 			return $this->addOrder(...func_get_args());
 		}
 
-		foreach ($column as $key => $val) {
+		foreach ($column as $val) {
 			$this->addOrder($val);
 		}
 
@@ -462,8 +462,6 @@ trait QueryTrait
 	 */
 	private function addOrder(string $column, string $sort = 'DESC'): static
 	{
-		$column = trim($column);
-
 		if (func_num_args() == 1 || str_contains($column, ' ')) {
 			$this->order[] = $column;
 		} else {
