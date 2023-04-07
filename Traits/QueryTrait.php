@@ -545,8 +545,8 @@ trait QueryTrait
 	 */
 	public function whereLike(string $column, string $value): static
 	{
-		$this->bindParam(':' . $column, $value);
-		$this->where[] = $column . ' LIKE \':' . $column . '\'';
+		$this->bindParam(':LIKE' . $column, $value);
+		$this->where[] = $column . ' LIKE \':LIKE' . $column . '\'';
 		return $this;
 	}
 
@@ -557,8 +557,8 @@ trait QueryTrait
 	 */
 	public function whereLeftLike(string $column, string $value): static
 	{
-		$this->bindParam(':' . $column, $value);
-		$this->where[] = $column . ' LLike \'%:' . $column . '\'';
+		$this->bindParam(':LLike' . $column, $value);
+		$this->where[] = $column . ' LLike \'%:LLike' . $column . '\'';
 		return $this;
 	}
 
@@ -569,8 +569,8 @@ trait QueryTrait
 	 */
 	public function whereRightLike(string $column, string $value): static
 	{
-		$this->bindParam(':' . $column, $value);
-		$this->where[] = $column . ' RLike \':' . $column . '%\'';
+		$this->bindParam(':RLike' . $column, $value);
+		$this->where[] = $column . ' RLike \':RLike' . $column . '%\'';
 		return $this;
 	}
 
@@ -582,8 +582,8 @@ trait QueryTrait
 	 */
 	public function whereNotLike(string $column, string $value): static
 	{
-		$this->bindParam(':' . $column, $value);
-		$this->where[] = $column . ' NOT LIKE \'%:' . $column . '%\'';
+		$this->bindParam(':LIKE' . $column, $value);
+		$this->where[] = $column . ' NOT LIKE \'%:LIKE' . $column . '%\'';
 		return $this;
 	}
 
@@ -595,8 +595,8 @@ trait QueryTrait
 	 */
 	public function whereEq(string $column, int $value): static
 	{
-		$this->bindParam(':' . $column, $value);
-		$this->where[] = $column . ' = :' . $column;
+		$this->bindParam(':eq' . $column, $value);
+		$this->where[] = $column . ' = :eq' . $column;
 		return $this;
 	}
 
@@ -609,8 +609,8 @@ trait QueryTrait
 	 */
 	public function whereNeq(string $column, int $value): static
 	{
-		$this->bindParam(':' . $column, $value);
-		$this->where[] = $column . ' <> :' . $column;
+		$this->bindParam(':neq' . $column, $value);
+		$this->where[] = $column . ' <> :neq' . $column;
 		return $this;
 	}
 
@@ -623,8 +623,8 @@ trait QueryTrait
 	 */
 	public function whereGt(string $column, int $value): static
 	{
-		$this->bindParam(':' . $column, $value);
-		$this->where[] = $column . ' > :' . $column;
+		$this->bindParam(':gt' . $column, $value);
+		$this->where[] = $column . ' > :gt' . $column;
 		return $this;
 	}
 
@@ -636,8 +636,8 @@ trait QueryTrait
 	 */
 	public function whereEgt(string $column, int $value): static
 	{
-		$this->bindParam(':' . $column, $value);
-		$this->where[] = $column . ' >= :' . $column;
+		$this->bindParam(':egt' . $column, $value);
+		$this->where[] = $column . ' >= :egt' . $column;
 		return $this;
 	}
 
@@ -650,8 +650,8 @@ trait QueryTrait
 	 */
 	public function whereLt(string $column, int $value): static
 	{
-		$this->bindParam(':' . $column, $value);
-		$this->where[] = $column . ' < :' . $column;
+		$this->bindParam(':lt' . $column, $value);
+		$this->where[] = $column . ' < :lt' . $column;
 		return $this;
 	}
 
@@ -663,8 +663,8 @@ trait QueryTrait
 	 */
 	public function whereElt(string $column, int $value): static
 	{
-		$this->bindParam(':' . $column, $value);
-		$this->where[] = $column . ' <= :' . $column;
+		$this->bindParam(':elt' . $column, $value);
+		$this->where[] = $column . ' <= :elt' . $column;
 		return $this;
 	}
 
@@ -682,8 +682,8 @@ trait QueryTrait
 		if (count($value) < 1) {
 			$value = [-1];
 		}
-		$this->bindParam(':' . $columns, $value);
-		$this->where[] = $columns . ' IN :' . $columns;
+		$this->bindParam(':in' . $columns, $value);
+		$this->where[] = $columns . ' IN :in' . $columns;
 		return $this;
 	}
 
@@ -724,8 +724,8 @@ trait QueryTrait
 		if (count($value) < 1) {
 			$value = [-1];
 		}
-		$this->bindParam(':' . $columns, $value);
-		$this->where[] = $columns . ' NOT IN :' . $columns;
+		$this->bindParam(':notin' . $columns, $value);
+		$this->where[] = $columns . ' NOT IN :notin' . $columns;
 		return $this;
 	}
 
@@ -788,6 +788,9 @@ trait QueryTrait
 	 */
 	public function bindParam(string $key, mixed $value): static
 	{
+		if (is_string($value)) {
+			$value = addslashes($value);
+		}
 		$this->attributes[$key] = $value;
 		return $this;
 	}
