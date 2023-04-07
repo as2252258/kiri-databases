@@ -97,7 +97,7 @@ class Command extends Component
 				throw new Exception($client->errorInfo()[1]);
 			}
 			foreach ($this->params as $key => $param) {
-				$prepare->bindParam($key, $param);
+				$prepare->bindParam($key, $param, PDO::PARAM_STR | PDO::PARAM_INT);
 			}
 			return $prepare->fetch(PDO::FETCH_ASSOC);
 		} catch (\Throwable $throwable) {
@@ -122,7 +122,7 @@ class Command extends Component
 				throw new Exception($client->errorInfo()[1]);
 			}
 			foreach ($this->params as $key => $param) {
-				$prepare->bindParam($key, $param);
+				$prepare->bindParam($key, $param, PDO::PARAM_STR | PDO::PARAM_INT);
 			}
 			return $prepare->fetchColumn(PDO::FETCH_ASSOC);
 		} catch (\Throwable $throwable) {
@@ -147,7 +147,7 @@ class Command extends Component
 				throw new Exception($client->errorInfo()[1]);
 			}
 			foreach ($this->params as $key => $param) {
-				$prepare->bindParam($key, $param);
+				$prepare->bindParam($key, $param, PDO::PARAM_STR | PDO::PARAM_INT);
 			}
 			return $prepare->rowCount();
 		} catch (\Throwable $throwable) {
@@ -207,7 +207,7 @@ class Command extends Component
 	 */
 	private function error(\Throwable $throwable): bool
 	{
-		$message = $this->sql . '(' . json_encode($this->params, JSON_UNESCAPED_UNICODE) . ');';
+		$message = $this->sql . '.' . json_encode($this->params, JSON_UNESCAPED_UNICODE);
 		return $this->logger->addError($message . $throwable->getMessage(), 'mysql');
 	}
 	
