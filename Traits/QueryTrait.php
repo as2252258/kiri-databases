@@ -794,20 +794,16 @@ trait QueryTrait
 	}
 
 	/**
-	 * @param Closure|array|string $column
+	 * @param array|string $column
 	 * @param string $opera
 	 * @param null $value
 	 * @return $this
 	 * @throws
 	 */
-	public function where(Closure|array|string $column, string $opera = '=', $value = null): static
+	public function where(array|string $column, string $opera = '=', $value = null): static
 	{
 		if (is_array($column)) {
 			return $this->addArray($column);
-		}
-		if ($column instanceof Closure) {
-			$this->where[] = $this->makeClosureFunction($column);
-			return $this;
 		}
 		if (is_string($column)) {
 			$this->where[] = $column;
@@ -890,14 +886,7 @@ trait QueryTrait
 	private function addArray(array $array): static
 	{
 		foreach ($array as $key => $value) {
-			if (is_null($value)) continue;
-			if (is_numeric($key)) {
-				[$column, $opera, $value] = $this->opera(...$value);
-
-				$this->where[] = $this->sprintf($column, $value, $opera);
-			} else {
-				$this->where[] = $this->sprintf($key, $value);
-			}
+			$this->where[] = $this->sprintf($key, $value);
 		}
 		return $this;
 	}
@@ -911,11 +900,10 @@ trait QueryTrait
 	 */
 	private function sprintf($column, $value, string $opera = '='): string
 	{
-		if (is_numeric($value)) {
-			return "$column $opera $value";
+		if (is_string($value)) {
+			$value = addslashes($value);
 		}
-		$value = trim($value, '\'"');
-		return "$column $opera '$value'";
+		return $column . ' ' . $opera . ' \'' . $value . '\'';
 	}
 
 
