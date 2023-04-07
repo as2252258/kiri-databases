@@ -71,7 +71,9 @@ class Command extends Component
 			if (($prepare = $pdo->query($this->sql)) === false) {
 				throw new Exception($pdo->errorInfo()[1]);
 			}
-			$prepare->execute($this->params);
+			foreach ($this->params as $key => $param) {
+				$prepare->bindParam($key, $param);
+			}
 			return $prepare->fetchAll(PDO::FETCH_ASSOC);
 		} catch (\Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
@@ -94,7 +96,9 @@ class Command extends Component
 			if (($prepare = $client->query($this->sql)) === false) {
 				throw new Exception($client->errorInfo()[1]);
 			}
-			$prepare->execute($this->params);
+			foreach ($this->params as $key => $param) {
+				$prepare->bindParam($key, $param);
+			}
 			return $prepare->fetch(PDO::FETCH_ASSOC);
 		} catch (\Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
@@ -117,7 +121,9 @@ class Command extends Component
 			if (($prepare = $client->query($this->sql)) === false) {
 				throw new Exception($client->errorInfo()[1]);
 			}
-			$prepare->execute($this->params);
+			foreach ($this->params as $key => $param) {
+				$prepare->bindParam($key, $param);
+			}
 			return $prepare->fetchColumn(PDO::FETCH_ASSOC);
 		} catch (\Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
@@ -140,7 +146,9 @@ class Command extends Component
 			if (($prepare = $client->query($this->sql)) === false) {
 				throw new Exception($client->errorInfo()[1]);
 			}
-			$prepare->execute($this->params);
+			foreach ($this->params as $key => $param) {
+				$prepare->bindParam($key, $param);
+			}
 			return $prepare->rowCount();
 		} catch (\Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
