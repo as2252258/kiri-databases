@@ -96,9 +96,7 @@ class Command extends Component
 			if (($prepare = $client->prepare($this->sql)) === false) {
 				throw new Exception($client->errorInfo()[1]);
 			}
-			foreach ($this->params as $key => $param) {
-				$prepare->bindParam($key, $param);
-			}
+			$prepare->execute($this->params);
 			return $prepare->fetch(PDO::FETCH_ASSOC);
 		} catch (\Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
