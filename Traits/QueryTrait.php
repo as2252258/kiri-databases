@@ -541,67 +541,51 @@ trait QueryTrait
 
 
 	/**
-	 * @param string $columns
+	 * @param string $column
 	 * @param string $value
 	 * @return $this
 	 */
-	public function whereLike(string $columns, string $value): static
+	public function whereLike(string $column, string $value): static
 	{
-		if (empty($columns) || (empty($value) && $value != 0)) {
-			return $this;
-		}
-
-		$this->where[] = $columns . ' LIKE \'%' . addslashes($value) . '%\'';
-
+		$this->bindParam(':' . $column, $value);
+		$this->where[] = $column . ' LIKE \':' . $column . '\'';
 		return $this;
 	}
 
 	/**
-	 * @param string $columns
+	 * @param string $column
 	 * @param string $value
 	 * @return $this
 	 */
-	public function whereLeftLike(string $columns, string $value): static
+	public function whereLeftLike(string $column, string $value): static
 	{
-		if (empty($columns) || (empty($value) && $value != 0)) {
-			return $this;
-		}
-
-		$this->where[] = $columns . ' LLike \'%' . addslashes($value) . '\'';
-
+		$this->bindParam(':' . $column, $value);
+		$this->where[] = $column . ' LLike \'%:' . $column . '\'';
 		return $this;
 	}
 
 	/**
-	 * @param string $columns
+	 * @param string $column
 	 * @param string $value
 	 * @return $this
 	 */
-	public function whereRightLike(string $columns, string $value): static
+	public function whereRightLike(string $column, string $value): static
 	{
-		if (empty($columns) || (empty($value) && $value != 0)) {
-			return $this;
-		}
-
-		$this->where[] = $columns . ' RLike \'' . addslashes($value) . '%\'';
-
+		$this->bindParam(':' . $column, $value);
+		$this->where[] = $column . ' RLike \':' . $column . '%\'';
 		return $this;
 	}
 
 
 	/**
-	 * @param string $columns
+	 * @param string $column
 	 * @param string $value
 	 * @return $this
 	 */
-	public function whereNotLike(string $columns, string $value): static
+	public function whereNotLike(string $column, string $value): static
 	{
-		if (empty($columns) || (empty($value) && $value != 0)) {
-			return $this;
-		}
-
-		$this->where[] = $columns . ' NOT LIKE \'%' . addslashes($value) . '%\'';
-
+		$this->bindParam(':' . $column, $value);
+		$this->where[] = $column . ' NOT LIKE \'%:' . $column . '%\'';
 		return $this;
 	}
 
@@ -613,8 +597,8 @@ trait QueryTrait
 	 */
 	public function whereEq(string $column, int $value): static
 	{
-		$this->where[] = ['EQ', $column, $value];
-
+		$this->bindParam(':' . $column, $value);
+		$this->where[] = $column . ' = :' . $column;
 		return $this;
 	}
 
@@ -627,8 +611,8 @@ trait QueryTrait
 	 */
 	public function whereNeq(string $column, int $value): static
 	{
-		$this->where[] = ['NEQ', $column, $value];
-
+		$this->bindParam(':' . $column, $value);
+		$this->where[] = $column . ' <> :' . $column;
 		return $this;
 	}
 
@@ -641,8 +625,8 @@ trait QueryTrait
 	 */
 	public function whereGt(string $column, int $value): static
 	{
-		$this->where[] = ['GT', $column, $value];
-
+		$this->bindParam(':' . $column, $value);
+		$this->where[] = $column . ' > :' . $column;
 		return $this;
 	}
 
@@ -654,8 +638,8 @@ trait QueryTrait
 	 */
 	public function whereEgt(string $column, int $value): static
 	{
-		$this->where[] = ['EGT', $column, $value];
-
+		$this->bindParam(':' . $column, $value);
+		$this->where[] = $column . ' >= :' . $column;
 		return $this;
 	}
 
@@ -668,8 +652,8 @@ trait QueryTrait
 	 */
 	public function whereLt(string $column, int $value): static
 	{
-		$this->where[] = ['LT', $column, $value];
-
+		$this->bindParam(':' . $column, $value);
+		$this->where[] = $column . ' < :' . $column;
 		return $this;
 	}
 
@@ -681,8 +665,8 @@ trait QueryTrait
 	 */
 	public function whereElt(string $column, int $value): static
 	{
-		$this->where[] = ['ELT', $column, $value];
-
+		$this->bindParam(':' . $column, $value);
+		$this->where[] = $column . ' <= :' . $column;
 		return $this;
 	}
 
@@ -697,10 +681,11 @@ trait QueryTrait
 		if ($value instanceof Closure) {
 			$value = $this->makeClosureFunction($value);
 		}
-		if (empty($value)) {
+		if (count($value) < 1) {
 			$value = [-1];
 		}
-		$this->where[] = ['IN', $columns, $value];
+		$this->bindParam(':' . $columns, $value);
+		$this->where[] = $columns . ' IN :' . $columns;
 		return $this;
 	}
 
@@ -738,10 +723,11 @@ trait QueryTrait
 	 */
 	public function whereNotIn(string $columns, array $value): static
 	{
-		if (empty($value)) {
+		if (count($value) < 1) {
 			$value = [-1];
 		}
-		$this->where[] = ['NOT IN', $columns, $value];
+		$this->bindParam(':' . $columns, $value);
+		$this->where[] = $columns . ' NOT IN :' . $columns;
 		return $this;
 	}
 
