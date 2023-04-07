@@ -18,7 +18,7 @@ class DefaultCondition extends Condition
 	 */
 	#[Pure] public function builder(): string
 	{
-		return sprintf('%s %s %s', $this->column, $this->opera, addslashes($this->value));
+		return $this->column . ' ' . $this->opera . ' ' . addslashes($this->value);
 	}
 
 }

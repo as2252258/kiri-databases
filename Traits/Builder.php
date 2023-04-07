@@ -22,8 +22,8 @@ use ReflectionException;
  */
 trait Builder
 {
-	
-	
+
+
 	/**
 	 * @param $alias
 	 * @return string
@@ -32,7 +32,7 @@ trait Builder
 	{
 		return " AS " . $alias;
 	}
-	
+
 	/**
 	 * @param $table
 	 * @return string
@@ -45,7 +45,7 @@ trait Builder
 		}
 		return " FROM " . $table;
 	}
-	
+
 	/**
 	 * @param $join
 	 * @return string
@@ -57,8 +57,8 @@ trait Builder
 		}
 		return '';
 	}
-	
-	
+
+
 	/**
 	 * @param string $select
 	 * @return string
@@ -67,8 +67,8 @@ trait Builder
 	{
 		return "SELECT " . $select;
 	}
-	
-	
+
+
 	/**
 	 * @param $group
 	 * @return string
@@ -80,7 +80,7 @@ trait Builder
 		}
 		return ' GROUP BY ' . $group;
 	}
-	
+
 	/**
 	 * @param $order
 	 * @return string
@@ -93,7 +93,7 @@ trait Builder
 			return '';
 		}
 	}
-	
+
 	/**
 	 * @param ActiveQuery|Query $query
 	 * @param bool $hasLimit
@@ -107,33 +107,31 @@ trait Builder
 			return ' LIMIT ' . $query->limit;
 		}
 	}
-	
-	
+
+
 	/**
-	 * @param $where
+	 * @param array $where
 	 * @return string
-	 * @throws Exception
+	 * @throws NotFindClassException
+	 * @throws ReflectionException
 	 */
-	private function where($where): string
+	private function where(array $where): string
 	{
-		$_tmp = [];
-		if (empty($where)) return '';
-		if (is_string($where)) return $where;
-		foreach ($where as $key => $value) {
-			if (is_null($value)) continue;
-			if (($_value = $this->resolveCondition($key, $value, $_tmp)) == '') {
-				continue;
-			}
-			$_tmp[] = $_value;
+		if (count($where) < 1) {
+			return '';
 		}
-		if (!empty($_tmp)) {
+		$_tmp = [];
+		foreach ($where as $key => $value) {
+			$_tmp[] = $this->resolveCondition($key, $value, $_tmp);
+		}
+		if (count($_tmp) > 0) {
 			return implode(' AND ', $_tmp);
 		} else {
 			return '';
 		}
 	}
-	
-	
+
+
 	/**
 	 * @param $field
 	 * @param $condition
@@ -152,8 +150,8 @@ trait Builder
 			return $this->_arrayMap($condition, $_tmp);
 		}
 	}
-	
-	
+
+
 	/**
 	 * @param $condition
 	 * @param $array
@@ -176,10 +174,10 @@ trait Builder
 			$builder->oldParams = $array;
 		} else if (isset(ConditionClassMap::$conditionMap[$stroppier])) {
 			$defaultConfig = ConditionClassMap::$conditionMap[$stroppier];
-			
+
 			$class = $defaultConfig['class'];
 			unset($defaultConfig['class']);
-			
+
 			$builder = Kiri::getDi()->make($class, [], $defaultConfig);
 			$builder->setValue($condition[2]);
 			$builder->setColumn($condition[1]);
@@ -187,13 +185,16 @@ trait Builder
 			$builder = Kiri::getDi()->get(HashCondition::class);
 			$builder->setValue($condition);
 		}
-		
+
 		$array[] = $builder->builder();
-		
+
 		return implode(' AND ', $array);
 	}
-	
-	
+
+
+	public array $params = [];
+
+
 	/**
 	 * @param $condition
 	 * @return array
@@ -202,16 +203,15 @@ trait Builder
 	{
 		$_array = [];
 		foreach ($condition as $key => $value) {
-			if (is_null($value)) continue;
-			$value = is_numeric($value) ? $value : '\'' . $value . '\'';
 			if (!is_numeric($key)) {
-				$_array[] = $key . '=' . $value;
+				$this->query->bindParam(':' . $key, $value);
+				$_array[] = $key . '=:' . $key;
 			} else {
 				$_array[] = $value;
 			}
 		}
 		return $_array;
 	}
-	
-	
+
+
 }

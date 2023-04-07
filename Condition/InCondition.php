@@ -22,9 +22,9 @@ class InCondition extends Condition
 	#[Pure] public function builder(): string
 	{
 		if (is_array($this->value)) {
-			return sprintf('%s IN (%s)', $this->column, implode(',', $this->value));
+			return $this->column . ' IN (' . implode(',', $this->value) . ')';
 		} else {
-			return sprintf('%s IN (%s)', $this->column, $this->value);
+			return $this->column . ' IN (' . $this->value . ')';
 		}
 	}
 

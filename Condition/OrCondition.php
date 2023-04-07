@@ -21,7 +21,7 @@ class OrCondition extends Condition
 	 */
 	#[Pure] public function builder(): string
 	{
-		return sprintf('(%s) OR %s', implode(' AND ', $this->oldParams), addslashes($this->value));
+		return '(' . implode(' AND ', $this->oldParams) . ') OR ' . addslashes($this->value);
 	}
 
 }

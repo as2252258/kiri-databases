@@ -34,7 +34,7 @@ trait QueryTrait
 	public int $offset = 0;
 	public int $limit = 500;
 	public string $group = '';
-	public string|Closure|ActiveQuery|null $from = '';
+	public string|Closure|ActiveQuery|null $from = null;
 	public string $alias = 't1';
 	public array $filter = [];
 
@@ -757,7 +757,9 @@ trait QueryTrait
 			return $this;
 		}
 
-		$this->where[] = $column . ' BETWEEN ' . $start . ' AND ' . $end;
+		$this->bindParam(':between_start' . $column, $start);
+		$this->bindParam(':between_end' . $column, $end);
+		$this->where[] = $column . ' BETWEEN :not_between_start' . $column . ' AND :not_between_end' . $column;
 
 		return $this;
 	}
@@ -774,7 +776,9 @@ trait QueryTrait
 			return $this;
 		}
 
-		$this->where[] = $column . 'NOT BETWEEN' . $start . ' AND ' . $end;
+		$this->bindParam(':not_between_start' . $column, $start);
+		$this->bindParam(':not_between_end' . $column, $end);
+		$this->where[] = $column . ' NOT BETWEEN :not_between_start' . $column . ' AND :not_between_end' . $column;
 
 		return $this;
 	}
@@ -786,10 +790,21 @@ trait QueryTrait
 	 */
 	public function bindParams(?array $params = []): static
 	{
-		if (empty($params)) {
+		if ($params === null) {
 			return $this;
 		}
 		$this->attributes = $params;
+		return $this;
+	}
+
+	/**
+	 * @param string $key
+	 * @param mixed $value
+	 * @return $this
+	 */
+	public function bindParam(string $key, mixed $value): static
+	{
+		$this->attributes[$key] = $value;
 		return $this;
 	}
 
@@ -809,7 +824,8 @@ trait QueryTrait
 			$this->where[] = $column;
 		} else {
 			[$column, $opera, $value] = $this->opera(...func_get_args());
-			$this->where[] = "$column $opera $value";
+			$this->bindParam(':' . $column, $value);
+			$this->where[] = $column . ' ' . $opera . ':' . $column;
 		}
 		return $this;
 	}
@@ -900,10 +916,8 @@ trait QueryTrait
 	 */
 	private function sprintf($column, $value, string $opera = '='): string
 	{
-		if (is_string($value)) {
-			$value = addslashes($value);
-		}
-		return $column . ' ' . $opera . ' \'' . $value . '\'';
+		$this->bindParam(':' . $column, $value);
+		return $column . ' ' . $opera . ' :' . $column;
 	}
 
 

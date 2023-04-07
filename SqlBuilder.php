@@ -203,7 +203,6 @@ class SqlBuilder extends Component
 	 */
 	public function one(): string
 	{
-		$this->query->limit(0, 1);
 		return $this->_selectPrefix() . $this->_prefix() . $this->builderLimit($this->query);
 	}
 	
@@ -321,14 +320,14 @@ class SqlBuilder extends Component
 	 */
 	public function tableName(): string
 	{
+		if ($this->query->from === null) {
+			return $this->query->modelClass->getTable();
+		}
 		if ($this->query->from instanceof \Closure) {
-			$this->query->from = '(' . $this->query->makeClosureFunction($this->query->from) . ')';
+			return $this->query->from = '(' . $this->query->makeClosureFunction($this->query->from) . ')';
 		}
 		if ($this->query->from instanceof ActiveQuery) {
-			$this->query->from = '(' . SqlBuilder::builder($this->query->from)->get($this->query->from) . ')';
-		}
-		if ($this->query->from == "") {
-			return $this->query->modelClass->getTable();
+			return $this->query->from = '(' . SqlBuilder::builder($this->query->from)->get($this->query->from) . ')';
 		} else {
 			return $this->query->from;
 		}

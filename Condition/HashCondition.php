@@ -12,17 +12,16 @@ class HashCondition extends Condition
 
 	/**
 	 * @return string
+	 * @throws \Exception
 	 */
 	public function builder(): string
 	{
 		$array = [];
-		if (empty($this->value)) {
-			return '';
+		if (count($this->value) < 1) {
+			throw new \Exception('Builder data by a empty array.');
 		}
 		foreach ($this->value as $key => $value) {
-			if (is_null($value)) continue;
-
-			$array[] = sprintf("%s = '%s'", $key, addslashes($value));
+			$array[] = $key . '=' . addslashes($value);
 		}
 		return implode(' AND ', $array);
 	}
