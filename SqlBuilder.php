@@ -16,13 +16,13 @@ use Kiri\Abstracts\Component;
  */
 class SqlBuilder extends Component
 {
-	
+
 	use Builder;
-	
-	
+
+
 	public ActiveQuery|Query|null $query;
-	
-	
+
+
 	/**
 	 * @param ISqlBuilder|null $query
 	 * @return $this
@@ -32,8 +32,8 @@ class SqlBuilder extends Component
 	{
 		return new static(['query' => $query]);
 	}
-	
-	
+
+
 	/**
 	 * @return string
 	 * @throws Exception
@@ -42,8 +42,8 @@ class SqlBuilder extends Component
 	{
 		return $this->conditionToString();
 	}
-	
-	
+
+
 	/**
 	 * @param array $compiler
 	 * @return string
@@ -53,8 +53,8 @@ class SqlBuilder extends Component
 	{
 		return $this->where($compiler);
 	}
-	
-	
+
+
 	/**
 	 * @param array $attributes
 	 * @return bool|array
@@ -63,11 +63,11 @@ class SqlBuilder extends Component
 	public function update(array $attributes): bool|array
 	{
 		[$string, $array] = $this->builderParams($attributes);
-		
+
 		return $this->__updateBuilder($string, $array);
 	}
-	
-	
+
+
 	/**
 	 * @param array $attributes
 	 * @param string $opera
@@ -82,8 +82,8 @@ class SqlBuilder extends Component
 		}
 		return $this->__updateBuilder($string, []);
 	}
-	
-	
+
+
 	/**
 	 * @param array $string
 	 * @param array $params
@@ -95,13 +95,13 @@ class SqlBuilder extends Component
 		if (empty($string)) {
 			return $this->logger->addError('None data update.');
 		}
-		
+
 		$update = 'UPDATE ' . $this->tableName() . ' SET ' . implode(',', $string) . $this->_prefix();
-		
+
 		return [$update, $params];
 	}
-	
-	
+
+
 	/**
 	 * @param array $attributes
 	 * @param false $isBatch
@@ -115,19 +115,19 @@ class SqlBuilder extends Component
 			$attributes = [$attributes];
 		}
 		$update .= '(' . implode(',', $this->getFields($attributes)) . ') VALUES ';
-		
+
 		$order = 0;
 		$keys = $params = [];
 		foreach ($attributes as $attribute) {
 			[$_keys, $params] = $this->builderParams($attribute, true, $params, $order);
-			
+
 			$keys[] = implode(',', $_keys);
 			$order++;
 		}
 		return [$update . '(' . implode('),(', $keys) . ')', $params];
 	}
-	
-	
+
+
 	/**
 	 * @return string
 	 * @throws Exception
@@ -136,8 +136,8 @@ class SqlBuilder extends Component
 	{
 		return 'DELETE FROM ' . $this->tableName() . ' WHERE ' . $this->_prefix();
 	}
-	
-	
+
+
 	/**
 	 * @param $attributes
 	 * @return array
@@ -146,8 +146,8 @@ class SqlBuilder extends Component
 	{
 		return array_keys(current($attributes));
 	}
-	
-	
+
+
 	/**
 	 * @param array $attributes
 	 * @param bool $isInsert
@@ -161,16 +161,16 @@ class SqlBuilder extends Component
 		$keys = [];
 		foreach ($attributes as $key => $value) {
 			if ($isInsert === true) {
-				$keys[] = ':' . $key . $order;
-				$params[$key . $order] = $value;
+				$keys[] = ':save' . $key . $order;
+				$params['save' . $key . $order] = $value;
 			} else {
 				[$keys, $params] = $this->resolveParams($key, $value, $order, $params, $keys);
 			}
 		}
 		return [$keys, $params];
 	}
-	
-	
+
+
 	/**
 	 * @param string $key
 	 * @param mixed $value
@@ -190,13 +190,13 @@ class SqlBuilder extends Component
 		) {
 			$keys[] = $key . '=' . $key . ' ' . $value;
 		} else {
-			$params[$key . $order] = $value;
-			$keys[] = $key . '=:' . $key . $order;
+			$params['update' . $key . $order] = $value;
+			$keys[] = $key . '=:update' . $key . $order;
 		}
 		return [$keys, $params];
 	}
-	
-	
+
+
 	/**
 	 * @return string
 	 * @throws Exception
@@ -205,8 +205,8 @@ class SqlBuilder extends Component
 	{
 		return $this->_selectPrefix() . $this->_prefix() . $this->builderLimit($this->query);
 	}
-	
-	
+
+
 	/**
 	 * @return string
 	 * @throws Exception
@@ -215,8 +215,8 @@ class SqlBuilder extends Component
 	{
 		return $this->_selectPrefix() . $this->_prefix() . $this->builderLimit($this->query);
 	}
-	
-	
+
+
 	/**
 	 * @return string
 	 * @throws Exception
@@ -226,8 +226,8 @@ class SqlBuilder extends Component
 		$this->query->select('COUNT(*)');
 		return $this->_selectPrefix() . $this->_prefix() . $this->builderLimit($this->query);
 	}
-	
-	
+
+
 	/**
 	 * @param $table
 	 * @return string
@@ -236,8 +236,8 @@ class SqlBuilder extends Component
 	{
 		return 'SHOW FULL FIELDS FROM ' . $table;
 	}
-	
-	
+
+
 	/**
 	 * @return string
 	 * @throws Exception
@@ -256,7 +256,7 @@ class SqlBuilder extends Component
 		}
 		return $select;
 	}
-	
+
 	/**
 	 * @return string
 	 * @throws Exception
@@ -275,8 +275,8 @@ class SqlBuilder extends Component
 		}
 		return $select;
 	}
-	
-	
+
+
 	/**
 	 * @param false $isCount
 	 * @return string
@@ -289,8 +289,8 @@ class SqlBuilder extends Component
 		}
 		return $this->count();
 	}
-	
-	
+
+
 	/**
 	 * @return string
 	 * @throws Exception
@@ -299,8 +299,8 @@ class SqlBuilder extends Component
 	{
 		return sprintf('TRUNCATE %s', $this->tableName());
 	}
-	
-	
+
+
 	/**
 	 * @return string
 	 * @throws Exception
@@ -309,8 +309,8 @@ class SqlBuilder extends Component
 	{
 		return $this->where($this->query->where);
 	}
-	
-	
+
+
 	/**
 	 * @return string
 	 * @throws Exception
@@ -329,5 +329,5 @@ class SqlBuilder extends Component
 			return $this->query->from;
 		}
 	}
-	
+
 }
