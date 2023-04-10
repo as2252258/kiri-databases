@@ -247,7 +247,7 @@ class ActiveQuery extends Component implements ISqlBuilder
 	 */
 	public function populate($data): ModelInterface|array
 	{
-		$model = $this->modelClass::populate($data);
+		$model = $this->modelClass->populates($data);
 		if ($this->asArray) {
 			return $model->toArray();
 		} else {
