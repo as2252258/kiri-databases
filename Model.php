@@ -223,6 +223,7 @@ class Model extends Base\Model
 	/**
 	 * @param $condition
 	 * @return array|Collection
+	 * @throws Exception
 	 */
 	public static function get($condition): Collection|array
 	{
