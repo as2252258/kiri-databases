@@ -261,7 +261,16 @@ class Model extends Base\Model
 			}
 			$data[$key] = $this->{$method}($datum);
 		}
+		return $this->withs($data);
+	}
 
+
+	/**
+	 * @param $data
+	 * @return array
+	 */
+	private function withs($data): array
+	{
 		$with = $this->getWith();
 		foreach ($with as $value) {
 			$join = $this->{'get' . ucfirst($value)}();
