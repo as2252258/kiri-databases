@@ -11,6 +11,7 @@ namespace Database;
 
 
 use Database\Base\Getter;
+use Database\Traits\HasBase;
 use Exception;
 use Kiri;
 use Kiri\Exception\NotFindClassException;
@@ -264,6 +265,9 @@ class Model extends Base\Model
 		$with = $this->getWith();
 		foreach ($with as $value) {
 			$join = $this->{'get' . ucfirst($value)}();
+			if ($join instanceof HasBase) {
+				$join = $join->get();
+			}
 			if ($join instanceof Kiri\ToArray) {
 				$join = $join->toArray();
 			}
