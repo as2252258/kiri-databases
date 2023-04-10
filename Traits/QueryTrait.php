@@ -808,15 +808,24 @@ trait QueryTrait
 	}
 
 	/**
-	 * @param int $offset
 	 * @param int $limit
 	 *
 	 * @return $this
 	 */
-	public function limit(int $offset, int $limit = 20): static
+	public function limit(int $limit = 20): static
+	{
+		$this->limit = $limit;
+		return $this;
+	}
+
+
+	/**
+	 * @param int $offset
+	 * @return $this
+	 */
+	public function offset(int $offset): static
 	{
 		$this->offset = $offset;
-		$this->limit = $limit;
 		return $this;
 	}
 

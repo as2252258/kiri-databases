@@ -192,7 +192,7 @@ class Pagination extends Component
 		if ($this->_max > 0 && $this->_length + $this->_limit > $this->_max) {
 			$this->_limit = $this->_length + $this->_limit - $this->_max;
 		}
-		$data = $this->activeQuery->limit($this->_offset, $this->_limit)->get();
+		$data = $this->activeQuery->offset($this->_offset)->limit($this->_limit)->get();
 		$this->_offset += $this->_limit;
 
 		if (is_array($data)) {

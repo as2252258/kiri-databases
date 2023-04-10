@@ -92,7 +92,7 @@ class ActiveQuery extends Component implements ISqlBuilder
 		$offset = ($page - 1) * $size;
 
 		$count = $this->count();
-		$lists = $this->limit($offset, $size)->get()->toArray();
+		$lists = $this->offset($offset)->limit($size)->get()->toArray();
 		return [
 			'code'    => 0,
 			'message' => 'ok',
@@ -153,12 +153,12 @@ class ActiveQuery extends Component implements ISqlBuilder
 
 
 	/**
-	 * @return ModelInterface|null
-	 * @throws
+	 * @return ModelInterface|array|null
+	 * @throws Exception
 	 */
-	public function first(): ModelInterface|null
+	public function first(): ModelInterface|null|array
 	{
-		$data = $this->limit(0, 1)->execute($this->builder->one(), $this->attributes)->one();
+		$data = $this->limit(1)->execute($this->builder->one(), $this->attributes)->one();
 		if (is_array($data)) {
 			return $this->populate($data);
 		} else {
@@ -230,7 +230,8 @@ class ActiveQuery extends Component implements ISqlBuilder
 	 */
 	public function all(): Collection|array
 	{
-		if (!($data = $this->execute($this->builder->all())->all())) {
+		$data = $this->execute($this->builder->all())->all();
+		if ($data === false) {
 			return new Collection($this, [], $this->modelClass);
 		}
 
@@ -241,12 +242,17 @@ class ActiveQuery extends Component implements ISqlBuilder
 
 	/**
 	 * @param $data
-	 * @return ModelInterface
-	 * @throws
+	 * @return ModelInterface|array
+	 * @throws Exception
 	 */
-	public function populate($data): ModelInterface
+	public function populate($data): ModelInterface|array
 	{
-		return $this->modelClass::populate($data);
+		$model = $this->modelClass::populate($data);
+		if ($this->asArray) {
+			return $model->toArray();
+		} else {
+			return $model;
+		}
 	}
 
 
