@@ -62,6 +62,7 @@ class Relation extends Component
 		if (empty($activeModel)) {
 			return null;
 		}
+		unset($this->_query[$_identification]);
 		return Context::set($_identification, $activeModel);
 	}
 
@@ -79,6 +80,7 @@ class Relation extends Component
 		if (empty($activeModel)) {
 			return null;
 		}
+		unset($this->_query[$_identification]);
 		return Context::set($_identification, $activeModel);
 	}
 
@@ -96,6 +98,7 @@ class Relation extends Component
 		if (empty($activeModel)) {
 			return $activeModel;
 		}
+		unset($this->_query[$_identification]);
 		return Context::set($_identification, $activeModel);
 	}
 
