@@ -12,6 +12,7 @@ use Kiri\Annotation\AbstractAttribute;
 /**
  * Class Get
  * @package Annotation\Model
+ * @deprecated
  */
 #[Attribute(Attribute::TARGET_METHOD)] class Get extends AbstractAttribute
 {
@@ -33,8 +34,8 @@ use Kiri\Annotation\AbstractAttribute;
 	 */
 	public function execute(mixed $class, mixed $method = null): bool
 	{
-		$keys = \Kiri::getDi()->get(Getter::class);
-		$keys->write($this->name, $class, $method);
+//		$keys = \Kiri::getDi()->get(Getter::class);
+//		$keys->write($this->name, $class, $method);
 		return true;
 	}
 	

@@ -78,6 +78,12 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	/**
 	 * @var array
 	 */
+	protected array $overwriteFields  = [];
+
+
+	/**
+	 * @var array
+	 */
 	protected array $actions = [];
 
 

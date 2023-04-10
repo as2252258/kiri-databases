@@ -265,9 +265,9 @@ class Model extends Base\Model
 	public function toArray(): array
 	{
 		$data = $this->_attributes;
-		$keys = Kiri::getDi()->get(Getter::class)->getAll(static::class);
-		foreach ($keys as $key => $datum) {
-			$data[$key] = $this->{$datum}($data[$key]);
+		foreach ($this->overwriteFields as $key => $datum) {
+			$method = 'get' . ucfirst($key) . 'Attribute';
+			$data[$key] = $this->{$method}($datum);
 		}
 		return $this->withRelates($data);
 	}
@@ -284,8 +284,8 @@ class Model extends Base\Model
 		}
 		return $relates;
 	}
-	
-	
+
+
 	/**
 	 * @param ModelInterface|string $modelName
 	 * @param $foreignKey
@@ -293,13 +293,14 @@ class Model extends Base\Model
 	 * @return string
 	 * @throws Exception
 	 */
-	private function _hasBase(ModelInterface|string $modelName, $foreignKey, $localKey):string {
+	private function _hasBase(ModelInterface|string $modelName, $foreignKey, $localKey): string
+	{
 		if (($value = $this->{$localKey}) === null) {
 			throw new Exception("Need join table primary key.");
 		}
-		
+
 		$relation = $this->getRelation();
-		
+
 		$primaryKey = $modelName . $foreignKey . $value;
 		if (!$relation->hasIdentification($primaryKey)) {
 			$relation->bindIdentification($primaryKey, $modelName::query()->where([$foreignKey => $value]));

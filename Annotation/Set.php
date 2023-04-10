@@ -7,6 +7,10 @@ namespace Database\Annotation;
 use Database\Base\Setter;
 use Kiri\Annotation\AbstractAttribute;
 
+
+/**
+ * @deprecated
+ */
 #[\Attribute(\Attribute::TARGET_METHOD)] class Set extends AbstractAttribute
 {
 
@@ -27,8 +31,8 @@ use Kiri\Annotation\AbstractAttribute;
 	 */
     public function execute(mixed $class, mixed $method = null): bool
 	{
-		$keys = \Kiri::getDi()->get(Setter::class);
-		$keys->write($this->name, $class, $method);
+//		$keys = \Kiri::getDi()->get(Setter::class);
+//		$keys->write($this->name, $class, $method);
 		return true;
 	}
 
