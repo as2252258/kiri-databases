@@ -676,7 +676,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 * @param $name
 	 * @return mixed|null
 	 */
-	private function withRelate($name): mixed
+	protected function withRelate($name): mixed
 	{
 		$response = $this->{'get' . ucfirst($name)}();
 		if ($response instanceof HasBase) {

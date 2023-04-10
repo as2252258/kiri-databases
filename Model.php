@@ -274,10 +274,7 @@ class Model extends Base\Model
 	{
 		$with = $this->getWith();
 		foreach ($with as $value) {
-			$join = $this->{'get' . ucfirst($value)}();
-			if ($join instanceof HasBase) {
-				$join = $join->get();
-			}
+			$join = $this->withRelate($value);
 			if ($join instanceof Kiri\ToArray) {
 				$join = $join->toArray();
 			}
