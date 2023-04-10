@@ -60,11 +60,9 @@ class SqlBuilder extends Component
 	 * @return bool|array
 	 * @throws Exception
 	 */
-	public function update(array $attributes): bool|array
+	public function update(array $attributes): bool|string
 	{
-		[$string, $array] = $this->builderParams($attributes);
-
-		return $this->__updateBuilder($string, $array);
+		return $this->__updateBuilder($this->builderParams($attributes));
 	}
 
 
@@ -74,31 +72,28 @@ class SqlBuilder extends Component
 	 * @return bool|array
 	 * @throws Exception
 	 */
-	public function mathematics(array $attributes, string $opera = '+'): bool|array
+	public function mathematics(array $attributes, string $opera = '+'): bool|string
 	{
 		$string = [];
 		foreach ($attributes as $attribute => $value) {
 			$string[] = $attribute . '=' . $attribute . $opera . $value;
 		}
-		return $this->__updateBuilder($string, []);
+		return $this->__updateBuilder($string);
 	}
 
 
 	/**
 	 * @param array $string
-	 * @param array $params
-	 * @return array|bool
+	 * @return string|bool
 	 * @throws Exception
 	 */
-	private function __updateBuilder(array $string, array $params): array|bool
+	private function __updateBuilder(array $string): string|bool
 	{
 		if (empty($string)) {
 			return $this->logger->addError('None data update.');
 		}
 
-		$update = 'UPDATE ' . $this->tableName() . ' SET ' . implode(',', $string) . $this->_prefix();
-
-		return [$update, $params];
+		return 'UPDATE ' . $this->query->from . ' SET ' . implode(',', $string) . $this->_prefix();
 	}
 
 
@@ -110,7 +105,7 @@ class SqlBuilder extends Component
 	 */
 	public function insert(array $attributes, bool $isBatch = false): array
 	{
-		$update = 'INSERT INTO ' . $this->tableName();
+		$update = 'INSERT INTO ' . $this->query->from;
 		if ($isBatch === false) {
 			$attributes = [$attributes];
 		}
@@ -119,7 +114,7 @@ class SqlBuilder extends Component
 		$order = 0;
 		$keys = $params = [];
 		foreach ($attributes as $attribute) {
-			[$_keys, $params] = $this->builderParams($attribute, true, $params, $order);
+			$_keys = $this->builderParams($attribute, true, $order);
 
 			$keys[] = implode(',', $_keys);
 			$order++;
@@ -134,7 +129,7 @@ class SqlBuilder extends Component
 	 */
 	public function delete(): string
 	{
-		return 'DELETE FROM ' . $this->tableName() . ' WHERE ' . $this->_prefix();
+		return 'DELETE FROM ' . $this->query->from . ' WHERE ' . $this->_prefix();
 	}
 
 
@@ -151,23 +146,22 @@ class SqlBuilder extends Component
 	/**
 	 * @param array $attributes
 	 * @param bool $isInsert
-	 * @param array $params
 	 * @param int $order
 	 * @return array[]
 	 * a=:b,
 	 */
-	#[Pure] private function builderParams(array $attributes, bool $isInsert = false, array $params = [], int $order = 0): array
+	private function builderParams(array $attributes, bool $isInsert = false, int $order = 0): array
 	{
 		$keys = [];
 		foreach ($attributes as $key => $value) {
 			if ($isInsert === true) {
 				$keys[] = ':save' . $key . $order;
-				$params[':save' . $key . $order] = $value;
+				$this->query->bindParam(':save' . $key . $order, $value);
 			} else {
-				[$keys, $params] = $this->resolveParams($key, $value, $order, $params, $keys);
+				$keys = $this->resolveParams($key, $value, $order, $keys);
 			}
 		}
-		return [$keys, $params];
+		return $keys;
 	}
 
 
@@ -175,14 +169,13 @@ class SqlBuilder extends Component
 	 * @param string $key
 	 * @param mixed $value
 	 * @param int $order
-	 * @param array $params
 	 * @param array $keys
 	 * @return array
 	 */
-	private function resolveParams(string $key, mixed $value, int $order, array $params, array $keys): array
+	private function resolveParams(string $key, mixed $value, int $order, array $keys): array
 	{
 		if (is_null($value)) {
-			return [$keys, $params];
+			return $keys;
 		}
 		if (
 			str_starts_with($value, '+ ') ||
@@ -190,10 +183,10 @@ class SqlBuilder extends Component
 		) {
 			$keys[] = $key . '=' . $key . ' ' . $value;
 		} else {
-			$params[':update' . $key . $order] = $value;
+			$this->query->bindParam(':update' . $key . $order, $value);
 			$keys[] = $key . '=:update' . $key . $order;
 		}
-		return [$keys, $params];
+		return $keys;
 	}
 
 
@@ -266,7 +259,7 @@ class SqlBuilder extends Component
 		if (count($this->query->select) < 1) {
 			$this->query->select = ['*'];
 		}
-		$select = "SELECT " . implode(',', $this->query->select) . " FROM " . $this->tableName();
+		$select = "SELECT " . implode(',', $this->query->select) . " FROM " . $this->query->from;
 		if ($this->query->alias != "") {
 			$select .= " AS " . $this->query->alias;
 		}
@@ -297,7 +290,7 @@ class SqlBuilder extends Component
 	 */
 	public function truncate(): string
 	{
-		return sprintf('TRUNCATE %s', $this->tableName());
+		return sprintf('TRUNCATE %s', $this->query->from);
 	}
 
 
@@ -308,26 +301,6 @@ class SqlBuilder extends Component
 	private function conditionToString(): string
 	{
 		return $this->where($this->query->where);
-	}
-
-
-	/**
-	 * @return string
-	 * @throws Exception
-	 */
-	public function tableName(): string
-	{
-		if ($this->query->from === null) {
-			return $this->query->modelClass->getTable();
-		}
-		if ($this->query->from instanceof \Closure) {
-			return $this->query->from = '(' . $this->query->makeClosureFunction($this->query->from) . ')';
-		}
-		if ($this->query->from instanceof ActiveQuery) {
-			return $this->query->from = '(' . SqlBuilder::builder($this->query->from)->get($this->query->from) . ')';
-		} else {
-			return $this->query->from;
-		}
 	}
 
 }

@@ -128,7 +128,7 @@ class Pagination extends Component
 	 * @return void
 	 * @throws Exception
 	 */
-	public function plunk(array $param = [])
+	public function plunk(array $param = []): void
 	{
 		$this->loop($param);
 	}

@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Database;
 
+use Closure;
 use Database\Affair\Commit;
 use Database\Affair\Rollback;
 use Database\Traits\QueryTrait;
@@ -51,9 +52,34 @@ class Db implements ISqlBuilder
 
 
 	/**
+	 * @param Closure $closure
+	 * @param mixed ...$params
+	 * @return mixed
 	 * @throws ContainerExceptionInterface
 	 * @throws NotFoundExceptionInterface
-	 * @throws ReflectionException
+	 * @throws Exception
+	 */
+	public static function Transaction(Closure $closure, ...$params): mixed
+	{
+		static::beginTransaction();
+		try {
+			$result = call_user_func($closure, ...$params);
+		} catch (\Throwable $throwable) {
+			$result = logger()->addError($throwable->getMessage(), 'mysql');
+		} finally {
+			if ($result === false) {
+				static::rollback();
+			} else {
+				static::commit();
+			}
+			return $result;
+		}
+	}
+
+
+	/**
+	 * @throws ContainerExceptionInterface
+	 * @throws NotFoundExceptionInterface
 	 */
 	public static function commit(): void
 	{
@@ -67,7 +93,6 @@ class Db implements ISqlBuilder
 	 * @return void
 	 * @throws ContainerExceptionInterface
 	 * @throws NotFoundExceptionInterface
-	 * @throws ReflectionException
 	 */
 	public static function rollback(): void
 	{
@@ -290,11 +315,11 @@ class Db implements ISqlBuilder
 	/**
 	 * @param string $table
 	 * @param Connection|NULL $connection
-	 * @return mixed
+	 * @return array|bool|null
 	 * @throws ConfigException
 	 * @throws Exception
 	 */
-	public static function showCreateSql(string $table, Connection $connection = NULL): mixed
+	public static function showCreateSql(string $table, Connection $connection = NULL): array|bool|null
 	{
 		$connection = static::getDefaultConnection($connection);
 
@@ -305,11 +330,11 @@ class Db implements ISqlBuilder
 	/**
 	 * @param string $table
 	 * @param Connection|NULL $connection
-	 * @return mixed
+	 * @return array|bool|null
 	 * @throws ConfigException
 	 * @throws Exception
 	 */
-	public static function desc(string $table, Connection $connection = NULL): mixed
+	public static function desc(string $table, Connection $connection = NULL): array|bool
 	{
 		$connection = static::getDefaultConnection($connection);
 
@@ -321,12 +346,12 @@ class Db implements ISqlBuilder
 	/**
 	 * @param string $table
 	 * @param Connection|NULL $connection
-	 * @return mixed
+	 * @return array|bool|null
 	 * @throws Exception
 	 */
-	public static function show(string $table, Connection $connection = NULL): mixed
+	public static function show(string $table, Connection $connection = NULL): array|bool|null
 	{
-		if (empty($table)) {
+		if ($table == '') {
 			return null;
 		}
 		$connection = static::getDefaultConnection($connection);
@@ -342,12 +367,11 @@ class Db implements ISqlBuilder
 
 	/**
 	 * @param null|Connection $connection
-	 * @param null $name
+	 * @param string $name
 	 * @return mixed
-	 * @throws ConfigException
 	 * @throws Exception
 	 */
-	public static function getDefaultConnection(?Connection $connection, $name = null): Connection
+	public static function getDefaultConnection(?Connection $connection, string $name = 'db'): Connection
 	{
 		if ($connection instanceof Connection) {
 			return $connection;
@@ -356,13 +380,7 @@ class Db implements ISqlBuilder
 		if (empty($databases) || !is_array($databases)) {
 			throw new Exception('Please configure the database link.');
 		}
-		if (!empty($name)) {
-			if (!isset($databases[$name])) {
-				throw new Exception('Please configure the database link.');
-			}
-			return $databases[$name];
-		}
-		return current($databases);
+		return \Kiri::service()->get($databases[$name]);
 	}
 
 

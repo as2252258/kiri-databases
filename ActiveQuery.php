@@ -23,9 +23,6 @@ class ActiveQuery extends Component implements ISqlBuilder
 
 	use QueryTrait;
 
-	/** @var array */
-	public array $with = [];
-
 	/** @var bool */
 	public bool $asArray = FALSE;
 
@@ -66,7 +63,6 @@ class ActiveQuery extends Component implements ISqlBuilder
 	{
 		$this->db = NULL;
 		$this->useCache = FALSE;
-		$this->with = [];
 	}
 
 	/**
@@ -134,14 +130,12 @@ class ActiveQuery extends Component implements ISqlBuilder
 	}
 
 	/**
-	 * @param array $name
+	 * @param array $methods
 	 * @return $this
 	 */
-	public function with(array $name): static
+	public function with(array $methods): static
 	{
-		foreach ($name as $val) {
-			$this->with[] = $val;
-		}
+		$this->modelClass->setWith($methods);
 		return $this;
 	}
 
@@ -240,7 +234,6 @@ class ActiveQuery extends Component implements ISqlBuilder
 			return new Collection($this, [], $this->modelClass);
 		}
 
-		$this->getWith($this->modelClass);
 		$collect = new Collection($this, $data, $this->modelClass);
 
 		return $this->asArray ? $collect->toArray() : $collect;
@@ -253,18 +246,9 @@ class ActiveQuery extends Component implements ISqlBuilder
 	 */
 	public function populate($data): ModelInterface
 	{
-		return $this->getWith($this->modelClass::populate($data));
+		return $this->modelClass::populate($data);
 	}
 
-
-	/**
-	 * @param ModelInterface $model
-	 * @return ModelInterface
-	 */
-	public function getWith(ModelInterface $model): ModelInterface
-	{
-		return $model->setWith($this->with);
-	}
 
 	/**
 	 * @return int
@@ -291,9 +275,6 @@ class ActiveQuery extends Component implements ISqlBuilder
 		if (is_bool($generate)) {
 			return $generate;
 		}
-
-		var_dump($this->attributes, $generate[1]);
-		var_dump(array_merge($this->attributes, $generate[1]));
 
 		$generate[1] = array_merge($this->attributes, $generate[1]);
 

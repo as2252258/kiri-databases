@@ -34,7 +34,7 @@ trait QueryTrait
 	public int $offset = 0;
 	public int $limit = 500;
 	public string $group = '';
-	public string|Closure|ActiveQuery|null $from = null;
+	public string $from = '';
 	public string $alias = 't1';
 	public array $filter = [];
 
@@ -103,7 +103,7 @@ trait QueryTrait
 	 */
 	public function whereRaw(string $whereRaw): static
 	{
-		if (empty($whereRaw)) {
+		if ($whereRaw == '') {
 			return $this;
 		}
 		$this->where[] = $whereRaw;
@@ -112,36 +112,10 @@ trait QueryTrait
 
 
 	/**
-	 * @param string|array|Closure $condition
-	 * @param string|array|Closure $condition1
-	 * @param string|array|Closure $condition2
-	 * @return $this
-	 * @throws
-	 */
-	public function whereIf(string|array|Closure $condition, string|array|Closure $condition1, string|array|Closure $condition2): static
-	{
-		if (!is_string($condition)) {
-			$condition = $this->makeClosureFunction($condition);
-		}
-
-		if (!is_string($condition1)) {
-			$condition1 = $this->makeClosureFunction($condition1);
-		}
-
-		if (!is_string($condition2)) {
-			$condition2 = $this->makeClosureFunction($condition2);
-		}
-
-		$this->where[] = 'IF(' . $condition . ', ' . $condition1 . ', ' . $condition2 . ')';
-		return $this;
-	}
-
-
-	/**
-	 * @param $bool
+	 * @param bool $bool
 	 * @return $this
 	 */
-	public function ifNotWhere($bool): static
+	public function ifNotWhere(bool $bool): static
 	{
 		$this->ifNotWhere = $bool;
 		return $this;
@@ -210,27 +184,6 @@ trait QueryTrait
 		return $this;
 	}
 
-	/**
-	 * @param array|Closure|string $columns
-	 * @return $this
-	 */
-	public function filter(array|Closure|string $columns): static
-	{
-		if (!$columns) {
-			return $this;
-		}
-		if (is_callable($columns, TRUE)) {
-			return call_user_func($columns, $this);
-		}
-		if (is_string($columns)) {
-			$columns = explode(',', $columns);
-		}
-		if (!is_array($columns)) {
-			return $this;
-		}
-		$this->filter = $columns;
-		return $this;
-	}
 
 	/**
 	 * @param string $alias
@@ -252,6 +205,9 @@ trait QueryTrait
 	 */
 	public function from(string|Closure $tableName): static
 	{
+		if ($tableName instanceof Closure) {
+			$tableName = call_user_func($tableName, $this->makeNewSqlGenerate());
+		}
 		$this->from = $tableName;
 		return $this;
 	}
@@ -325,7 +281,7 @@ trait QueryTrait
 			}
 			$tableName = $model->getTable();
 		}
-		return $this->join(...["LEFT JOIN " . $tableName, $alias, $onCondition, $param]);
+		return $this->join("LEFT JOIN " . $tableName, $alias, $onCondition, $param);
 	}
 
 	/**
@@ -345,7 +301,7 @@ trait QueryTrait
 			}
 			$tableName = $model->getTable();
 		}
-		return $this->join(...["RIGHT JOIN " . $tableName, $alias, $onCondition, $param]);
+		return $this->join("RIGHT JOIN " . $tableName, $alias, $onCondition, $param);
 	}
 
 	/**
@@ -365,7 +321,7 @@ trait QueryTrait
 			}
 			$tableName = $model->getTable();
 		}
-		return $this->join(...["INNER JOIN " . $tableName, $alias, $onCondition, $param]);
+		return $this->join("INNER JOIN " . $tableName, $alias, $onCondition, $param);
 	}
 
 	/**

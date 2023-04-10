@@ -46,27 +46,16 @@ use validator\Validator;
 abstract class Model extends Component implements ModelInterface, ArrayAccess, ToArray
 {
 
-	const GET = 'get';
-
-
-	const SET = 'set';
-
 	/** @var array */
 	protected array $_attributes = [];
+
 
 	/** @var array */
 	protected array $_oldAttributes = [];
 
-	/** @var array */
-	protected array $_relate = [];
 
 	/** @var null|string */
 	protected ?string $primary = NULL;
-
-	/**
-	 * @var array
-	 */
-	private array $_annotations = [];
 
 
 	/**
@@ -76,15 +65,9 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 
 
 	/**
-	 * @var array
+	 * @var bool
 	 */
-	protected array $overwriteFields  = [];
-
-
-	/**
-	 * @var array
-	 */
-	protected array $actions = [];
+	protected bool $skipValidate = false;
 
 
 	/**
@@ -103,6 +86,18 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 * @var array
 	 */
 	protected array $_with = [];
+
+
+	/**
+	 * @param array $config
+	 * @throws Exception
+	 */
+	public function __construct(array $config = [])
+	{
+		parent::__construct($config);
+
+		$this->init();
+	}
 
 
 	/**
@@ -164,15 +159,6 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 
 
 	/**
-	 * @return array
-	 */
-	public function getActions(): array
-	{
-		return $this->actions;
-	}
-
-
-	/**
 	 * @return bool
 	 */
 	public function getIsNowExample(): bool
@@ -209,31 +195,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function hasPrimary(): bool
 	{
-		if ($this->primary !== NULL) {
-			return TRUE;
-		}
-		$primary = $this->getColumns()->getPrimaryKeys();
-		if (!empty($primary)) {
-			return $this->primary = is_array($primary) ? current($primary) : $primary;
-		}
-		return FALSE;
-	}
-
-
-	/**
-	 * @throws Exception
-	 */
-	public function isAutoIncrement(): bool
-	{
-		return $this->getAutoIncrement() !== NULL;
-	}
-
-	/**
-	 * @throws Exception
-	 */
-	public function getAutoIncrement(): int|string|null
-	{
-		return $this->getColumns()->getAutoIncrement();
+		return $this->primary !== NULL && $this->primary !== '';
 	}
 
 	/**
@@ -256,7 +218,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	public function hasPrimaryValue(): bool
 	{
 		if ($this->hasPrimary()) {
-			return !empty($this->{$this->getPrimary()});
+			return $this->getPrimaryValue() === null;
 		}
 		return false;
 	}
@@ -269,87 +231,20 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	public function getPrimaryValue(): ?int
 	{
 		if ($this->hasPrimary()) {
-			return $this->getAttribute($this->primary);
+			return $this->getAttribute($this->getPrimary());
 		}
 		return null;
 	}
 
 	/**
-	 * @param int|array|string|null $param
+	 * @param array|string $param
 	 * @param null $db
 	 * @return Model|null
-	 * @throws NotFindClassException
-	 * @throws ReflectionException
 	 * @throws Exception
 	 */
-	public static function findOne(int|array|string|null $param, $db = NULL): static|null
+	public static function findOne(array|string $param, $db = NULL): static|null
 	{
-		if (is_null($param)) {
-			return NULL;
-		}
-		if (is_numeric($param)) {
-			$param = static::getPrimaryCondition($param);
-		}
 		return static::query()->where($param)->first();
-	}
-
-
-	/**
-	 * @param $param
-	 * @return array
-	 * @throws Exception
-	 */
-	private static function getPrimaryCondition($param): array
-	{
-		$primary = static::makeNewInstance()->getColumns()->getPrimaryKeys();
-		if (empty($primary)) {
-			throw new Exception('Primary key cannot be empty.');
-		}
-		if (is_array($primary)) {
-			$primary = current($primary);
-		}
-		return [$primary => $param];
-	}
-
-
-	/**
-	 * @param null $field
-	 * @return ModelInterface|null
-	 * @throws Exception
-	 * @throws Exception
-	 */
-	public static function max($field = NULL): ?ModelInterface
-	{
-		$columns = static::makeNewInstance()->getColumns();
-		if (empty($field)) {
-			$field = $columns->getFirstPrimary();
-		}
-		$columns = $columns->get_fields();
-		if (!isset($columns[$field])) {
-			return NULL;
-		}
-		$first = static::query()->max($field)->first();
-		if (empty($first)) {
-			return NULL;
-		}
-		return $first[$field];
-	}
-
-
-	/**
-	 * @param string|int $param
-	 * @return Model|null
-	 * @throws NotFindClassException
-	 * @throws ReflectionException
-	 * @throws Exception
-	 */
-	public static function find(string|int $param): ?static
-	{
-		$columns = (new static())->getPrimary();
-		if (empty($columns)) {
-			$columns = static::makeNewInstance()->getColumns()->getFirstPrimary();
-		}
-		return static::query()->where([$columns => $param])->first();
 	}
 
 
@@ -375,10 +270,12 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 
 	/**
 	 * @return ActiveQuery
+	 * @throws Exception
 	 */
 	public static function query(): ActiveQuery
 	{
-		return new ActiveQuery(new static());
+		$model = new static();
+		return (new ActiveQuery($model))->from($model->getTable())->alias('t1');
 	}
 
 
@@ -396,11 +293,10 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 * @param null $condition
 	 * @param array $attributes
 	 *
-	 * @param bool $if_condition_is_null
 	 * @return bool
 	 * @throws Exception
 	 */
-	protected static function deleteByCondition($condition = NULL, array $attributes = [], bool $if_condition_is_null = FALSE): bool
+	protected static function deleteByCondition($condition = NULL, array $attributes = []): bool
 	{
 		$model = static::query();
 		if (!empty($condition)) {
@@ -435,9 +331,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function setAttribute($name, $value): mixed
 	{
-		$keys = Kiri::getDi()->get(Setter::class);
-		if ($keys->has(static::class, $name)) {
-			$method = $keys->get(static::class, $name);
+		$method = 'set' . ucfirst($name) . 'Attribute';
+		if (method_exists($this, $method)) {
 			$value = $this->{$method}($value);
 		}
 		return $this->_attributes[$name] = $value;
@@ -451,8 +346,9 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function setOldAttribute($name, $value): mixed
 	{
-		if (method_exists($this, 'set' . ucfirst($name) . 'Attribute')) {
-			$value = $this->{'set' . ucfirst($name) . 'Attribute'}($value);
+		$method = 'set' . ucfirst($name) . 'Attribute';
+		if (method_exists($this, $method)) {
+			$value = $this->{$method}($value);
 		}
 		return $this->_oldAttributes[$name] = $value;
 	}
@@ -464,7 +360,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function setAttributes(array $param): static
 	{
-		if (empty($param)) {
+		if (count($param) < 1) {
 			return $this;
 		}
 		foreach ($param as $key => $attribute) {
@@ -475,13 +371,13 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 
 
 	/**
-	 * @param $param
+	 * @param array $param
 	 * @return $this
 	 * @throws ReflectionException
 	 */
-	public function setOldAttributes($param): static
+	public function setOldAttributes(array $param): static
 	{
-		if (empty($param) || !is_array($param)) {
+		if (count($param) < 1) {
 			return $this;
 		}
 		foreach ($param as $key => $attribute) {
@@ -492,105 +388,96 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 
 
 	/**
-	 * @param $attributes
-	 * @param $param
 	 * @return $this|bool
 	 * @throws Exception
 	 */
-	private function insert($param, $attributes): bool|static
+	private function insert(): bool|static
 	{
-		[$sql, $param] = SqlBuilder::builder(static::query())->insert($param);
+		[$sql, $param] = SqlBuilder::builder(static::query())->insert($this->_attributes);
+
 		$dbConnection = $this->getConnection()->createCommand($sql, $param);
 
 		$lastId = $dbConnection->save();
-		if ($this->isAutoIncrement()) {
-			$lastId = $this->setPrimary((int)$lastId, $param);
-		} else {
-			$lastId = $this;
+		if ($lastId === false) {
+			return false;
 		}
-
-		$this->setIsNowExample(false);
-
-		$this->refresh()->afterSave($attributes, $param);
-
-		return $lastId;
-	}
-
-
-	/**
-	 * @param $lastId
-	 * @param $param
-	 * @return static
-	 * @throws Exception
-	 */
-	private function setPrimary($lastId, $param): static
-	{
-		if ($this->isAutoIncrement()) {
-			$this->setAttribute($this->getAutoIncrement(), (int)$lastId);
-			return $this;
-		}
-
-		if (!$this->hasPrimary()) {
-			return $this;
-		}
-
-		$primary = $this->getPrimary();
-		if (empty($param[$primary])) {
-			$this->setAttribute($primary, (int)$lastId);
+		if ($this->hasPrimary()) {
+			$this->_attributes[$this->getPrimary()] = $lastId;
 		}
 		return $this;
 	}
 
 
 	/**
-	 * @param $fields
-	 * @param $condition
-	 * @param $param
+	 * @param array $old
+	 * @param array|string $condition
+	 * @param array $change
 	 * @return $this|bool
 	 * @throws Exception
 	 */
-	private function updateInternal($fields, $condition, $param): bool|static
+	protected function updateInternal(array $old, array|string $condition, array $change): bool|static
 	{
-		if (empty($param)) {
-			return TRUE;
-		}
-		if ($this->hasPrimary()) {
-			$condition = [$this->getPrimary() => $this->getPrimaryValue()];
-		}
-
 		$query = static::query()->where($condition);
-		$generate = SqlBuilder::builder($query)->update($param);
-		if (is_bool($generate)) {
-			return $generate;
+		$generate = SqlBuilder::builder($query)->update($change);
+		if ($generate === false) {
+			return false;
 		}
 
-		$generate[1] = array_merge($query->attributes, $generate[1]);
-		$command = $this->getConnection()->createCommand($generate[0], $generate[1]);
+		$command = $this->getConnection()->createCommand($generate, $query->attributes);
 		if ($command->save()) {
-			return $this->refresh()->afterSave($fields, $param);
+			return $this->refresh()->afterSave($old, $change);
+		} else {
+			return FALSE;
 		}
-		return FALSE;
 	}
 
 	/**
-	 * @param null $data
+	 * @param array $data
 	 * @return bool|$this
 	 * @throws Exception
 	 */
-	public function save($data = NULL): static|bool
+	public function save(array $data = []): static|bool
 	{
-		if (!is_null($data)) {
-			$this->_attributes = merge($this->_attributes, $data);
+		if (count($data) > 0) {
+			$this->_attributes = array_merge($this->_attributes, $data);
 		}
+		if (!$this->isNewExample) {
+			if (!$this->validator($this->rules()) || !$this->beforeSave($this)) {
+				return FALSE;
+			}
+
+			[$changes, $condition] = $this->diff();
+
+			return $this->updateInternal($condition, $condition, $changes);
+		} else {
+			return $this->create();
+		}
+	}
+
+
+	/**
+	 * @return array<array, array>
+	 */
+	private function diff(): array
+	{
+		$changes = array_diff_assoc($this->_oldAttributes, $this->_attributes);
+
+		$condition = array_intersect_key($this->_oldAttributes, $this->_attributes);
+
+		return [$changes, $condition];
+	}
+
+
+	/**
+	 * @return $this|bool
+	 * @throws Exception
+	 */
+	protected function create(): bool|static
+	{
 		if (!$this->validator($this->rules()) || !$this->beforeSave($this)) {
 			return FALSE;
 		}
-		[$change, $condition, $fields] = $this->separation();
-		if (!$this->getIsNowExample()) {
-			return $this->updateInternal($fields, $condition, $change);
-		} else {
-			return $this->insert($change, $fields);
-		}
+		return $this->insert();
 	}
 
 
@@ -602,19 +489,21 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	{
 		$this->_attributes = $value;
 		$this->_oldAttributes = $value;
-		$this->setIsNowExample(FALSE);
+		$this->setIsNowExample();
 		return $this;
 	}
 
 
 	/**
-	 * @param array|null $rule
+	 * @param array $rule
 	 * @return bool
 	 * @throws Exception
 	 */
-	public function validator(?array $rule): bool
+	public function validator(array $rule): bool
 	{
-		if (empty($rule)) return TRUE;
+		if (count($rule) < 1 || $this->skipValidate) {
+			return TRUE;
+		}
 		$validate = $this->resolve($rule);
 		if (!$validate->validation()) {
 			return $this->logger->addError($validate->getError(), 'mysql');
@@ -630,9 +519,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	private function resolve($rule): Validator
 	{
-		$validate = Validator::getInstance();
-		$validate->setParams($this->_attributes);
-		$validate->setModel($this);
+		$validate = Validator::instance($this->_attributes, $this);
 		foreach ($rule as $val) {
 			$field = array_shift($val);
 
@@ -653,97 +540,6 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 
 
 	/**
-	 * @param string $name
-	 * @param mixed $value
-	 * @param string $type
-	 * @return mixed
-	 */
-	protected function runAnnotation(string $name, mixed $value, string $type = self::GET): mixed
-	{
-		return call_user_func($this->_annotations[$type][$name], $value);
-	}
-
-
-	/**
-	 * @return array
-	 * @throws Exception
-	 */
-	private function separation(): array
-	{
-		$assoc = array_diff_assoc($this->_attributes, $this->_oldAttributes);
-
-		$column = $this->getColumns();
-
-		$uassoc = array_intersect_assoc($this->_attributes, $this->_oldAttributes);
-		foreach ($assoc as $key => $item) {
-			$encode = $column->get_fields($key);
-			if ($column->isString($encode) && $item === null) {
-				unset($assoc[$key]);
-			}
-		}
-		return [$assoc, $uassoc, array_keys($assoc)];
-	}
-
-
-	/**
-	 * @param $columns
-	 * @param $format
-	 * @param $key
-	 * @param $value
-	 * @return mixed
-	 */
-	public function toFormat($columns, $format, $key, $value): mixed
-	{
-		if (isset($format[$key])) {
-			return $columns->encode($value, $columns->clean($format[$key]));
-		}
-		return $value;
-	}
-
-
-	/**
-	 * @param $name
-	 * @param $value
-	 */
-	public function setRelate($name, $value)
-	{
-		$this->_relate[$name] = $value;
-	}
-
-
-	/**
-	 * @param $name
-	 * @return bool
-	 */
-	public function hasRelate($name): bool
-	{
-		return isset($this->_relate[$name]);
-	}
-
-
-	/**
-	 * @param array $relates
-	 */
-	public function setRelates(array $relates)
-	{
-		if (empty($relates)) {
-			return;
-		}
-		foreach ($relates as $key => $val) {
-			$this->setRelate($key, $val);
-		}
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getRelates(): array
-	{
-		return $this->_relate;
-	}
-
-
-	/**
 	 * @return Relation|null
 	 */
 	public function getRelation(): ?Relation
@@ -759,7 +555,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function has($attribute): bool
 	{
-		return static::makeNewInstance()->getColumns()->hasField($attribute);
+		return true;
 	}
 
 	/**ƒ
@@ -783,22 +579,22 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 
 
 	/**
-	 * @param $attributes
+	 * @param $oldAttributes
 	 * @param $changeAttributes
 	 * @return bool
-	 * @throws Exception
 	 */
-	public function afterSave($attributes, $changeAttributes): bool
+	public function afterSave($oldAttributes, $changeAttributes): bool
 	{
 		return TRUE;
 	}
 
 
 	/**
-	 * @param $model
+	 * @param self $model
 	 * @return bool
+	 * @throws Exception
 	 */
-	public function beforeSave($model): bool
+	public function beforeSave(self $model): bool
 	{
 		return TRUE;
 	}
@@ -820,13 +616,14 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function __set($name, $value): void
 	{
-		$method = 'set' . ucfirst($name);
-		if (method_exists($this, $method)) {
-			$this->{$method}($value);
+		if ($this->hasRelateMethod($name, 'set')) {
+			$this->{'set' . ucfirst($name)}($value);
 		} else {
-			$overrideSetter = Kiri::getDi()->get(Setter::class);
-
-			$this->_attributes[$name] = $overrideSetter->override($this, $name, $value);
+			$method = 'set' . ucfirst($name) . 'Attribute';
+			if (method_exists($this, $method)) {
+				$value = $this->{$method} ($value);
+			}
+			$this->_attributes[$name] = $value;
 		}
 	}
 
@@ -838,10 +635,11 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function __get($name): mixed
 	{
-		if (isset($this->_attributes[$name])) {
-			return $this->withPropertyOverride($name);
+		$value = $this->_attributes[$name] ?? null;
+		if (!$this->hasRelateMethod($name)) {
+			return $this->withPropertyOverride($name, $value);
 		} else {
-			return $this->getRelateValue($name);
+			return $this->withRelate($name);
 		}
 	}
 
@@ -854,23 +652,23 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	protected function withPropertyOverride($name, $value = null): mixed
 	{
-		if (is_null($value)) {
-			$value = $this->_attributes[$name] ?? NULL;
+		$method = 'get' . ucfirst($name) . 'Attribute';
+		if (method_exists($this, $method)) {
+			return $this->{$method}($value);
+		} else {
+			return $value;
 		}
-
-		$overrideGetter = Kiri::getDi()->get(Getter::class);
-
-		return $overrideGetter->override($this, $name, $value);
 	}
 
 
 	/**
-	 * @param $name
+	 * @param string $name
+	 * @param string $prefix
 	 * @return bool
 	 */
-	protected function hasRelateMethod($name): bool
+	protected function hasRelateMethod(string $name, string $prefix = 'get'): bool
 	{
-		return method_exists($this, 'get' . ucfirst($name));
+		return method_exists($this, $prefix . ucfirst($name));
 	}
 
 
@@ -878,25 +676,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 * @param $name
 	 * @return mixed|null
 	 */
-	protected function withRelate($name): mixed
+	private function withRelate($name): mixed
 	{
-		$response = $this->getRelateValue($name);
-		if ($response instanceof ToArray) {
-			$response = $response->toArray();
-		}
-		return $response;
-	}
-
-
-	/**
-	 * @param $name
-	 * @return mixed
-	 */
-	protected function getRelateValue($name): mixed
-	{
-		if (!$this->hasRelateMethod($name)) {
-			return null;
-		}
 		$response = $this->{'get' . ucfirst($name)}();
 		if ($response instanceof HasBase) {
 			$response = $response->get();
@@ -904,42 +685,6 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		return $response;
 	}
 
-
-	/**
-	 * @param $name
-	 * @param $value
-	 * @return mixed
-	 * @throws Exception
-	 */
-	protected function _decode($name, $value): mixed
-	{
-		return $this->getColumns()->_decode($name, $value);
-	}
-
-
-	/**
-	 * @param $name
-	 * @return mixed
-	 */
-	private function with($name): mixed
-	{
-		$data = $this->{$this->_relate[$name]}();
-		if ($data instanceof HasBase) {
-			return $data->get();
-		}
-		return $data;
-	}
-
-
-	/**
-	 * @param $item
-	 * @param $data
-	 * @return array
-	 */
-	protected function resolveAttributes($item, $data): array
-	{
-		return call_user_func($item, $data);
-	}
 
 	/**
 	 * @param $name
@@ -993,9 +738,6 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		}
 		unset($this->_attributes[$offset]);
 		unset($this->_oldAttributes[$offset]);
-		if (isset($this->_relate)) {
-			unset($this->_relate[$offset]);
-		}
 	}
 
 	/**
@@ -1018,6 +760,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 			->table($this->getTable());
 	}
 
+
 	/**
 	 * @param array $data
 	 * @return static
@@ -1025,32 +768,11 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public static function populate(array $data): static
 	{
-		$model = instance(static::class);
+		$model = new static();
 		$model->_attributes = $data;
 		$model->_oldAttributes = $data;
-		$model->setIsNowExample(FALSE);
+		$model->setIsNowExample();
 		return $model;
-	}
-	
-	
-	/**
-	 * @return void
-	 */
-	public function __clone(): void
-	{
-	}
-	
-	
-	/**
-	 * @param $method
-	 * @param $value
-	 * @return Closure
-	 */
-	protected function dispatcher($method, $value): Closure
-	{
-		return function () use ($method, $value) {
-			return $this->{$method}($value);
-		};
 	}
 
 

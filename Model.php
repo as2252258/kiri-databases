@@ -15,6 +15,8 @@ use Exception;
 use Kiri;
 use Kiri\Exception\NotFindClassException;
 use Kiri\Error\StdoutLoggerInterface;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use ReflectionException;
 
 defined('SAVE_FAIL') or define('SAVE_FAIL', 3227);
@@ -99,31 +101,20 @@ class Model extends Base\Model
 	/**
 	 * @param array $condition
 	 * @param array $attributes
-	 * @return bool|ModelInterface
-	 * @throws ReflectionException
-	 * @throws NotFindClassException
-	 * @throws Exception
+	 * @return bool|static
+	 * @throws ContainerExceptionInterface
+	 * @throws NotFoundExceptionInterface
 	 */
 	public static function findOrCreate(array $condition, array $attributes): bool|static
 	{
-		$logger = Kiri::getDi()->get(StdoutLoggerInterface::class);
-		if (empty($attributes)) {
-			return $logger->addError(FIND_OR_CREATE_MESSAGE, 'mysql');
-		}
-
-		/** @var static $select */
-		$select = static::query()->where($condition)->first();
-		if (!empty($select)) {
+		return Db::Transaction(function ($condition, $attributes) {
+			/** @var static $select */
+			$select = static::query()->where($condition)->first();
+			if ($select === null) {
+				$select = static::populate(array_merge($condition, $attributes))->create();
+			}
 			return $select;
-		}
-
-		$select = new static();
-		$select->setAttributes($condition);
-		$select->setAttributes($attributes);
-		if (!$select->save()) {
-			throw new Exception($select->getLastError());
-		}
-		return $select;
+		}, $condition, $attributes);
 	}
 
 
@@ -131,25 +122,19 @@ class Model extends Base\Model
 	 * @param array $condition
 	 * @param array $attributes
 	 * @return bool|static
-	 * @throws Exception
+	 * @throws ContainerExceptionInterface
+	 * @throws NotFoundExceptionInterface
 	 */
 	public static function createOrUpdate(array $condition, array $attributes = []): bool|static
 	{
-		$logger = Kiri::getDi()->get(StdoutLoggerInterface::class);
-		if (empty($attributes)) {
-			return $logger->addError(FIND_OR_CREATE_MESSAGE, 'mysql');
-		}
-		/** @var static $select */
-		$select = static::query()->where($condition)->first();
-		if (empty($select)) {
-			$select = new static();
-			$select->setAttributes($condition);
-		}
-		$select->setAttributes($attributes);
-		if (!$select->save()) {
-			throw new Exception($select->getLastError());
-		}
-		return $select;
+		return Db::Transaction(function ($condition, $attributes) {
+			/** @var static $select */
+			$select = static::query()->where($condition)->first();
+			if (empty($select)) {
+				$select = static::populate($condition);
+			}
+			return $select->save($attributes);
+		}, $condition, $attributes);
 	}
 
 
@@ -168,18 +153,26 @@ class Model extends Base\Model
 		if (is_bool($create)) {
 			return false;
 		}
-		return $this->getConnection()->createCommand($create[0], $create[1])->exec();
+		return $this->getConnection()->createCommand($create, $activeQuery->attributes)->exec();
 	}
 
 
 	/**
-	 * @param array $fields
+	 * @param array $params
 	 * @return ModelInterface|bool
 	 * @throws Exception
 	 */
-	public function update(array $fields): static|bool
+	public function update(array $params): static|bool
 	{
-		return $this->save($fields);
+		if (!$this->validator($this->rules()) || !$this->beforeSave($this)) {
+			return FALSE;
+		}
+
+		$condition = array_diff_assoc($this->_oldAttributes, $params);
+
+		$old = array_intersect_key($this->_oldAttributes, $params);
+
+		return $this->updateInternal($old, $condition, $params);
 	}
 
 
@@ -202,18 +195,13 @@ class Model extends Base\Model
 	 */
 	public function delete(): bool
 	{
-		$primary = $this->getPrimary();
-		if (empty($primary) || !$this->hasPrimaryValue()) {
-			return $this->logger->addError("Only primary key operations are supported.", 'mysql');
-		}
-		if (!$this->beforeDelete()) {
+		if ($this->beforeDelete()) {
+			$result = static::deleteByCondition($this->_attributes);
+
+			return $this->afterDelete($result);
+		} else {
 			return false;
 		}
-		$result = static::deleteByCondition([$primary => $this->getPrimaryValue()]);
-
-		$this->afterDelete($result);
-
-		return $result;
 	}
 
 
@@ -265,24 +253,23 @@ class Model extends Base\Model
 	public function toArray(): array
 	{
 		$data = $this->_attributes;
-		foreach ($this->overwriteFields as $key => $datum) {
+		foreach ($data as $key => $datum) {
 			$method = 'get' . ucfirst($key) . 'Attribute';
+			if (!method_exists($this, $method)) {
+				continue;
+			}
 			$data[$key] = $this->{$method}($datum);
 		}
-		return $this->withRelates($data);
-	}
 
-	/**
-	 * @param $relates
-	 * @return array
-	 * @throws Exception
-	 */
-	private function withRelates($relates): array
-	{
-		foreach ($this->_with as $val) {
-			$relates[$val] = $this->withRelate($val);
+		$with = $this->getWith();
+		foreach ($with as $value) {
+			$join = $this->{'get' . ucfirst($value)}();
+			if ($join instanceof Kiri\ToArray) {
+				$join = $join->toArray();
+			}
+			$data[$value] = $join;
 		}
-		return $relates;
+		return $data;
 	}
 
 
@@ -372,10 +359,11 @@ class Model extends Base\Model
 
 	/**
 	 * @param bool $result
-	 * @return void
+	 * @return bool
 	 */
-	public function afterDelete(bool $result): void
+	public function afterDelete(bool $result): bool
 	{
+		return $result;
 	}
 
 	/**

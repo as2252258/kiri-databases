@@ -70,12 +70,12 @@ trait Builder
 
 
 	/**
-	 * @param $group
+	 * @param string $group
 	 * @return string
 	 */
-	private function builderGroup($group): string
+	private function builderGroup(string $group): string
 	{
-		if (empty($group)) {
+		if ($group != '') {
 			return '';
 		}
 		return ' GROUP BY ' . $group;
@@ -143,7 +143,8 @@ trait Builder
 	private function resolveCondition($field, $condition, $_tmp): string
 	{
 		if (is_string($field)) {
-			return $field . ' = \'' . $condition . '\'';
+			$this->query->bindParam(':where' . $field, $condition);
+			return $field . ' = ' . ':where' . $field;
 		} else if (is_string($condition)) {
 			return $condition;
 		} else {
@@ -192,9 +193,6 @@ trait Builder
 	}
 
 
-	public array $params = [];
-
-
 	/**
 	 * @param $condition
 	 * @return array
@@ -203,12 +201,8 @@ trait Builder
 	{
 		$_array = [];
 		foreach ($condition as $key => $value) {
-			if (!is_numeric($key)) {
-				$this->query->bindParam(':' . $key, $value);
-				$_array[] = $key . '=:' . $key;
-			} else {
-				$_array[] = $value;
-			}
+			$this->query->bindParam(':hash' . $key, $value);
+			$_array[] = $key . '=:hash' . $key;
 		}
 		return $_array;
 	}

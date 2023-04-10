@@ -28,19 +28,19 @@ class Command extends Component
 	const FETCH_ALL = 'fetchAll';
 	const EXECUTE = 'execute';
 	const FETCH_COLUMN = 'fetchColumn';
-	
+
 	const DB_ERROR_MESSAGE = 'The system is busy, please try again later.';
-	
+
 	/** @var Connection */
 	public Connection $connection;
-	
+
 	/** @var ?string */
 	public ?string $sql = '';
-	
+
 	/** @var array */
 	public array $params = [];
-	
-	
+
+
 	/**
 	 * @return int|bool
 	 * @throws Exception
@@ -49,7 +49,7 @@ class Command extends Component
 	{
 		return $this->_execute();
 	}
-	
+
 	/**
 	 * @return int|bool
 	 * @throws Exception
@@ -58,13 +58,13 @@ class Command extends Component
 	{
 		return $this->_execute();
 	}
-	
-	
+
+
 	/**
-	 * @return bool|array|null
+	 * @return bool|array
 	 * @throws Exception
 	 */
-	public function all(): null|bool|array
+	public function all(): bool|array
 	{
 		try {
 			$client = $this->connection->getConnection();
@@ -82,7 +82,7 @@ class Command extends Component
 			$this->connection->release($client ?? null);
 		}
 	}
-	
+
 	/**
 	 * @return bool|array|null
 	 * @throws Exception
@@ -105,7 +105,7 @@ class Command extends Component
 			$this->connection->release($client ?? null);
 		}
 	}
-	
+
 	/**
 	 * @return bool|array|null
 	 * @throws Exception
@@ -128,7 +128,7 @@ class Command extends Component
 			$this->connection->release($client ?? null);
 		}
 	}
-	
+
 	/**
 	 * @return int|bool
 	 * @throws Exception
@@ -151,8 +151,8 @@ class Command extends Component
 			$this->connection->release($client ?? null);
 		}
 	}
-	
-	
+
+
 	/**
 	 * @return int|bool
 	 * @throws Exception
@@ -161,7 +161,7 @@ class Command extends Component
 	{
 		return $this->_execute();
 	}
-	
+
 	/**
 	 * @return bool|int
 	 * @throws ConfigException
@@ -179,7 +179,7 @@ class Command extends Component
 			}
 			$result = $client->lastInsertId();
 			$prepare->closeCursor();
-			
+
 			if (!$client->inTransaction()) {
 				$this->connection->release($client);
 			}
@@ -191,8 +191,8 @@ class Command extends Component
 			return $this->error($throwable);
 		}
 	}
-	
-	
+
+
 	/**
 	 * @param \Throwable $throwable
 	 * @return bool
@@ -202,8 +202,8 @@ class Command extends Component
 		$message = $this->sql . '.' . json_encode($this->params, JSON_UNESCAPED_UNICODE);
 		return $this->logger->addError($message . $throwable->getMessage(), 'mysql');
 	}
-	
-	
+
+
 	/**
 	 * @return int|bool
 	 * @throws Exception
@@ -212,7 +212,7 @@ class Command extends Component
 	{
 		return $this->_execute();
 	}
-	
+
 	/**
 	 * @return int|bool
 	 * @throws Exception
@@ -221,7 +221,7 @@ class Command extends Component
 	{
 		return $this->_execute();
 	}
-	
+
 	/**
 	 * @param array $data
 	 * @return $this
@@ -233,7 +233,7 @@ class Command extends Component
 		}
 		return $this;
 	}
-	
+
 	/**
 	 * @param $sql
 	 * @return $this
@@ -244,5 +244,5 @@ class Command extends Component
 		$this->sql = $sql;
 		return $this;
 	}
-	
+
 }
