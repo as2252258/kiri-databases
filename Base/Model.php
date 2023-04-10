@@ -1019,7 +1019,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public static function populate(array $data): static
 	{
-		$model = replica(static::class);
+		$model = instance(static::class);
 		$model->_attributes = $data;
 		$model->_oldAttributes = $data;
 		$model->setIsNowExample(FALSE);
