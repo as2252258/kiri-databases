@@ -29,6 +29,6 @@ class HasMany extends HasBase
 	public function get(): array|Collection|null
 	{
 		$relation = Kiri::getDi()->get(Relation::class);
-		return $relation->getQuery($this->name)->get();
+		return $relation->get($this->name);
 	}
 }

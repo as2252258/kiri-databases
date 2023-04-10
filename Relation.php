@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Database;
 
 
+use Exception;
 use Kiri\Abstracts\Component;
 use Kiri\Di\Context;
 
@@ -13,8 +14,6 @@ use Kiri\Di\Context;
  */
 class Relation extends Component
 {
-
-	private array $_relations = [];
 
 	/** @var ActiveQuery[] $_query */
 	private array $_query = [];
@@ -52,6 +51,7 @@ class Relation extends Component
 	/**
 	 * @param string $_identification
 	 * @return mixed
+	 * @throws Exception
 	 */
 	public function first(string $_identification): mixed
 	{
