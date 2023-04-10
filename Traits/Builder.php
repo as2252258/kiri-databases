@@ -96,16 +96,11 @@ trait Builder
 
 	/**
 	 * @param ActiveQuery|Query $query
-	 * @param bool $hasLimit
 	 * @return string
 	 */
-	#[Pure] private function builderLimit(ActiveQuery|Query $query, bool $hasLimit = true): string
+	#[Pure] private function builderLimit(ActiveQuery|Query $query): string
 	{
-		if ($hasLimit) {
-			return ' LIMIT ' . $query->offset . ',' . $query->limit;
-		} else {
-			return ' LIMIT ' . $query->limit;
-		}
+		return ' LIMIT ' . $query->offset . ',' . $query->limit;
 	}
 
 
