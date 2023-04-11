@@ -14,6 +14,8 @@ use Kiri\Events\EventProvider;
 use Kiri\Annotation\Inject;
 use Kiri\Server\Events\OnWorkerStart;
 use Kiri\Server\Events\OnTaskerStart;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use Kiri\Server\Events\OnWorkerExit;
 use Swoole\Timer;
@@ -38,11 +40,15 @@ class DatabasesProviders extends Providers
 	/**
 	 * @param LocalService $application
 	 * @return void
-	 * @throws ConfigException
+	 * @throws ContainerExceptionInterface
+	 * @throws NotFoundExceptionInterface
 	 * @throws Exception
 	 */
 	public function onImport(LocalService $application): void
 	{
+		$main = Kiri::getDi()->get(Kiri\Main::class);
+		$main->command(BackupCommand::class);
+
 		$databases = Config::get('databases.connections', []);
 		if (empty($databases)) {
 			return;
