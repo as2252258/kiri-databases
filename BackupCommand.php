@@ -32,12 +32,11 @@ class BackupCommand extends Command
 	{
 		$this->service = \Kiri::getDi()->get(LocalService::class);
 		$this->setName('db:backup')
-			->addOption('struct', 's', InputArgument::OPTIONAL)
 			->addOption('data', 'd', InputArgument::OPTIONAL)
 			->addOption('path', 'p', InputArgument::REQUIRED)
 			->addOption('table', 't', InputArgument::OPTIONAL)
 			->addOption('database', 'db', InputArgument::OPTIONAL)
-			->setDescription('php kiri.php sw:backup --struct 1 --database users --data 1');
+			->setDescription('php kiri.php sw:backup --database users --data 1');
 	}
 
 
@@ -63,10 +62,15 @@ class BackupCommand extends Command
 					$table[] = current($value);
 				}
 			}
+
+			$tableInfo = $data->createCommand('show create DATABASE `' . $data->database . '`')->one();
+
+			file_put_contents($input->getOption('path'), '');
+			file_put_contents($input->getOption('path'), current($tableInfo) . PHP_EOL, FILE_APPEND);
 			foreach ($table as $value) {
 				$tableInfo = $data->createCommand('show create table `' . $data->database . '`.`' . $value . '`')->one();
 
-				file_put_contents($input->getOption('path'), $tableInfo[$value], FILE_APPEND);
+				file_put_contents($input->getOption('path'), current($tableInfo) . PHP_EOL, FILE_APPEND);
 			}
 		} catch (\Throwable $throwable) {
 			$output->writeln($throwable->getMessage());
