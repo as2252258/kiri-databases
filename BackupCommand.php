@@ -57,7 +57,7 @@ class BackupCommand extends Command
 			if ($table !== null) {
 				$table = explode(',', $table);
 			} else {
-				$tmp = $data->createCommand('show tables from `users`')->all();
+				$tmp = $data->createCommand('show tables from `' . $data->database . '`')->all();
 				$table = [];
 				foreach ($tmp as $value) {
 					$table[] = current($value);
