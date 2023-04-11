@@ -14,8 +14,8 @@ defined('FIND_OR_CREATE_MESSAGE') or define('FIND_OR_CREATE_MESSAGE', 'Create a 
 
 
 use ArrayAccess;
-use Closure;
 use Database\ActiveQuery;
+use Database\Collection;
 use Database\Connection;
 use Database\ModelInterface;
 use Database\Mysql\Columns;
@@ -24,11 +24,9 @@ use Database\SqlBuilder;
 use Database\Traits\HasBase;
 use Exception;
 use Kiri;
-use Kiri\Annotation\Inject;
 use Kiri\Abstracts\Component;
 use Kiri\Annotation\Annotation;
 use Kiri\Error\StdoutLoggerInterface;
-use Kiri\Exception\NotFindClassException;
 use ReturnTypeWillChange;
 use Kiri\ToArray;
 use ReflectionException;
@@ -237,14 +235,36 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	}
 
 	/**
-	 * @param array|string $param
+	 * @param int|string|array $param
 	 * @param null $db
 	 * @return Model|null
 	 * @throws Exception
 	 */
-	public static function findOne(array|string $param, $db = NULL): static|null
+	public static function findOne(int|string|array $param, $db = NULL): ?static
 	{
-		return static::query()->where($param)->first();
+		$model = new ActiveQuery(static::makeNewInstance());
+		$model->from($model->getTable())->alias('t1');
+		if (is_numeric($param)) {
+			$model->where([$model->modelClass->getPrimary() => $param]);
+		} else {
+			$model->where($param);
+		}
+		return $model->first();
+	}
+
+
+	/**
+	 * @param int $param
+	 * @param null $db
+	 * @return Model|null
+	 * @throws Exception
+	 */
+	public static function primary(int $param, $db = NULL): ?static
+	{
+		$model = new ActiveQuery(static::makeNewInstance());
+		$model->from($model->getTable())->alias('t1');
+		$model->where([$model->modelClass->getPrimary() => $param]);
+		return $model->first();
 	}
 
 
@@ -258,13 +278,27 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 
 
 	/**
-	 * @param $condition
+	 * @param int|string|array $condition
 	 * @return static|null
 	 * @throws Exception
 	 */
-	public static function first($condition): ?static
+	public static function first(int|string|array $condition): ?static
 	{
-		return static::query()->where($condition)->first();
+		return static::findOne($condition);
+	}
+
+
+	/**
+	 * @param string|array $condition
+	 * @return Collection
+	 * @throws Exception
+	 */
+	public static function all(string|array $condition): Collection
+	{
+		$model = new ActiveQuery(static::makeNewInstance());
+		$model->from($model->getTable())->alias('t1');
+		$model->where($condition);
+		return $model->get();
 	}
 
 
@@ -274,8 +308,9 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public static function query(): ActiveQuery
 	{
-		$model = new static();
-		return (new ActiveQuery($model))->from($model->getTable())->alias('t1');
+		$model = new ActiveQuery(static::makeNewInstance());
+		$model->from($model->getTable())->alias('t1');
+		return $model;
 	}
 
 

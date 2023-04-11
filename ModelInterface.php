@@ -18,11 +18,19 @@ interface ModelInterface
 {
 
 	/**
-	 * @param array|string $param
+	 * @param array|string|int $param
 	 * @param null $db
-	 * @return ModelInterface
+	 * @return ModelInterface|null
 	 */
-	public static function findOne(array|string $param, $db = NULL): mixed;
+	public static function findOne(array|string|int $param, $db = NULL): ?static;
+
+
+	/**
+	 * @param int $param
+	 * @param null $db
+	 * @return ModelInterface|null
+	 */
+	public static function primary(int $param, $db = NULL): ?static;
 
 
 	/**
