@@ -19,7 +19,7 @@ class BackupCommand extends Command
 	public string $command = 'db:backup';
 
 
-	public string $description = './snowflake sw:gii make=model|controller|task|interceptor|limits|middleware name=xxxx';
+	public string $description = 'php kiri.php db:backup --database users --table u_user --data 1 /Users/admin/snowflake-bi/test.sql';
 
 
 	private LocalService $service;
@@ -33,10 +33,10 @@ class BackupCommand extends Command
 		$this->service = \Kiri::getDi()->get(LocalService::class);
 		$this->setName('db:backup')
 			->addOption('data', 'd', InputArgument::OPTIONAL)
-			->addOption('path', 'p', InputArgument::REQUIRED)
+			->addArgument('path', InputArgument::REQUIRED, "save to path", null)
 			->addOption('table', 't', InputArgument::OPTIONAL)
 			->addOption('database', 'db', InputArgument::OPTIONAL)
-			->setDescription('php kiri.php sw:backup --database users --data 1');
+			->setDescription('php kiri.php db:backup --database users --table u_user --data 1 /Users/admin/snowflake-bi/test.sql');
 	}
 
 
@@ -63,14 +63,33 @@ class BackupCommand extends Command
 				}
 			}
 
-			$tableInfo = $data->createCommand('show create DATABASE `' . $data->database . '`')->one();
+			$databaseInfo = $data->createCommand('show create DATABASE `' . $data->database . '`')->one();
 
-			file_put_contents($input->getOption('path'), '');
-			file_put_contents($input->getOption('path'), current($tableInfo) . PHP_EOL, FILE_APPEND);
+			$database = next($databaseInfo);
+
+			$path = $input->getArgument('path');
+
+			if (!is_dir($path)) {
+				mkdir($path);
+			}
+
 			foreach ($table as $value) {
 				$tableInfo = $data->createCommand('show create table `' . $data->database . '`.`' . $value . '`')->one();
 
-				file_put_contents($input->getOption('path'), current($tableInfo) . PHP_EOL, FILE_APPEND);
+				$tmp = rtrim($path, '/') . '/' . current($tableInfo) . '.sql';
+				if (!file_exists($tmp)) {
+					touch($tmp);
+				}
+
+				file_put_contents($tmp, '');
+				file_put_contents($tmp, $database . ';' . PHP_EOL, FILE_APPEND);
+
+				$tableCreator = next($tableInfo);
+				if (preg_match('/AUTO_INCREMENT=\d+\s/', $tableCreator)) {
+					$tableCreator = preg_replace('/AUTO_INCREMENT=\d+\s/', 'AUTO_INCREMENT=1 ', $tableCreator);
+				}
+
+				file_put_contents($tmp, $tableCreator . ';' . PHP_EOL . PHP_EOL, FILE_APPEND);
 			}
 		} catch (\Throwable $throwable) {
 			$output->writeln($throwable->getMessage());
