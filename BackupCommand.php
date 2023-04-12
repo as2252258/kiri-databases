@@ -93,8 +93,7 @@ class BackupCommand extends Command
 				}
 				
 				file_put_contents($tmp, '');
-				file_put_contents($tmp, $database . ';' . PHP_EOL, FILE_APPEND);
-				
+
 				$tableCreator = next($tableInfo);
 				if (preg_match('/AUTO_INCREMENT=\d+\s/', $tableCreator)) {
 					$tableCreator = preg_replace('/AUTO_INCREMENT=\d+\s/', 'AUTO_INCREMENT=1 ', $tableCreator);
