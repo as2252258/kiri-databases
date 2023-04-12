@@ -68,11 +68,7 @@ class BackupCommand extends Command
 					$table[] = current($value);
 				}
 			}
-			
-			$databaseInfo = $data->createCommand('show create DATABASE `' . $data->database . '`')->one();
-			
-			$database = next($databaseInfo);
-			
+
 			$path = $input->getArgument('path');
 			if (!str_starts_with($path, '/')) {
 				$path = APP_PATH . $path;
