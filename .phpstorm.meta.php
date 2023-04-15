@@ -4,7 +4,7 @@ namespace PHPSTORM_META {
 
     // Reflect
 	use Kiri\Di\Container;
-	use Kiri\Di\ContainerInterface;
+	use Psr\Container\ContainerInterface;
 
 	override(ContainerInterface::get(0), map('@'));
 	override(Container::make(0), map('@'));
