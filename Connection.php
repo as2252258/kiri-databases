@@ -18,19 +18,12 @@ use Database\Mysql\Schema;
 use Exception;
 use Kiri;
 use Kiri\Abstracts\Component;
-use Kiri\Abstracts\Config;
 use Kiri\Di\ContainerInterface;
 use Kiri\Di\Context;
-use Kiri\Annotation\Inject;
 use Kiri\Pool\Pool;
 use Kiri\Events\EventProvider;
-use Kiri\Exception\ConfigException;
 use Kiri\Exception\NotFindClassException;
-use Kiri\Pool\Connection as PoolConnection;
-use Kiri\Server\Events\OnWorkerExit;
 use PDO;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use ReflectionException;
 
 /**
@@ -103,7 +96,6 @@ class Connection extends Component
 	 */
 	public function init(): void
 	{
-		$this->eventProvider->on(OnWorkerExit::class, [$this, 'clear_connection'], 9999);
 		$this->eventProvider->on(BeginTransaction::class, [$this, 'beginTransaction'], 0);
 		$this->eventProvider->on(Rollback::class, [$this, 'rollback'], 0);
 		$this->eventProvider->on(Commit::class, [$this, 'commit'], 0);

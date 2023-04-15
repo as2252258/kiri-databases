@@ -4,14 +4,12 @@
 namespace Database\Annotation;
 
 
-use Database\Base\Setter;
-use Kiri\Annotation\AbstractAttribute;
 
 
 /**
  * @deprecated
  */
-#[\Attribute(\Attribute::TARGET_METHOD)] class Set extends AbstractAttribute
+#[\Attribute(\Attribute::TARGET_METHOD)] class Set
 {
 
 

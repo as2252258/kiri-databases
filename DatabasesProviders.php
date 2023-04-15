@@ -9,15 +9,12 @@ use Kiri;
 use Kiri\Abstracts\Config;
 use Kiri\Abstracts\Providers;
 use Kiri\Pool\Connection as PoolConnection;
-use Kiri\Exception\ConfigException;
 use Kiri\Events\EventProvider;
-use Kiri\Annotation\Inject;
-use Kiri\Server\Events\OnWorkerStart;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use Kiri\Server\Events\OnWorkerExit;
 use Swoole\Timer;
 use Kiri\Di\LocalService;
+use Kiri\Di\Inject\Container;
 
 /**
  * Class DatabasesProviders
@@ -29,7 +26,7 @@ class DatabasesProviders extends Providers
 	/**
 	 * @var EventProvider
 	 */
-	#[Inject(EventProvider::class)]
+	#[Container(EventProvider::class)]
 	public EventProvider $provider;
 
 
@@ -49,15 +46,13 @@ class DatabasesProviders extends Providers
 		if (empty($databases)) {
 			return;
 		}
-		$this->provider->on(OnWorkerExit::class, [$this, 'exit'], 9999);
-		$this->provider->on(OnWorkerStart::class, [$this, 'start']);
 		foreach ($databases as $key => $database) {
 			$application->set($key, $this->_settings($database));
 		}
 	}
 
 
-	public function start(OnWorkerStart $start)
+	public function start()
 	{
 		if (!Kiri\Di\Context::inCoroutine()) {
 			return;
@@ -81,12 +76,10 @@ class DatabasesProviders extends Providers
 
 
 	/**
-	 * @param OnWorkerExit $exit
 	 * @return void
-	 * @throws ConfigException
 	 * @throws Exception
 	 */
-	public function exit(OnWorkerExit $exit): void
+	public function exit(): void
 	{
 		Timer::clearAll();
 		$databases = Config::get('databases.connections', []);

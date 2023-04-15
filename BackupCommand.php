@@ -1,13 +1,12 @@
 <?php
+declare(strict_types=1);
 
 namespace Database;
 
 use Co\Channel;
 use Exception;
 use Kiri\Di\LocalService;
-use Kiri\Error\StdoutLoggerInterface;
 use Swoole\Coroutine;
-use Swoole\Process;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;

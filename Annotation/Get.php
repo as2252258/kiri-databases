@@ -5,8 +5,6 @@ namespace Database\Annotation;
 
 
 use Attribute;
-use Database\Base\Getter;
-use Kiri\Annotation\AbstractAttribute;
 
 
 /**
@@ -14,7 +12,7 @@ use Kiri\Annotation\AbstractAttribute;
  * @package Annotation\Model
  * @deprecated
  */
-#[Attribute(Attribute::TARGET_METHOD)] class Get extends AbstractAttribute
+#[Attribute(Attribute::TARGET_METHOD)] class Get
 {
 	
 	

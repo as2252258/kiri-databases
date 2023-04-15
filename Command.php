@@ -12,10 +12,9 @@ namespace Database;
 
 use Exception;
 use Kiri\Abstracts\Component;
-use Kiri\Di\Context;
+use Kiri\Di\Container;
 use Kiri\Exception\ConfigException;
 use PDO;
-use PDOStatement;
 
 /**
  * Class Command
@@ -39,6 +38,17 @@ class Command extends Component
 
 	/** @var array */
 	public array $params = [];
+
+
+	/**
+	 * @param array $params
+	 * @throws Exception
+	 */
+	public function __construct(array $params = [])
+	{
+		parent::__construct();
+		Container::configure($this, $params);
+	}
 
 
 	/**
