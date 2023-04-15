@@ -13,14 +13,10 @@ use Kiri\Exception\ConfigException;
 use Kiri\Events\EventProvider;
 use Kiri\Annotation\Inject;
 use Kiri\Server\Events\OnWorkerStart;
-use Kiri\Server\Events\OnTaskerStart;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use Psr\Log\LoggerInterface;
 use Kiri\Server\Events\OnWorkerExit;
 use Swoole\Timer;
-use Kiri\Server\WorkerStatus;
-use Kiri\Server\Abstracts\StatusEnum;
 use Kiri\Di\LocalService;
 
 /**
@@ -80,8 +76,6 @@ class DatabasesProviders extends Providers
 
 				$connection->flush($slaveCds, $database['pool']['min'] ?? 1);
 			}
-
-//			$this->logger->warning("database tick clear.");
 		});
 	}
 
