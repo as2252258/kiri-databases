@@ -541,7 +541,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 		}
 		$validate = $this->resolve($rule);
 		if (!$validate->validation()) {
-			return $this->logger->addError($validate->getError(), 'mysql');
+			return \Kiri::getLogger()->addError($validate->getError(), 'mysql');
 		} else {
 			return TRUE;
 		}
