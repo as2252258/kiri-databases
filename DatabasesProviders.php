@@ -23,19 +23,11 @@ use Kiri\Di\Inject\Container;
 class DatabasesProviders extends Providers
 {
 
-	/**
-	 * @var EventProvider
-	 */
-	#[Container(EventProvider::class)]
-	public EventProvider $provider;
-
 
 	/**
 	 * @param LocalService $application
 	 * @return void
-	 * @throws ContainerExceptionInterface
-	 * @throws NotFoundExceptionInterface
-	 * @throws Exception
+	 * @throws \ReflectionException
 	 */
 	public function onImport(LocalService $application): void
 	{

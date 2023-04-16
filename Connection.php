@@ -75,20 +75,7 @@ class Connection extends Component
 	
 	
 	private ?Schema $_schema = null;
-	
-	
-	/**
-	 * @param EventProvider $eventProvider
-	 * @param Pool $connections
-	 * @param ContainerInterface $container
-	 * @param array $config
-	 * @throws Exception
-	 */
-	public function __construct(public EventProvider $eventProvider, public Pool $connections, public ContainerInterface $container, array $config = [])
-	{
-		parent::__construct();
-	}
-	
+
 	
 	/**
 	 * @return void
@@ -96,20 +83,24 @@ class Connection extends Component
 	 */
 	public function init(): void
 	{
-		$this->eventProvider->on(BeginTransaction::class, [$this, 'beginTransaction'], 0);
-		$this->eventProvider->on(Rollback::class, [$this, 'rollback'], 0);
-		$this->eventProvider->on(Commit::class, [$this, 'commit'], 0);
+
+		$eventProvider = Kiri::getDi()->get(EventProvider::class);
+		$eventProvider->on(BeginTransaction::class, [$this, 'beginTransaction'], 0);
+		$eventProvider->on(Rollback::class, [$this, 'rollback'], 0);
+		$eventProvider->on(Commit::class, [$this, 'commit'], 0);
 		
 		$this->initConnections();
 	}
-	
-	
+
+
 	/**
 	 * @return void
+	 * @throws ReflectionException
 	 */
 	public function initConnections(): void
 	{
-		$this->connections->initConnections($this->cds, $this->pool['max'] ?? 1, $this->gender([
+		$connections = Kiri::getDi()->get(Pool::class);
+		$connections->initConnections($this->cds, $this->pool['max'] ?? 1, $this->gender([
 			'cds'             => $this->cds,
 			'username'        => $this->username,
 			'password'        => $this->password,
@@ -175,11 +166,8 @@ class Connection extends Component
 	 */
 	public function getConnection(): PDO
 	{
-		return $this->connections->get($this->cds);
-		if ($client === false) {
-			throw new Exception('waite db client timeout.');
-		}
-		return $client;
+		$connections = Kiri::getDi()->get(Pool::class);
+		return $connections->get($this->cds);
 	}
 	
 	
@@ -237,7 +225,8 @@ class Connection extends Component
 			if ($pdo->inTransaction()) {
 				$pdo->rollback();
 			}
-			$this->connections->push($this->cds, $pdo);
+			$connections = Kiri::getDi()->get(Pool::class);
+			$connections->push($this->cds, $pdo);
 			Context::remove($this->cds);
 		}
 	}
@@ -254,7 +243,8 @@ class Connection extends Component
 			if ($pdo->inTransaction()) {
 				$pdo->commit();
 			}
-			$this->connections->push($this->cds, $pdo);
+			$connections = Kiri::getDi()->get(Pool::class);
+			$connections->push($this->cds, $pdo);
 			Context::remove($this->cds);
 		}
 	}
@@ -280,7 +270,8 @@ class Connection extends Component
 	 */
 	public function release(PDO $PDO)
 	{
-		$this->connections->push($this->cds, $PDO);
+		$connections = Kiri::getDi()->get(Pool::class);
+		$connections->push($this->cds, $PDO);
 	}
 	
 	
@@ -291,7 +282,8 @@ class Connection extends Component
 	 */
 	public function clear_connection()
 	{
-		$this->connections->clean($this->cds);
+		$connections = Kiri::getDi()->get(Pool::class);
+		$connections->clean($this->cds);
 	}
 	
 	
@@ -300,7 +292,8 @@ class Connection extends Component
 	 */
 	public function disconnect()
 	{
-		$this->connections->clean($this->cds);
+		$connections = Kiri::getDi()->get(Pool::class);
+		$connections->clean($this->cds);
 	}
 	
 }
