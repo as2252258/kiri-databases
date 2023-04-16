@@ -24,6 +24,14 @@ class SqlBuilder extends Component
 	public ActiveQuery|Query|null $query;
 
 
+	public function __construct(ActiveQuery|Query|null $config)
+	{
+		parent::__construct();
+
+		$this->query = $config;
+	}
+
+
 	/**
 	 * @param ISqlBuilder|null $query
 	 * @return $this
@@ -31,7 +39,7 @@ class SqlBuilder extends Component
 	 */
 	public static function builder(ISqlBuilder|null $query): static
 	{
-		return new static(['query' => $query]);
+		return new static($query);
 	}
 
 
