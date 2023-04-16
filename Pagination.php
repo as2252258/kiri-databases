@@ -42,7 +42,7 @@ class Pagination extends Component
 	 */
 	public function __construct(ActiveQuery $activeQuery, array $config = [])
 	{
-		parent::__construct($config);
+		parent::__construct();
 		$this->activeQuery = $activeQuery;
 	}
 

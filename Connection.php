@@ -86,7 +86,7 @@ class Connection extends Component
 	 */
 	public function __construct(public EventProvider $eventProvider, public Pool $connections, public ContainerInterface $container, array $config = [])
 	{
-		parent::__construct($config);
+		parent::__construct();
 	}
 	
 	

@@ -52,7 +52,7 @@ class ActiveQuery extends Component implements ISqlBuilder
 		$this->modelClass = $model;
 
 		$this->builder = SqlBuilder::builder($this);
-		parent::__construct($config);
+		parent::__construct();
 	}
 
 

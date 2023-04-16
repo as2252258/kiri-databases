@@ -65,7 +65,7 @@ abstract class AbstractCollection extends Component implements \IteratorAggregat
 		$this->query = $query;
 		$this->model = $model;
 
-		parent::__construct([]);
+		parent::__construct();
 	}
 
 

@@ -87,12 +87,11 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 
 
 	/**
-	 * @param array $config
 	 * @throws Exception
 	 */
-	public function __construct(array $config = [])
+	public function __construct()
 	{
-		parent::__construct($config);
+		parent::__construct();
 
 		$this->init();
 	}
@@ -149,10 +148,10 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	/**
 	 * @throws Exception
 	 */
-	public function init()
+	public function init(): void
 	{
-		$an = Kiri::getDi()->get(Annotation::class);
-		$an->injectProperty($this);
+		$container = Kiri::getDi();
+		$container->resolveProperties($container->getReflectionClass(get_called_class()), $this);
 	}
 
 
