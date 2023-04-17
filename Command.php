@@ -28,7 +28,6 @@ class Command extends Component
 	const FETCH = 'fetch';
 	const FETCH_ALL = 'fetchAll';
 	const EXECUTE = 'execute';
-	const FETCH_COLUMN = 'fetchColumn';
 
 	const DB_ERROR_MESSAGE = 'The system is busy, please try again later.';
 
