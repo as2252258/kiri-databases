@@ -15,6 +15,8 @@ use Kiri\Abstracts\Component;
 use Kiri\Di\Container;
 use Kiri\Exception\ConfigException;
 use PDO;
+use ReflectionException;
+use Throwable;
 
 /**
  * Class Command
@@ -83,7 +85,7 @@ class Command extends Component
 			}
 			$prepare->execute($this->params);
 			return $prepare->fetchAll(PDO::FETCH_ASSOC);
-		} catch (\Throwable $throwable) {
+		} catch (Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
 				return $this->all();
 			}
@@ -106,7 +108,7 @@ class Command extends Component
 			}
 			$prepare->execute($this->params);
 			return $prepare->fetch(PDO::FETCH_ASSOC);
-		} catch (\Throwable $throwable) {
+		} catch (Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
 				return $this->one();
 			}
@@ -129,7 +131,7 @@ class Command extends Component
 			}
 			$prepare->execute($this->params);
 			return $prepare->fetchColumn(PDO::FETCH_ASSOC);
-		} catch (\Throwable $throwable) {
+		} catch (Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
 				return $this->fetchColumn();
 			}
@@ -152,7 +154,7 @@ class Command extends Component
 			}
 			$prepare->execute($this->params);
 			return $prepare->rowCount();
-		} catch (\Throwable $throwable) {
+		} catch (Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
 				return $this->rowCount();
 			}
@@ -194,7 +196,7 @@ class Command extends Component
 				$this->connection->release($client);
 			}
 			return $result == 0 ? true : $result;
-		} catch (\Throwable $throwable) {
+		} catch (Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
 				return $this->_execute();
 			}
@@ -204,10 +206,11 @@ class Command extends Component
 
 
 	/**
-	 * @param \Throwable $throwable
+	 * @param Throwable $throwable
 	 * @return bool
+	 * @throws ReflectionException
 	 */
-	private function error(\Throwable $throwable): bool
+	private function error(Throwable $throwable): bool
 	{
 		$message = $this->sql . '.' . json_encode($this->params, JSON_UNESCAPED_UNICODE);
 		return \Kiri::getLogger()->addError($message . $throwable->getMessage(), 'mysql');
