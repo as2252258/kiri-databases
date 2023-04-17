@@ -27,8 +27,6 @@ class Command extends Component
 	const ROW_COUNT = 'count';
 	const FETCH = 'fetch';
 	const FETCH_ALL = 'fetchAll';
-	const EXECUTE = 'execute';
-
 	const DB_ERROR_MESSAGE = 'The system is busy, please try again later.';
 
 	/** @var Connection */
