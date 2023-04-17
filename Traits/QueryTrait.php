@@ -767,6 +767,9 @@ trait QueryTrait
 			$this->where[] = $column;
 		} else {
 			[$column, $opera, $value] = $this->opera(...func_get_args());
+			if ($value === null) {
+				return $this;
+			}
 			$this->bindParam(':' . $column, $value);
 			$this->where[] = $column . ' ' . $opera . ':' . $column;
 		}
@@ -854,6 +857,9 @@ trait QueryTrait
 	private function addArray(array $array): static
 	{
 		foreach ($array as $key => $value) {
+			if ($value === null) {
+				continue;
+			}
 			$this->where[] = $this->sprintf($key, $value);
 		}
 		return $this;
