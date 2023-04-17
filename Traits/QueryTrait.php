@@ -778,6 +778,17 @@ trait QueryTrait
 
 
 	/**
+	 * @param Closure $closure
+	 * @return $this
+	 */
+	public function whereClosure(Closure $closure): static
+	{
+		$this->where[] = $this->makeClosureFunction($closure);
+		return $this;
+	}
+
+
+	/**
 	 * @param Closure|array $closure
 	 * @return string
 	 * @throws
