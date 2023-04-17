@@ -186,7 +186,6 @@ class Collection extends AbstractCollection
 		$model = $this->getModel();
 		if ($model->hasPrimary()) {
 			$key = $model->getPrimary();
-
 			return $model::query()->whereIn($key, $this->column($key))->delete();
 		}
 		throw new Exception('Must set primary key. if you wante delete');
