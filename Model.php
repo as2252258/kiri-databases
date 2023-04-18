@@ -185,7 +185,7 @@ class Model extends Base\Model
 	public static function inserts(array $data): bool
 	{
 		if (empty($data)) {
-			return error('Insert data empty.', 'mysql');
+			return addError('Insert data empty.', 'mysql');
 		}
 		return static::query()->insert($data);
 	}

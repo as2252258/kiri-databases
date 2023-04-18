@@ -211,7 +211,8 @@ class Command extends Component
 	private function error(Throwable $throwable): bool
 	{
 		$message = $this->sql . '.' . json_encode($this->params, JSON_UNESCAPED_UNICODE);
-		return \Kiri::getLogger()->addError($message . $throwable->getMessage(), 'mysql');
+		error($throwable, [$message]);
+		return addError($throwable->getMessage(), 'mysql');
 	}
 
 

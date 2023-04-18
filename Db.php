@@ -65,7 +65,8 @@ class Db implements ISqlBuilder
 		try {
 			$result = call_user_func($closure, ...$params);
 		} catch (\Throwable $throwable) {
-			$result = logger()->addError($throwable->getMessage(), 'mysql');
+			error($throwable);
+			$result = addError($throwable->getMessage(), 'mysql');
 		} finally {
 			if ($result === false) {
 				static::rollback();
