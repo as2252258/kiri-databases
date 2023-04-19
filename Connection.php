@@ -18,7 +18,6 @@ use Database\Mysql\Schema;
 use Exception;
 use Kiri;
 use Kiri\Abstracts\Component;
-use Psr\Container\ContainerInterface;
 use Kiri\Di\Context;
 use Kiri\Pool\Pool;
 use Kiri\Events\EventProvider;

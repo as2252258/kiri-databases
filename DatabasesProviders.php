@@ -8,13 +8,8 @@ use Exception;
 use Kiri;
 use Kiri\Abstracts\Config;
 use Kiri\Abstracts\Providers;
-use Kiri\Pool\Connection as PoolConnection;
-use Kiri\Events\EventProvider;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use Swoole\Timer;
 use Kiri\Di\LocalService;
-use Kiri\Di\Inject\Container;
 
 /**
  * Class DatabasesProviders
@@ -44,7 +39,7 @@ class DatabasesProviders extends Providers
 	}
 
 
-	public function start()
+	public function start(): void
 	{
 		if (!Kiri\Di\Context::inCoroutine()) {
 			return;
@@ -55,13 +50,9 @@ class DatabasesProviders extends Providers
 				return;
 			}
 
-			$connection = Kiri::getDi()->get(PoolConnection::class);
+			$connection = Kiri::getDi()->get(Kiri\Pool\Pool::class);
 			foreach ($databases as $database) {
-				$connection->flush($database['cds'] . 'master', $database['pool']['min'] ?? 1);
-
-				$slaveCds = ($database['slaveConfig']['cds'] ?? $database['cds']) . 'slave';
-
-				$connection->flush($slaveCds, $database['pool']['min'] ?? 1);
+				$connection->flush($database['cds'], $database['pool']['min'] ?? 1);
 			}
 		});
 	}
@@ -76,13 +67,9 @@ class DatabasesProviders extends Providers
 		Timer::clearAll();
 		$databases = Config::get('databases.connections', []);
 		if (!empty($databases)) {
-			$connection = Kiri::getDi()->get(PoolConnection::class);
+			$connection = Kiri::getDi()->get(Kiri\Pool\Pool::class);
 			foreach ($databases as $database) {
-				$connection->disconnect($database['cds'] . 'master');
-
-				$slaveCds = ($database['slaveConfig']['cds'] ?? $database['cds']) . 'slave';
-
-				$connection->disconnect($slaveCds);
+				$connection->clean($database['cds']);
 			}
 		}
 	}
