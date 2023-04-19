@@ -25,8 +25,7 @@ use Database\Traits\HasBase;
 use Exception;
 use Kiri;
 use Kiri\Abstracts\Component;
-use Kiri\Annotation\Annotation;
-use Kiri\Error\StdoutLoggerInterface;
+use Psr\Log\LoggerInterface;
 use ReturnTypeWillChange;
 use Kiri\ToArray;
 use ReflectionException;
@@ -181,7 +180,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function getLastError(): string
 	{
-		$logger = Kiri::getDi()->get(StdoutLoggerInterface::class);
+		$logger = Kiri::getDi()->get(LoggerInterface::class);
 		return $logger->getLastError('mysql');
 	}
 
