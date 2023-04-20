@@ -205,6 +205,9 @@ class SqlBuilder extends Component
 	 */
 	public function one(): string
 	{
+		if (count($this->query->select) < 1) {
+			$this->query->select = ['*'];
+		}
 		return $this->_selectPrefix() . $this->_prefix() . $this->builderLimit($this->query);
 	}
 
@@ -215,6 +218,9 @@ class SqlBuilder extends Component
 	 */
 	public function all(): string
 	{
+		if (count($this->query->select) < 1) {
+			$this->query->select = ['*'];
+		}
 		return $this->_selectPrefix() . $this->_prefix() . $this->builderLimit($this->query);
 	}
 
@@ -225,8 +231,7 @@ class SqlBuilder extends Component
 	 */
 	public function count(): string
 	{
-		$this->query->select('COUNT(*)');
-		return $this->_selectPrefix() . $this->_prefix() . $this->builderLimit($this->query);
+		return $this->_selectPrefix(['COUNT(*)']) . $this->_prefix() . $this->builderLimit($this->query);
 	}
 
 
@@ -263,12 +268,9 @@ class SqlBuilder extends Component
 	 * @return string
 	 * @throws Exception
 	 */
-	private function _selectPrefix(): string
+	private function _selectPrefix(array $select = ['*']): string
 	{
-		if (count($this->query->select) < 1) {
-			$this->query->select = ['*'];
-		}
-		$select = "SELECT " . implode(',', $this->query->select) . " FROM " . $this->query->from;
+		$select = "SELECT " . implode(',', $select) . " FROM " . $this->query->from;
 		if ($this->query->alias != "") {
 			$select .= " AS " . $this->query->alias;
 		}
