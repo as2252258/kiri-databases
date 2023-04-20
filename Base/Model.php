@@ -21,7 +21,6 @@ use Database\ModelInterface;
 use Database\Mysql\Columns;
 use Database\Relation;
 use Database\SqlBuilder;
-use Database\Traits\HasBase;
 use Exception;
 use Kiri;
 use Kiri\Abstracts\Component;
@@ -712,7 +711,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	protected function withRelate($name): mixed
 	{
 		$response = $this->{'get' . ucfirst($name)}();
-		if ($response instanceof HasBase) {
+		if ($response instanceof \Database\Traits\Relation) {
 			$response = $response->get();
 		}
 		return $response;
