@@ -208,7 +208,7 @@ class SqlBuilder extends Component
 		if (count($this->query->select) < 1) {
 			$this->query->select = ['*'];
 		}
-		return $this->_selectPrefix() . $this->_prefix() . $this->builderLimit($this->query);
+		return $this->_selectPrefix($this->query->select) . $this->_prefix() . $this->builderLimit($this->query);
 	}
 
 
@@ -221,7 +221,7 @@ class SqlBuilder extends Component
 		if (count($this->query->select) < 1) {
 			$this->query->select = ['*'];
 		}
-		return $this->_selectPrefix() . $this->_prefix() . $this->builderLimit($this->query);
+		return $this->_selectPrefix($this->query->select) . $this->_prefix() . $this->builderLimit($this->query);
 	}
 
 
