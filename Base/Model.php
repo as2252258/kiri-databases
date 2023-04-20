@@ -17,6 +17,7 @@ use ArrayAccess;
 use Database\ActiveQuery;
 use Database\Collection;
 use Database\Connection;
+use Database\ISqlBuilder;
 use Database\ModelInterface;
 use Database\Mysql\Columns;
 use Database\Relation;
