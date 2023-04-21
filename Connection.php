@@ -216,7 +216,7 @@ class Connection extends Component
 	 * @throws Exception
 	 * 事务回滚
 	 */
-	public function rollback()
+	public function rollback(): void
 	{
 		$this->storey--;
 		if ($this->storey == 0) {
@@ -234,7 +234,7 @@ class Connection extends Component
 	 * @throws Exception
 	 * 事务提交
 	 */
-	public function commit()
+	public function commit(): void
 	{
 		$this->storey--;
 		if ($this->storey == 0) {
@@ -267,7 +267,7 @@ class Connection extends Component
 	 * 回收链接
 	 * @throws
 	 */
-	public function release(PDO $PDO)
+	public function release(PDO $PDO): void
 	{
 		$connections = Kiri::getDi()->get(Pool::class);
 		$connections->push($this->cds, $PDO);
@@ -279,7 +279,7 @@ class Connection extends Component
 	 * 回收链接
 	 * @throws
 	 */
-	public function clear_connection()
+	public function clear_connection(): void
 	{
 		$connections = Kiri::getDi()->get(Pool::class);
 		$connections->clean($this->cds);
@@ -289,7 +289,7 @@ class Connection extends Component
 	/**
 	 * @throws Exception
 	 */
-	public function disconnect()
+	public function disconnect(): void
 	{
 		$connections = Kiri::getDi()->get(Pool::class);
 		$connections->clean($this->cds);
