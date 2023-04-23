@@ -137,7 +137,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	/**
 	 * object init
 	 */
-	public function clean()
+	public function clean(): void
 	{
 		$this->_attributes = [];
 		$this->_oldAttributes = [];
