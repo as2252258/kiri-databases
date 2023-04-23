@@ -34,7 +34,7 @@ class DatabasesProviders extends Providers
 			return;
 		}
 		foreach ($databases as $key => $database) {
-			$application->set($key, $this->_settings($database));
+			$application->set('db.' . $key, $this->_settings($database));
 		}
 	}
 
@@ -81,7 +81,7 @@ class DatabasesProviders extends Providers
 	 */
 	public function get($name): Connection
 	{
-		return Kiri::service()->get($name);
+		return Kiri::service()->get('db.' . $name);
 	}
 
 

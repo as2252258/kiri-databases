@@ -318,7 +318,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function getConnection(): Connection
 	{
-		return Kiri::service()->get($this->connection);
+		return Kiri::service()->get('db.' . $this->connection);
 	}
 
 
