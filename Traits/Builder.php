@@ -101,7 +101,11 @@ trait Builder
 	 */
 	#[Pure] private function builderLimit(ActiveQuery|Query $query): string
 	{
-		return ' LIMIT ' . $query->offset . ',' . $query->limit;
+		if ($query->limit > 0) {
+			return ' LIMIT ' . $query->offset . ',' . $query->limit;
+		} else {
+			return ' OFFSET ' . $query->offset;
+		}
 	}
 
 
