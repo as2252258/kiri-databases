@@ -230,7 +230,7 @@ class ActiveQuery extends Component implements ISqlBuilder
 	 */
 	public function all(): Collection|array
 	{
-		$data = $this->execute($this->builder->all())->all();
+		$data = $this->execute($this->builder->all(), $this->attributes)->all();
 		if ($data === false) {
 			return new Collection($this, [], $this->modelClass);
 		}
@@ -262,7 +262,7 @@ class ActiveQuery extends Component implements ISqlBuilder
 	 */
 	public function count(): int
 	{
-		$data = $this->execute($this->builder->count())->one();
+		$data = $this->execute($this->builder->count(), $this->attributes)->one();
 		if ($data && is_array($data)) {
 			return (int)array_shift($data);
 		}
@@ -317,7 +317,7 @@ class ActiveQuery extends Component implements ISqlBuilder
 	 */
 	public function exists(): bool
 	{
-		return !empty($this->execute($this->builder->one())->fetchColumn());
+		return !empty($this->execute($this->builder->one(), $this->attributes)->fetchColumn());
 	}
 
 
@@ -330,7 +330,7 @@ class ActiveQuery extends Component implements ISqlBuilder
 	{
 		$sql = $this->builder->delete();
 		if ($getSql === FALSE) {
-			return (bool)$this->execute($sql)->delete();
+			return (bool)$this->execute($sql, $this->attributes)->delete();
 		}
 		return $sql;
 	}
