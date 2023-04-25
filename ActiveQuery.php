@@ -34,6 +34,7 @@ class ActiveQuery extends Component implements ISqlBuilder
 	 */
 	public ?Connection $db = NULL;
 
+
 	/**
 	 * @var array
 	 * 参数绑定
