@@ -60,7 +60,7 @@ class ActiveQuery extends Component implements ISqlBuilder
 	/**
 	 * 清除不完整数据
 	 */
-	public function clear()
+	public function clear(): void
 	{
 		$this->db = NULL;
 		$this->useCache = FALSE;
