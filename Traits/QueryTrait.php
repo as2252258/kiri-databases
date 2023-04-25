@@ -32,7 +32,7 @@ trait QueryTrait
 	public array $join = [];
 	public array $order = [];
 	public int $offset = 0;
-	public int $limit = 500;
+	public int $limit = 50;
 	public string $group = '';
 	public string $from = '';
 	public string $alias = 't1';
