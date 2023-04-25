@@ -186,10 +186,8 @@ class SqlBuilder extends Component
 		if (is_null($value)) {
 			return $keys;
 		}
-		if (
-			str_starts_with($value, '+ ') ||
-			str_starts_with($value, '- ')
-		) {
+		if (is_string($value) && (str_starts_with($value, '+ ') ||
+				str_starts_with($value, '- '))) {
 			$keys[] = $key . '=' . $key . ' ' . $value;
 		} else {
 			$this->query->bindParam(':update' . $key . $order, $value);
