@@ -639,7 +639,7 @@ trait QueryTrait
 			$value = [-1];
 		}
 		$this->bindParam(':in' . $columns, implode(',', $value));
-		$this->where[] = $columns . ' IN :in' . $columns;
+		$this->where[] = $columns . ' IN (:in' . $columns . ')';
 		return $this;
 	}
 
@@ -681,7 +681,7 @@ trait QueryTrait
 			$value = [-1];
 		}
 		$this->bindParam(':notin' . $columns, implode(',', $value));
-		$this->where[] = $columns . ' NOT IN :notin' . $columns;
+		$this->where[] = $columns . ' NOT IN (:notin' . $columns . ')';
 		return $this;
 	}
 
