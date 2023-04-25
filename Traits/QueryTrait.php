@@ -638,8 +638,7 @@ trait QueryTrait
 		if (count($value) < 1) {
 			$value = [-1];
 		}
-		$this->bindParam(':in' . $columns, implode(',', $value));
-		$this->where[] = $columns . ' IN (:in' . $columns . ')';
+		$this->where[] = $columns . ' IN (' . implode(',', $value) . ')';
 		return $this;
 	}
 
@@ -680,8 +679,7 @@ trait QueryTrait
 		if (count($value) < 1) {
 			$value = [-1];
 		}
-		$this->bindParam(':notin' . $columns, implode(',', $value));
-		$this->where[] = $columns . ' NOT IN (:notin' . $columns . ')';
+		$this->where[] = $columns . ' NOT IN (' . implode(',', $value) . ')';
 		return $this;
 	}
 
