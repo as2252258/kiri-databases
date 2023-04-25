@@ -229,7 +229,7 @@ class SqlBuilder extends Component
 	 */
 	public function count(): string
 	{
-		return $this->_selectPrefix(['COUNT(*)']) . $this->_prefix() . $this->builderLimit($this->query);
+		return $this->_selectPrefix(['COUNT(*)']) . $this->_prefix();
 	}
 
 

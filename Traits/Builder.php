@@ -104,7 +104,7 @@ trait Builder
 		if ($query->limit > 0) {
 			return ' LIMIT ' . $query->offset . ',' . $query->limit;
 		} else {
-			return ' OFFSET ' . $query->offset;
+			return '';
 		}
 	}
 
