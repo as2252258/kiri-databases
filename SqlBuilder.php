@@ -128,7 +128,7 @@ class SqlBuilder extends Component
 			$keys[] = implode(',', $_keys);
 			$order++;
 		}
-		return [$update . '(' . implode('),(', $keys) . ')', $params];
+		return [$update . '(' . implode('),(', $keys) . ')', $this->query->attributes];
 	}
 
 
