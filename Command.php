@@ -193,7 +193,7 @@ class Command extends Component
 			if (!$client->inTransaction()) {
 				$this->connection->release($client);
 			}
-			return $result == 0 ? true : $result;
+			return $result == 0 ? true : (int)$result;
 		} catch (Throwable $throwable) {
 			if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
 				return $this->_execute();

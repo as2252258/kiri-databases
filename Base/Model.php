@@ -180,8 +180,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function getLastError(): string
 	{
-		$logger = Kiri::getDi()->get(LoggerInterface::class);
-		return $logger->getLastError('mysql');
+		return Kiri::getLogger()->getLastError('mysql');
 	}
 
 
