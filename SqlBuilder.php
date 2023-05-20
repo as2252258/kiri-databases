@@ -262,10 +262,10 @@ class SqlBuilder extends Component
 		return $select;
 	}
 
-	/**
-	 * @return string
-	 * @throws Exception
-	 */
+    /**
+     * @param array $select
+     * @return string
+     */
 	private function _selectPrefix(array $select = ['*']): string
 	{
 		$select = "SELECT " . implode(',', $select) . " FROM " . $this->query->from;
