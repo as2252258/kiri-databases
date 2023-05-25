@@ -6,8 +6,8 @@ namespace Database;
 
 use Exception;
 use Kiri;
-use Kiri\Abstracts\Config;
 use Kiri\Abstracts\Providers;
+use Kiri\Config\ConfigProvider;
 use Swoole\Timer;
 use Kiri\Di\LocalService;
 
@@ -26,10 +26,10 @@ class DatabasesProviders extends Providers
 	 */
 	public function onImport(LocalService $application): void
 	{
-		$main = Kiri::getDi()->get(Kiri\Main::class);
+		$main = Kiri::getDi()->get(Kiri\Application::class);
 		$main->command(BackupCommand::class);
 
-		$databases = Config::get('databases.connections', []);
+		$databases = \config('databases.connections', []);
 		if (empty($databases)) {
 			return;
 		}
@@ -45,7 +45,7 @@ class DatabasesProviders extends Providers
 			return;
 		}
 		Timer::tick(60000, function () {
-			$databases = Config::get('databases.connections', []);
+			$databases = \config('databases.connections', []);
 			if (empty($databases)) {
 				return;
 			}
@@ -65,7 +65,7 @@ class DatabasesProviders extends Providers
 	public function exit(): void
 	{
 		Timer::clearAll();
-		$databases = Config::get('databases.connections', []);
+		$databases = \config('databases.connections', []);
 		if (!empty($databases)) {
 			$connection = Kiri::getDi()->get(Kiri\Pool\Pool::class);
 			foreach ($databases as $database) {

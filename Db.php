@@ -14,7 +14,6 @@ use Database\Affair\Commit;
 use Database\Affair\Rollback;
 use Database\Traits\QueryTrait;
 use Exception;
-use Kiri\Abstracts\Config;
 use Kiri\Di\Context;
 use Kiri\Events\EventDispatch;
 use Kiri\Exception\ConfigException;
@@ -377,7 +376,7 @@ class Db implements ISqlBuilder
 		if ($connection instanceof Connection) {
 			return $connection;
 		}
-		$databases = Config::get('databases.connections', []);
+		$databases = \config('databases.connections', []);
 		if (empty($databases) || !is_array($databases)) {
 			throw new Exception('Please configure the database link.');
 		}

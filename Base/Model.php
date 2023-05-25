@@ -492,7 +492,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	private function diff(): array
 	{
-		$changes = array_diff_assoc($this->_oldAttributes, $this->_attributes);
+		$changes = array_diff_assoc($this->_attributes, $this->_oldAttributes);
 
 		$condition = array_intersect_assoc($this->_oldAttributes, $this->_attributes);
 
