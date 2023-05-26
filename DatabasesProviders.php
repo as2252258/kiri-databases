@@ -7,8 +7,6 @@ namespace Database;
 use Exception;
 use Kiri;
 use Kiri\Abstracts\Providers;
-use Kiri\Config\ConfigProvider;
-use Swoole\Timer;
 use Kiri\Di\LocalService;
 
 /**
@@ -22,55 +20,19 @@ class DatabasesProviders extends Providers
 	/**
 	 * @param LocalService $application
 	 * @return void
-	 * @throws \ReflectionException
+	 * @throws Exception
 	 */
 	public function onImport(LocalService $application): void
 	{
 		$main = Kiri::getDi()->get(Kiri\Application::class);
 		$main->command(BackupCommand::class);
 
-		$databases = \config('databases.connections', []);
+        $databases = \config('databases.connections', []);
 		if (empty($databases)) {
 			return;
 		}
 		foreach ($databases as $key => $database) {
-			$application->set('db.' . $key, $this->_settings($database));
-		}
-	}
-
-
-	public function start(): void
-	{
-		if (!Kiri\Di\Context::inCoroutine()) {
-			return;
-		}
-		Timer::tick(60000, function () {
-			$databases = \config('databases.connections', []);
-			if (empty($databases)) {
-				return;
-			}
-
-			$connection = Kiri::getDi()->get(Kiri\Pool\Pool::class);
-			foreach ($databases as $database) {
-				$connection->flush($database['cds'], $database['pool']['min'] ?? 1);
-			}
-		});
-	}
-
-
-	/**
-	 * @return void
-	 * @throws Exception
-	 */
-	public function exit(): void
-	{
-		Timer::clearAll();
-		$databases = \config('databases.connections', []);
-		if (!empty($databases)) {
-			$connection = Kiri::getDi()->get(Kiri\Pool\Pool::class);
-			foreach ($databases as $database) {
-				$connection->clean($database['cds']);
-			}
+			$application->set('db.' . $key, Kiri::createObject($this->_settings($database)));
 		}
 	}
 

@@ -10,16 +10,14 @@ declare(strict_types=1);
 namespace Database;
 
 use Closure;
+use Database\Affair\BeginTransaction;
 use Database\Affair\Commit;
 use Database\Affair\Rollback;
 use Database\Traits\QueryTrait;
 use Exception;
-use Kiri\Di\Context;
-use Kiri\Events\EventDispatch;
 use Kiri\Exception\ConfigException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use ReflectionException;
 
 /**
  * Class Db
@@ -33,20 +31,11 @@ class Db implements ISqlBuilder
 	private static bool $_inTransaction = false;
 
 	/**
-	 * @return bool
-	 */
-	public static function inTransactionsActive(): bool
-	{
-		return Context::exists('transactions::status') && Context::get('transactions::status') === true;
-	}
-
-
-	/**
 	 * @return void
 	 */
 	public static function beginTransaction(): void
 	{
-		Context::set('transactions::status', true);
+        fire(new BeginTransaction());
 	}
 
 
@@ -77,28 +66,21 @@ class Db implements ISqlBuilder
 	}
 
 
-	/**
-	 * @throws ContainerExceptionInterface
-	 * @throws NotFoundExceptionInterface
-	 */
+    /**
+     * @return void
+     */
 	public static function commit(): void
 	{
-		$event = \Kiri::getDi()->get(EventDispatch::class);
-		$event->dispatch(new Commit());
-		Context::remove('transactions::status');
+        fire(new Commit());
 	}
 
 
-	/**
-	 * @return void
-	 * @throws ContainerExceptionInterface
-	 * @throws NotFoundExceptionInterface
-	 */
+    /**
+     * @return void
+     */
 	public static function rollback(): void
 	{
-		$event = \Kiri::getDi()->get(EventDispatch::class);
-		$event->dispatch(new Rollback());
-		Context::remove('transactions::status');
+        fire(new Rollback());
 	}
 
 
@@ -173,11 +155,11 @@ class Db implements ISqlBuilder
 
 	/**
 	 * @param Connection|null $connection
-	 * @return mixed
-	 * @throws Exception
+	 * @return array|bool|null
+     * @throws Exception
 	 */
-	public function find(Connection $connection = NULL): mixed
-	{
+	public function find(Connection $connection = NULL): array|bool|null
+    {
 		$connection = static::getDefaultConnection($connection);
 
 		return $connection->createCommand(SqlBuilder::builder($this)->all())
