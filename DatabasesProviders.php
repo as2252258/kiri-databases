@@ -36,6 +36,7 @@ class DatabasesProviders extends Providers
 		}
 	}
 
+
 	/**
 	 * @param $name
 	 * @return Connection
