@@ -17,7 +17,6 @@ use ArrayAccess;
 use Database\ActiveQuery;
 use Database\Collection;
 use Database\Connection;
-use Database\ISqlBuilder;
 use Database\ModelInterface;
 use Database\Mysql\Columns;
 use Database\Relation;
@@ -25,7 +24,6 @@ use Database\SqlBuilder;
 use Exception;
 use Kiri;
 use Kiri\Abstracts\Component;
-use Psr\Log\LoggerInterface;
 use ReturnTypeWillChange;
 use Kiri\ToArray;
 use ReflectionException;
@@ -317,7 +315,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 	 */
 	public function getConnection(): Connection
 	{
-		return Kiri::service()->get('db.' . $this->connection);
+		return Kiri::service()->get($this->connection);
 	}
 
 
