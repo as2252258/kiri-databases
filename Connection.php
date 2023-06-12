@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Database;
 
 
+use Closure;
 use Database\Affair\BeginTransaction;
 use Database\Affair\Commit;
 use Database\Affair\Rollback;
@@ -96,9 +97,9 @@ class Connection extends Component
 
     /**
      * @param array $config
-     * @return \Closure
+     * @return Closure
      */
-    public function gender(array $config): \Closure
+    public function gender(array $config): Closure
     {
         return static function () use ($config) {
             $options = [

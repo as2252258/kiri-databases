@@ -263,11 +263,7 @@ class ActiveQuery extends Component implements ISqlBuilder
 	 */
 	public function count(): int
 	{
-		$data = $this->execute($this->builder->count(), $this->attributes)->one();
-		if ($data && is_array($data)) {
-			return (int)array_shift($data);
-		}
-		return 0;
+		return $this->execute($this->builder->count(), $this->attributes)->one()['row_count'] ?? 0;
 	}
 
 
