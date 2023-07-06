@@ -206,8 +206,7 @@ class Command extends Component
 	/**
 	 * @param Throwable $throwable
 	 * @return bool
-	 * @throws ReflectionException
-	 */
+     */
 	private function error(Throwable $throwable): bool
 	{
 		$message = $this->sql . '.' . json_encode($this->params, JSON_UNESCAPED_UNICODE);
