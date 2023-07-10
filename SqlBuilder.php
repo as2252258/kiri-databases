@@ -138,7 +138,7 @@ class SqlBuilder extends Component
 	 */
 	public function delete(): string
 	{
-		return 'DELETE FROM ' . $this->query->from . ' WHERE ' . $this->_prefix();
+		return 'DELETE FROM ' . $this->query->from . $this->_prefix();
 	}
 
 

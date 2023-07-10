@@ -209,9 +209,9 @@ class Command extends Component
      */
 	private function error(Throwable $throwable): bool
 	{
-		error('mysql', [$throwable]);
         error($this->sql . '.' . json_encode($this->params, JSON_UNESCAPED_UNICODE));
-		return addError($throwable->getMessage(), 'mysql');
+        error(throwable($throwable), []);
+        return addError($throwable->getMessage(), 'mysql');
 	}
 
 
