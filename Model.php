@@ -197,7 +197,7 @@ class Model extends Base\Model
 	public function delete(): bool
 	{
 		if ($this->beforeDelete()) {
-			$result = static::deleteByCondition($this->_attributes);
+			$result = static::deleteByCondition($this->_attributes, $this->_attributes);
 
 			return $this->afterDelete($result);
 		} else {
