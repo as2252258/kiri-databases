@@ -731,7 +731,7 @@ trait QueryTrait
 		if ($params === null) {
 			return $this;
 		}
-		$this->attributes = $params;
+		$this->attributes = array_merge($this->attributes, $params);
 		return $this;
 	}
 
