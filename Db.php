@@ -228,12 +228,29 @@ class Db implements ISqlBuilder
 
 
     /**
+     * @param string $table
+     * @param Connection|null $connection
+     * @param string $database
+     * @return array|null
+     * @throws Exception
+     */
+    public static function desc(string $table, ?Connection $connection = null, string $database = 'db'): ?array
+    {
+        $sql = SqlBuilder::builder(new Query())->columns($table);
+
+        $connection = self::getDefaultConnection($connection, $database);
+
+        return $connection->createCommand($sql)->all();
+    }
+
+
+    /**
      * @param null|Connection $connection
-     * @param string $name
+     * @param string $database
      * @return mixed
      * @throws Exception
      */
-    public static function getDefaultConnection(?Connection $connection = null, string $name = 'db'): Connection
+    public static function getDefaultConnection(?Connection $connection = null, string $database = 'db'): Connection
     {
         if ($connection instanceof Connection) {
             return $connection;
@@ -242,7 +259,7 @@ class Db implements ISqlBuilder
         if (empty($databases) || !is_array($databases)) {
             throw new Exception('Please configure the database link.');
         }
-        return Kiri::service()->get($databases[$name]);
+        return Kiri::service()->get($databases[$database]);
     }
 
 
