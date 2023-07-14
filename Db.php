@@ -42,7 +42,7 @@ class Db implements ISqlBuilder
     /**
      * @param string|Connection $dbname
      * @return Db
-     * @throws \Exception
+     * @throws Exception
      */
     public static function connect(string|Connection $dbname): Db
     {
