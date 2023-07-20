@@ -121,7 +121,7 @@ class SqlBuilder extends Component
 		$update .= '(' . implode(',', $this->getFields($attributes)) . ') VALUES ';
 
 		$order = 0;
-		$keys = $params = [];
+		$keys = [];
 		foreach ($attributes as $attribute) {
 			$_keys = $this->builderParams($attribute, true, $order);
 

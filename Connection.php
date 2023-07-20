@@ -144,7 +144,7 @@ class Connection extends Component
 
     /**
      * @return PDO
-     * @throws Exception
+     * @throws Kiri\Exception\ConfigException
      */
     public function getConnection(): PDO
     {
@@ -255,7 +255,7 @@ class Connection extends Component
      * 回收链接
      * @throws
      */
-    public function release(PDO $PDO): void
+    public function release(?PDO $PDO): void
     {
         $this->pool()->push($this->cds, $PDO);
     }
