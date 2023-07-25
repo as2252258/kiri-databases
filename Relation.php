@@ -60,7 +60,7 @@ class Relation extends Component
 		}
 		$activeModel = $this->_query[$_identification]->first();
 		if (empty($activeModel)) {
-			return null;
+            return $this->_query[$_identification]->mock();
 		}
 		unset($this->_query[$_identification]);
 		return Context::set($_identification, $activeModel);
@@ -78,17 +78,18 @@ class Relation extends Component
 		}
 		$activeModel = $this->_query[$_identification]->count();
 		if (empty($activeModel)) {
-			return null;
+            return $this->_query[$_identification]->mock();
 		}
 		unset($this->_query[$_identification]);
 		return Context::set($_identification, $activeModel);
 	}
 
 
-	/**
-	 * @param string $_identification
-	 * @return mixed
-	 */
+    /**
+     * @param string $_identification
+     * @return mixed
+     * @throws Exception
+     */
 	public function get(string $_identification): mixed
 	{
 		if (Context::exists($_identification)) {

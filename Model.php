@@ -229,7 +229,7 @@ class Model extends Base\Model
      */
     public static function get($condition): Collection|array
     {
-        return static::query()->where($condition)->all();
+        return static::query()->where($condition)->get();
     }
 
 
@@ -246,7 +246,7 @@ class Model extends Base\Model
         if (!empty($attributes)) {
             $query->bindParams($attributes);
         }
-        return $query->all();
+        return $query->get();
     }
 
 
