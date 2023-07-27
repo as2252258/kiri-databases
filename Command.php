@@ -84,7 +84,7 @@ class Command extends Component
             $prepare->execute($this->params);
             return $prepare->fetchAll(PDO::FETCH_ASSOC);
         } catch (Throwable $throwable) {
-            if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
+            if ($this->canReconnect($throwable->getMessage())) {
                 return $this->all();
             }
             return $this->error($throwable);
@@ -107,7 +107,7 @@ class Command extends Component
             $prepare->execute($this->params);
             return $prepare->fetch(PDO::FETCH_ASSOC);
         } catch (Throwable $throwable) {
-            if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
+            if ($this->canReconnect($throwable->getMessage())) {
                 return $this->one();
             }
             return $this->error($throwable);
@@ -130,7 +130,7 @@ class Command extends Component
             $prepare->execute($this->params);
             return $prepare->fetchColumn(PDO::FETCH_ASSOC);
         } catch (Throwable $throwable) {
-            if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
+            if ($this->canReconnect($throwable->getMessage())) {
                 return $this->fetchColumn();
             }
             return $this->error($throwable);
@@ -153,7 +153,7 @@ class Command extends Component
             $prepare->execute($this->params);
             return $prepare->rowCount();
         } catch (Throwable $throwable) {
-            if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
+            if ($this->canReconnect($throwable->getMessage())) {
                 return $this->rowCount();
             }
             return $this->error($throwable);
@@ -195,11 +195,30 @@ class Command extends Component
             }
             return $result == 0 ? true : (int)$result;
         } catch (Throwable $throwable) {
-            if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
+            if ($this->canReconnect($throwable->getMessage())) {
                 return $this->_execute();
             }
             return $this->error($throwable);
         }
+    }
+
+
+    /**
+     * @param string $message
+     * @return bool
+     */
+    protected function canReconnect(string $message): bool
+    {
+        $errors = [
+            'MySQL server has gone away',
+            'Packets out of order. Expected 1 received 0.'
+        ];
+        foreach ($errors as $error) {
+            if (str_contains($message, $error)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 
