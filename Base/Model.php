@@ -241,8 +241,10 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
         $model->from($model->getTable())->alias('t1');
         if (is_numeric($param)) {
             $model->where([$model->modelClass->getPrimary() => $param]);
-        } else {
+        } else if (is_array($param)) {
             $model->where($param);
+        } else {
+            $model->whereRaw($param);
         }
         return $model->first();
     }
@@ -292,7 +294,11 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
     {
         $model = new ActiveQuery(static::makeNewInstance());
         $model->from($model->getTable())->alias('t1');
-        $model->where($condition);
+        if (is_array($condition)) {
+            $model->where($condition);
+        } else {
+            $model->whereRaw($condition);
+        }
         return $model->get();
     }
 
@@ -442,12 +448,12 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 
     /**
      * @param array $old
-     * @param array|string $condition
+     * @param array $condition
      * @param array $change
      * @return $this|bool
      * @throws Exception
      */
-    protected function updateInternal(array $old, array|string $condition, array $change): bool|static
+    protected function updateInternal(array $old, array $condition, array $change): bool|static
     {
         $query = static::query()->where($condition);
         $generate = SqlBuilder::builder($query)->update($change);
