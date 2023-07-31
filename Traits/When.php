@@ -54,8 +54,8 @@ class When
 	/**
 	 * @param string $alias
 	 */
-	public function else(string $alias)
-	{
+	public function else(string $alias): void
+    {
 		$this->else = $alias;
 	}
 

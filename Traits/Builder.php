@@ -112,23 +112,13 @@ trait Builder
 	/**
 	 * @param array $where
 	 * @return string
-	 * @throws NotFindClassException
-	 * @throws ReflectionException
-	 */
+     */
 	private function where(array $where): string
 	{
 		if (count($where) < 1) {
 			return '';
 		}
-		$_tmp = [];
-		foreach ($where as $key => $value) {
-			$_tmp[] = $this->resolveCondition($key, $value, $_tmp);
-		}
-		if (count($_tmp) > 0) {
-			return implode(' AND ', $_tmp);
-		} else {
-			return '';
-		}
+        return implode(' AND ', $where);
 	}
 
 

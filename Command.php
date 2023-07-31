@@ -15,6 +15,7 @@ use Kiri\Abstracts\Component;
 use Kiri\Di\Container;
 use Kiri\Exception\ConfigException;
 use PDO;
+use PDOStatement;
 use ReflectionException;
 use Throwable;
 
@@ -77,12 +78,7 @@ class Command extends Component
     public function all(): bool|array
     {
         try {
-            $client = $this->connection->getConnection();
-            if (($prepare = $client->prepare($this->sql)) === false) {
-                throw new Exception($client->errorInfo()[1]);
-            }
-            $prepare->execute($this->params);
-            return $prepare->fetchAll(PDO::FETCH_ASSOC);
+            return $this->prepare()->fetchAll(PDO::FETCH_ASSOC);
         } catch (Throwable $throwable) {
             if ($this->canReconnect($throwable->getMessage())) {
                 return $this->all();
@@ -100,12 +96,7 @@ class Command extends Component
     public function one(): null|bool|array
     {
         try {
-            $client = $this->connection->getConnection();
-            if (($prepare = $client->prepare($this->sql)) === false) {
-                throw new Exception($client->errorInfo()[1]);
-            }
-            $prepare->execute($this->params);
-            return $prepare->fetch(PDO::FETCH_ASSOC);
+            return $this->prepare()->fetch(PDO::FETCH_ASSOC);
         } catch (Throwable $throwable) {
             if ($this->canReconnect($throwable->getMessage())) {
                 return $this->one();
@@ -123,12 +114,7 @@ class Command extends Component
     public function fetchColumn(): null|bool|array
     {
         try {
-            $client = $this->connection->getConnection();
-            if (($prepare = $client->prepare($this->sql)) === false) {
-                throw new Exception($client->errorInfo()[1]);
-            }
-            $prepare->execute($this->params);
-            return $prepare->fetchColumn(PDO::FETCH_ASSOC);
+            return $this->prepare()->fetchColumn(PDO::FETCH_ASSOC);
         } catch (Throwable $throwable) {
             if ($this->canReconnect($throwable->getMessage())) {
                 return $this->fetchColumn();
@@ -146,12 +132,7 @@ class Command extends Component
     public function rowCount(): int|bool
     {
         try {
-            $client = $this->connection->getConnection();
-            if (($prepare = $client->prepare($this->sql)) === false) {
-                throw new Exception($client->errorInfo()[1]);
-            }
-            $prepare->execute($this->params);
-            return $prepare->rowCount();
+            return $this->prepare()->rowCount();
         } catch (Throwable $throwable) {
             if ($this->canReconnect($throwable->getMessage())) {
                 return $this->rowCount();
@@ -164,6 +145,21 @@ class Command extends Component
 
 
     /**
+     * @return PDOStatement
+     * @throws Exception
+     */
+    protected function prepare(): PDOStatement
+    {
+        $client = $this->connection->getConnection();
+        if (($prepare = $client->prepare($this->sql)) === false) {
+            throw new Exception($client->errorInfo()[1]);
+        }
+        $prepare->execute($this->params);
+        return $prepare;
+    }
+
+
+    /**
      * @return int|bool
      * @throws Exception
      */
@@ -171,7 +167,6 @@ class Command extends Component
     {
         return $this->_execute();
     }
-
 
 
     /**
@@ -230,8 +225,7 @@ class Command extends Component
      */
     private function error(Throwable $throwable): bool
     {
-        $message = $this->sql . '.' . json_encode($this->params, JSON_UNESCAPED_UNICODE) . PHP_EOL . jTraceEx($throwable);
-        return addError($message, 'mysql');
+        return trigger_print_error($this->sql . '.' . json_encode($this->params, JSON_UNESCAPED_UNICODE) . PHP_EOL . jTraceEx($throwable), 'mysql');
     }
 
 

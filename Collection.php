@@ -59,16 +59,14 @@ class Collection extends AbstractCollection
 	public function update(array $attributes): bool
 	{
 		$lists = [];
-		$primary = $this->getModel()->getPrimary();
-		$items = $this->getItems();
-		if ($this->isEmpty() || !isset($items[0][$primary])) {
-			return false;
-		}
-		foreach ($items as $item) {
-			$lists[] = $item[$primary];
-		}
-		return $this->getModel()::query()->whereIn($primary, $lists)
-			->update($attributes);
+        $model = $this->getModel();
+		if (!$this->isEmpty()) {
+            foreach ($this->_item as $item) {
+                $lists[] = $item[$model->getPrimary()];
+            }
+            return $model::query()->whereIn($model->getPrimary(), $lists)->update($attributes);
+        }
+        return false;
 	}
 
 	/**
@@ -185,8 +183,7 @@ class Collection extends AbstractCollection
 	{
 		$model = $this->getModel();
 		if ($model->hasPrimary()) {
-			$key = $model->getPrimary();
-			return $model::query()->whereIn($key, $this->column($key))->delete();
+			return $model::query()->whereIn($model->getPrimary(), $this->column($model->getPrimary()))->delete();
 		}
 		throw new Exception('Must set primary key. if you wante delete');
 	}

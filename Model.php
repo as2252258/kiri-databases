@@ -10,15 +10,10 @@ declare(strict_types=1);
 namespace Database;
 
 
-use Database\Base\Getter;
-use Database\Traits\HasBase;
 use Exception;
 use Kiri;
-use Kiri\Exception\NotFindClassException;
-use Kiri\Error\StdoutLoggerInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use ReflectionException;
 
 defined('SAVE_FAIL') or define('SAVE_FAIL', 3227);
 defined('FIND_OR_CREATE_MESSAGE') or define('FIND_OR_CREATE_MESSAGE', 'Create a new model, but the data cannot be empty.');
@@ -185,7 +180,7 @@ class Model extends Base\Model
     public static function inserts(array $data): bool
     {
         if (empty($data)) {
-            return addError('Insert data empty.', 'mysql');
+            return trigger_print_error('Insert data empty.', 'mysql');
         }
         return static::query()->insert($data);
     }
@@ -196,15 +191,15 @@ class Model extends Base\Model
      */
     public function delete(): bool
     {
-        if (!$this->beforeDelete()) {
-            return false;
+        if ($this->beforeDelete()) {
+            if ($this->hasPrimary()) {
+                $result = static::deleteByCondition("id = :id", [":id" => $this->getPrimaryValue()]);
+            } else {
+                $result = static::deleteByCondition($this->_attributes);
+            }
+            return $this->afterDelete($result);
         }
-        if ($this->hasPrimary()) {
-            $result = static::deleteByCondition("id = :id", [":id" => $this->getPrimaryValue()]);
-        } else {
-            $result = static::deleteByCondition($this->_attributes);
-        }
-        return $this->afterDelete($result);
+        return false;
     }
 
 
@@ -217,8 +212,7 @@ class Model extends Base\Model
      */
     public static function updateAll(mixed $condition, array $attributes = []): bool
     {
-        $condition = static::query()->where($condition);
-        return $condition->update($attributes);
+        return static::query()->where($condition)->update($attributes);
     }
 
 

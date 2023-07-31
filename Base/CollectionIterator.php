@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Database\Base;
 
 
-use Database\ActiveQuery;
 use Database\ModelInterface;
 use Exception;
 

@@ -19,6 +19,7 @@ use Kiri;
 use Kiri\Exception\ConfigException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use ReflectionException;
 use Throwable;
 
 /**
@@ -56,7 +57,9 @@ class Db implements ISqlBuilder
 
     /**
      * @return void
-     * @throws Exception
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws ReflectionException
      */
     public static function beginTransaction(): void
     {
@@ -78,8 +81,7 @@ class Db implements ISqlBuilder
         try {
             $result = call_user_func($closure, ...$params);
         } catch (Throwable $throwable) {
-            error($throwable);
-            $result = addError($throwable->getMessage(), 'mysql');
+            $result = trigger_print_error($throwable->getMessage(), 'mysql');
         } finally {
             if ($result === false) {
                 static::rollback();
@@ -93,6 +95,9 @@ class Db implements ISqlBuilder
 
     /**
      * @return void
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws ReflectionException
      */
     public static function commit(): void
     {
@@ -102,6 +107,9 @@ class Db implements ISqlBuilder
 
     /**
      * @return void
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws ReflectionException
      */
     public static function rollback(): void
     {

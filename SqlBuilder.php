@@ -105,9 +105,8 @@ class SqlBuilder extends Component
     private function __updateBuilder(array $string): string|bool
     {
         if (empty($string)) {
-            return \Kiri::getLogger()->addError('None data update.');
+            return \Kiri::getLogger()->failure('None data update.');
         }
-
         return 'UPDATE ' . $this->query->from . ' SET ' . implode(',', $string) . $this->_prefix();
     }
 

@@ -28,7 +28,7 @@ class Schema extends Component
 	public function getColumns(): ?Columns
 	{
 		if ($this->_column === null) {
-			$this->_column = new Columns(['db' => $this->db]);
+			$this->_column = new Columns($this->db);
 		}
 
 		return $this->_column;
