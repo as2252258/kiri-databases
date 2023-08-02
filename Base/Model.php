@@ -456,7 +456,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
     protected function updateInternal(array $old, array $condition, array $change): bool|static
     {
         $query = static::query()->where($condition);
-        if (count($change)) {
+        if (count($change) < 1) {
             return true;
         }
         $generate = SqlBuilder::builder($query)->update($change);
