@@ -456,6 +456,9 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
     protected function updateInternal(array $old, array $condition, array $change): bool|static
     {
         $query = static::query()->where($condition);
+        if (count($change)) {
+            return true;
+        }
         $generate = SqlBuilder::builder($query)->update($change);
         if ($generate === false) {
             return false;
@@ -579,6 +582,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 
     /**
      * @return Relation|null
+     * @throws ReflectionException
      */
     public function getRelation(): ?Relation
     {

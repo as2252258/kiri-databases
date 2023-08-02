@@ -286,6 +286,9 @@ class ActiveQuery extends Component implements ISqlBuilder
      */
     public function update(array $data): bool
     {
+        if (count($data) < 1) {
+            return true;
+        }
         $generate = $this->builder->update($data);
         if (is_bool($generate)) {
             return $generate;
