@@ -293,7 +293,7 @@ class ActiveQuery extends Component implements ISqlBuilder
         if (is_bool($generate)) {
             return $generate;
         }
-        return (bool)$this->execute($generate)->exec();
+        return (bool)$this->execute($generate, $this->attributes)->exec();
     }
 
     /**
