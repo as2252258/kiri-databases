@@ -187,15 +187,16 @@ class Command extends Component
             $result = $client->lastInsertId();
             $prepare->closeCursor();
 
-            if (!$client->inTransaction()) {
-                $this->connection->release($client);
-            }
             return $result == 0 ? true : (int)$result;
         } catch (Throwable $throwable) {
             if ($this->canReconnect($throwable->getMessage())) {
                 return $this->_execute();
             }
             return $this->error($throwable);
+        } finally {
+            if (isset($client) && !$client->inTransaction()) {
+                $this->connection->release($client);
+            }
         }
     }
 
