@@ -472,8 +472,8 @@ trait QueryTrait
      */
     public function whereLike(string $column, string $value): static
     {
-        $this->bindParam(':LIKE' . $column, $value);
-        $this->where[] = $column . ' LIKE \':LIKE' . $column . '\'';
+        $this->pushParam($value);
+        $this->where[] = $column . ' LIKE \'%?%\'';
         return $this;
     }
 
@@ -484,8 +484,8 @@ trait QueryTrait
      */
     public function whereLeftLike(string $column, string $value): static
     {
-        $this->bindParam(':LLike' . $column, $value);
-        $this->where[] = $column . ' LLike \'%:LLike' . $column . '\'';
+        $this->pushParam($value);
+        $this->where[] = $column . ' LLike \'%?\'';
         return $this;
     }
 
@@ -496,8 +496,8 @@ trait QueryTrait
      */
     public function whereRightLike(string $column, string $value): static
     {
-        $this->bindParam(':RLike' . $column, $value);
-        $this->where[] = $column . ' RLike \':RLike' . $column . '%\'';
+        $this->pushParam($value);
+        $this->where[] = $column . ' RLike \'?%\'';
         return $this;
     }
 
@@ -509,8 +509,8 @@ trait QueryTrait
      */
     public function whereNotLike(string $column, string $value): static
     {
-        $this->bindParam(':LIKE' . $column, $value);
-        $this->where[] = $column . ' NOT LIKE \'%:LIKE' . $column . '%\'';
+        $this->pushParam($value);
+        $this->where[] = $column . ' NOT LIKE \'%?%\'';
         return $this;
     }
 
@@ -586,9 +586,9 @@ trait QueryTrait
             return $this;
         }
 
-        $this->bindParam(':between_start' . $column, $start);
-        $this->bindParam(':between_end' . $column, $end);
-        $this->where[] = $column . ' BETWEEN :not_between_start' . $column . ' AND :not_between_end' . $column;
+        $this->pushParam($start);
+        $this->pushParam($end);
+        $this->where[] = $column . ' BETWEEN ? AND ?';
 
         return $this;
     }
@@ -605,9 +605,9 @@ trait QueryTrait
             return $this;
         }
 
-        $this->bindParam(':not_between_start' . $column, $start);
-        $this->bindParam(':not_between_end' . $column, $end);
-        $this->where[] = $column . ' NOT BETWEEN :not_between_start' . $column . ' AND :not_between_end' . $column;
+        $this->pushParam($start);
+        $this->pushParam($end);
+        $this->where[] = $column . ' NOT BETWEEN ? AND ?';
 
         return $this;
     }
@@ -622,7 +622,9 @@ trait QueryTrait
         if ($params === null) {
             return $this;
         }
-        $this->attributes = array_merge($this->attributes, $params);
+        foreach ($params as $param) {
+            $this->attributes[] = $param;
+        }
         return $this;
     }
 
@@ -637,6 +639,19 @@ trait QueryTrait
             $value = addslashes($value);
         }
         $this->attributes[$key] = $value;
+        return $this;
+    }
+
+    /**
+     * @param mixed $value
+     * @return $this
+     */
+    public function pushParam(mixed $value): static
+    {
+        if (is_string($value)) {
+            $value = addslashes($value);
+        }
+        $this->attributes[] = $value;
         return $this;
     }
 
@@ -658,8 +673,8 @@ trait QueryTrait
      */
     public function whereMath(string $column, string $opera, mixed $value): static
     {
-        $this->bindParam(':' . $column, $value);
-        $this->where[] = $column . ' ' . $opera . ':' . $column;
+        $this->pushParam($value);
+        $this->where[] = $column . ' ' . $opera . ' ?';
         return $this;
     }
 
@@ -772,8 +787,8 @@ trait QueryTrait
      */
     private function sprintf($column, $value, string $opera = '='): string
     {
-        $this->bindParam(':' . $column, $value);
-        return $column . ' ' . $opera . ' :' . $column;
+        $this->pushParam($value);
+        return $column . ' ' . $opera . ' ?';
     }
 
 

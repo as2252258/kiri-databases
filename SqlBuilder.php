@@ -169,8 +169,8 @@ class SqlBuilder extends Component
         $keys = [];
         foreach ($attributes as $key => $value) {
             if ($isInsert === true) {
-                $keys[] = ':save' . $key . $order;
-                $this->query->bindParam(':save' . $key . $order, $value);
+                $keys[] = '?';
+                $this->query->pushParam($value);
             } else {
                 $keys = $this->resolveParams($key, $value, $order, $keys);
             }
@@ -195,8 +195,8 @@ class SqlBuilder extends Component
                 str_starts_with($value, '- '))) {
             $keys[] = $key . '=' . $key . ' ' . $value;
         } else {
-            $this->query->bindParam(':update' . $key . $order, $value);
-            $keys[] = $key . '=:update' . $key . $order;
+            $this->query->pushParam($value);
+            $keys[] = $key . '= ?';
         }
         return $keys;
     }

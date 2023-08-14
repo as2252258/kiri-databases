@@ -226,7 +226,7 @@ class Command extends Component
      */
     private function error(Throwable $throwable): bool
     {
-        return trigger_print_error($this->sql . '.' . json_encode($this->params, JSON_UNESCAPED_UNICODE) . PHP_EOL . jTraceEx($throwable), 'mysql');
+        return trigger_print_error($this->sql . '.' . json_encode($this->params, JSON_UNESCAPED_UNICODE) . PHP_EOL . throwable($throwable), 'mysql');
     }
 
 

@@ -133,8 +133,8 @@ trait Builder
 	private function resolveCondition($field, $condition, $_tmp): string
 	{
 		if (is_string($field)) {
-			$this->query->bindParam(':where' . $field, $condition);
-			return $field . ' = ' . ':where' . $field;
+			$this->query->pushParam($condition);
+			return $field . ' = ?';
 		} else if (is_string($condition)) {
 			return $condition;
 		} else {
@@ -191,8 +191,8 @@ trait Builder
 	{
 		$_array = [];
 		foreach ($condition as $key => $value) {
-			$this->query->bindParam(':hash' . $key, $value);
-			$_array[] = $key . '=:hash' . $key;
+			$this->query->pushParam($value);
+			$_array[] = $key . '= ?';
 		}
 		return $_array;
 	}
