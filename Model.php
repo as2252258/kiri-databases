@@ -193,7 +193,7 @@ class Model extends Base\Model
     {
         if ($this->beforeDelete()) {
             if ($this->hasPrimary()) {
-                $result = static::deleteByCondition("id = :id", [":id" => $this->getPrimaryValue()]);
+                $result = static::deleteByCondition("id = ?", [$this->getPrimaryValue()]);
             } else {
                 $result = static::deleteByCondition($this->_attributes);
             }
