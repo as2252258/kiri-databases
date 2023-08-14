@@ -113,6 +113,8 @@ class Connection extends Component
             ];
             if (!Context::inCoroutine()) {
                 $options[PDO::ATTR_PERSISTENT] = true;
+            } else {
+                $options[PDO::ATTR_PERSISTENT] = false;
             }
             $link = new PDO('mysql:dbname=' . $config['dbname'] . ';host=' . $config['cds'],
                 $config['username'], $config['password'], $options);
