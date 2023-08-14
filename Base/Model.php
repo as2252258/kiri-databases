@@ -266,6 +266,16 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
 
 
     /**
+     * @return mixed
+     * @throws Exception
+     */
+    public function optimize(): mixed
+    {
+        return static::query()->execute('OPTIMIZE TABLE ' . $this->getTable())->exec();
+    }
+
+
+    /**
      * @return static
      */
     private static function makeNewInstance(): static

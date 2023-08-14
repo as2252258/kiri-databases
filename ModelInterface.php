@@ -25,6 +25,12 @@ interface ModelInterface
 	public static function findOne(array|string|int $param, $db = NULL): ?static;
 
 
+    /**
+     * @return mixed
+     */
+    public function optimize(): mixed;
+
+
 	/**
 	 * @param int $param
 	 * @param null $db

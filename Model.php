@@ -197,6 +197,7 @@ class Model extends Base\Model
             } else {
                 $result = static::deleteByCondition($this->_attributes);
             }
+            $this->optimize();
             return $this->afterDelete($result);
         }
         return false;

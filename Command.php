@@ -108,10 +108,10 @@ class Command extends Component
     }
 
     /**
-     * @return bool|array|null
+     * @return mixed
      * @throws Exception
      */
-    public function fetchColumn(): null|bool|array
+    public function fetchColumn(): mixed
     {
         try {
             return $this->prepare()->fetchColumn(PDO::FETCH_ASSOC);
