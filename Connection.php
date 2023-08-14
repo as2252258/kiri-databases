@@ -96,37 +96,6 @@ class Connection extends Component
 
 
     /**
-     * @param array $config
-     * @return Closure
-     */
-    public function gender(array $config): Closure
-    {
-        return static function () use ($config) {
-            $options = [
-                PDO::ATTR_CASE               => PDO::CASE_NATURAL,
-                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_ORACLE_NULLS       => PDO::NULL_NATURAL,
-                PDO::ATTR_STRINGIFY_FETCHES  => false,
-                PDO::ATTR_EMULATE_PREPARES   => true,
-                PDO::ATTR_TIMEOUT            => $config['connect_timeout'],
-                PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . ($config['charset'] ?? 'utf8mb4')
-            ];
-            if (!Context::inCoroutine()) {
-                $options[PDO::ATTR_PERSISTENT] = true;
-            } else {
-                $options[PDO::ATTR_PERSISTENT] = false;
-            }
-            $link = new PDO('mysql:dbname=' . $config['dbname'] . ';host=' . $config['cds'],
-                $config['username'], $config['password'], $options);
-            foreach ($config['attributes'] as $key => $attribute) {
-                $link->setAttribute($key, $attribute);
-            }
-            return $link;
-        };
-    }
-
-
-    /**
      * @return mixed
      * @throws ReflectionException
      * @throws NotFindClassException
@@ -284,23 +253,40 @@ class Connection extends Component
 
 
     /**
+     * @return PDO
+     */
+    public function newConnect(): PDO
+    {
+        $options = [
+            PDO::ATTR_CASE               => PDO::CASE_NATURAL,
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_ORACLE_NULLS       => PDO::NULL_NATURAL,
+            PDO::ATTR_STRINGIFY_FETCHES  => false,
+            PDO::ATTR_EMULATE_PREPARES   => true,
+            PDO::ATTR_TIMEOUT            => $this->connect_timeout,
+            PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $this->charset
+        ];
+        if (!Context::inCoroutine()) {
+            $options[PDO::ATTR_PERSISTENT] = true;
+        } else {
+            $options[PDO::ATTR_PERSISTENT] = false;
+        }
+        $link = new PDO('mysql:dbname=' . $this->database . ';host=' . $this->cds,
+            $this->username, $this->password, $options);
+        foreach ($this->attributes as $key => $attribute) {
+            $link->setAttribute($key, $attribute);
+        }
+        return $link;
+    }
+
+
+    /**
      * @return Pool
      */
     private function pool(): Pool
     {
         if (!$this->connections->hasChannel($this->cds)) {
-            $params = [
-                'cds'             => $this->cds,
-                'username'        => $this->username,
-                'password'        => $this->password,
-                'attributes'      => $this->attributes,
-                'connect_timeout' => $this->connect_timeout,
-                'read_timeout'    => $this->read_timeout,
-                'dbname'          => $this->database,
-                'pool'            => $this->pool
-            ];
-            $itemCount = $this->pool['max'] ?? 1;
-            $this->connections->created($this->cds, $itemCount, $this->gender($params));
+            $this->connections->created($this->cds, $this->pool['max'] ?? 1, [$this, 'newConnect']);
         }
         return $this->connections;
     }
