@@ -11,7 +11,8 @@
   "require": {
     "php": ">=8.0",
     "ext-json": "*",
-    "ext-pdo": "*"
+    "ext-pdo": "*",
+    "game-worker/kiri-pool": "~v1.0"
   },
   "autoload": {
     "psr-4": {
