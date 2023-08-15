@@ -96,6 +96,7 @@ class Connection extends Component
         $eventProvider->on(BeginTransaction::class, [$this, 'beginTransaction'], 0);
         $eventProvider->on(Rollback::class, [$this, 'rollback'], 0);
         $eventProvider->on(Commit::class, [$this, 'commit'], 0);
+        $eventProvider->on('afterRequest', [$this, 'clear']);
     }
 
 
@@ -183,15 +184,7 @@ class Connection extends Component
     {
         $this->storey--;
         if ($this->storey == 0) {
-            $pdo = Context::get($this->cds);
-            if ($pdo === null) {
-                return;
-            }
-            if ($pdo->inTransaction()) {
-                $pdo->rollback();
-            }
-            $this->pool()->push($this->cds, $pdo);
-            Context::remove($this->cds);
+            $this->clear();
         }
     }
 
@@ -213,6 +206,25 @@ class Connection extends Component
             $this->pool()->push($this->cds, $pdo);
             Context::remove($this->cds);
         }
+    }
+
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function clear(): void
+    {
+        /** @var PDO $pdo */
+        $pdo = Context::get($this->cds);
+        if ($pdo === null) {
+            return;
+        }
+        if ($pdo->inTransaction()) {
+            $pdo->rollback();
+        }
+        $this->pool()->push($this->cds, $pdo);
+        Context::remove($this->cds);
     }
 
 
