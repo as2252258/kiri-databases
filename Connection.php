@@ -25,6 +25,7 @@ use Kiri\Events\EventProvider;
 use Kiri\Exception\NotFindClassException;
 use PDO;
 use ReflectionException;
+use Kiri\Server\Events\OnAfterRequest;
 
 /**
  * Class Connection
@@ -96,7 +97,7 @@ class Connection extends Component
         $eventProvider->on(BeginTransaction::class, [$this, 'beginTransaction'], 0);
         $eventProvider->on(Rollback::class, [$this, 'rollback'], 0);
         $eventProvider->on(Commit::class, [$this, 'commit'], 0);
-        $eventProvider->on('afterRequest', [$this, 'clear']);
+        $eventProvider->on(OnAfterRequest::class, [$this, 'clear']);
     }
 
 
