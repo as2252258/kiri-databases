@@ -123,7 +123,11 @@ class Connection extends Component
      */
     public function getConnection(): PDO
     {
-        return $this->pool()->get($this->cds);
+        if (!$this->inTransaction()) {
+            return $this->pool()->get($this->cds);
+        } else {
+            return $this->getTransactionClient();
+        }
     }
 
 
@@ -136,7 +140,7 @@ class Connection extends Component
         if ($this->storey == 0) {
             /** @var PDO $pdo */
             $pdo = Context::get($this->cds);
-            if ($pdo !== null && !$pdo->inTransaction()) {
+            if ($pdo instanceof PDO && !$pdo->inTransaction()) {
                 $pdo->beginTransaction();
             }
         }
@@ -226,12 +230,14 @@ class Connection extends Component
 
 
     /**
-     *
      * 回收链接
      * @throws
      */
     public function release(?PDO $PDO): void
     {
+        if ($PDO === null || $PDO->inTransaction()) {
+            return;
+        }
         $this->pool()->push($this->cds, $PDO);
     }
 
@@ -243,7 +249,7 @@ class Connection extends Component
      */
     public function clear_connection(): void
     {
-        $this->pool()->clean($this->cds);
+        $this->pool()->flush($this->cds, 0);
     }
 
 

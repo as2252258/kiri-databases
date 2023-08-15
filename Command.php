@@ -177,7 +177,7 @@ class Command extends Component
     private function _execute(): bool|int
     {
         try {
-            $client = $this->connection->getTransactionClient();
+            $client = $this->connection->getConnection();
             if (($prepare = $client->prepare($this->sql)) === false) {
                 throw new Exception($client->errorInfo()[1]);
             }
@@ -194,9 +194,7 @@ class Command extends Component
             }
             return $this->error($throwable);
         } finally {
-            if (isset($client) && !$client->inTransaction()) {
-                $this->connection->release($client);
-            }
+            $this->connection->release($client ?? null);
         }
     }
 
