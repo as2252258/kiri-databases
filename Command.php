@@ -80,7 +80,7 @@ class Command extends Component
         try {
             return $this->prepare()->fetchAll(PDO::FETCH_ASSOC);
         } catch (Throwable $throwable) {
-            if ($this->canReconnect($throwable->getMessage())) {
+            if (str_contains($throwable->getMessage(),'MySQL server has gone away')) {
                 return $this->all();
             }
             return $this->error($throwable);
@@ -98,7 +98,7 @@ class Command extends Component
         try {
             return $this->prepare()->fetch(PDO::FETCH_ASSOC);
         } catch (Throwable $throwable) {
-            if ($this->canReconnect($throwable->getMessage())) {
+            if (str_contains($throwable->getMessage(),'MySQL server has gone away')) {
                 return $this->one();
             }
             return $this->error($throwable);
@@ -116,7 +116,7 @@ class Command extends Component
         try {
             return $this->prepare()->fetchColumn(PDO::FETCH_ASSOC);
         } catch (Throwable $throwable) {
-            if ($this->canReconnect($throwable->getMessage())) {
+            if (str_contains($throwable->getMessage(),'MySQL server has gone away')) {
                 return $this->fetchColumn();
             }
             return $this->error($throwable);
@@ -134,7 +134,7 @@ class Command extends Component
         try {
             return $this->prepare()->rowCount();
         } catch (Throwable $throwable) {
-            if ($this->canReconnect($throwable->getMessage())) {
+            if (str_contains($throwable->getMessage(),'MySQL server has gone away')) {
                 return $this->rowCount();
             }
             return $this->error($throwable);
@@ -189,7 +189,7 @@ class Command extends Component
 
             return $result == 0 ? true : (int)$result;
         } catch (Throwable $throwable) {
-            if ($this->canReconnect($throwable->getMessage())) {
+            if (str_contains($throwable->getMessage(),'MySQL server has gone away')) {
                 return $this->_execute();
             }
             return $this->error($throwable);
@@ -199,26 +199,6 @@ class Command extends Component
             }
         }
     }
-
-
-    /**
-     * @param string $message
-     * @return bool
-     */
-    protected function canReconnect(string $message): bool
-    {
-        $errors = [
-            'MySQL server has gone away',
-            'Packets out of order. Expected 1 received 0.'
-        ];
-        foreach ($errors as $error) {
-            if (str_contains($message, $error)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
 
     /**
      * @param Throwable $throwable
