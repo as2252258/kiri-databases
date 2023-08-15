@@ -62,9 +62,6 @@ class Connection extends Component
     private ?PDO $_pdo = null;
 
 
-    private Pool $connections;
-
-
     /**
      * @var string
      */
@@ -81,6 +78,15 @@ class Connection extends Component
 
 
     /**
+     * @param Pool $connections
+     */
+    public function __construct(public Pool $connections)
+    {
+        parent::__construct();
+    }
+
+
+    /**
      * @return void
      * @throws Exception
      */
@@ -90,8 +96,6 @@ class Connection extends Component
         $eventProvider->on(BeginTransaction::class, [$this, 'beginTransaction'], 0);
         $eventProvider->on(Rollback::class, [$this, 'rollback'], 0);
         $eventProvider->on(Commit::class, [$this, 'commit'], 0);
-
-        $this->connections = Kiri::getDi()->get(Pool::class);
     }
 
 
@@ -115,7 +119,7 @@ class Connection extends Component
 
     /**
      * @return PDO
-     * @throws Kiri\Exception\ConfigException
+     * @throws Exception
      */
     public function getConnection(): PDO
     {
@@ -248,7 +252,7 @@ class Connection extends Component
      */
     public function disconnect(): void
     {
-        $this->pool()->clean($this->cds);
+        $this->pool()->close($this->cds);
     }
 
 
