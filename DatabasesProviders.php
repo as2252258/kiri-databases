@@ -20,7 +20,7 @@ class DatabasesProviders extends Providers
     /**
      * @param LocalService $application
      * @return void
-     * @throws Exception
+     * @throws
      */
     public function onImport(LocalService $application): void
     {
