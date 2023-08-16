@@ -78,7 +78,12 @@ class Command extends Component
     public function all(): bool|array
     {
         try {
-            return $this->prepare()->fetchAll(PDO::FETCH_ASSOC);
+            $client = $this->connection->getConnection();
+            if (($prepare = $client->prepare($this->sql)) === false) {
+                throw new Exception($client->errorInfo()[1]);
+            }
+            $prepare->execute($this->params);
+            return $prepare->fetchAll(PDO::FETCH_ASSOC);
         } catch (Throwable $throwable) {
             $result = $this->error($throwable);
             if (str_contains($throwable->getMessage(),'MySQL server has gone away')) {
@@ -97,7 +102,12 @@ class Command extends Component
     public function one(): null|bool|array
     {
         try {
-            return $this->prepare()->fetch(PDO::FETCH_ASSOC);
+            $client = $this->connection->getConnection();
+            if (($prepare = $client->prepare($this->sql)) === false) {
+                throw new Exception($client->errorInfo()[1]);
+            }
+            $prepare->execute($this->params);
+            return $prepare->fetch(PDO::FETCH_ASSOC);
         } catch (Throwable $throwable) {
             $result = $this->error($throwable);
             if (str_contains($throwable->getMessage(),'MySQL server has gone away')) {
@@ -116,7 +126,12 @@ class Command extends Component
     public function fetchColumn(): mixed
     {
         try {
-            return $this->prepare()->fetchColumn(PDO::FETCH_ASSOC);
+            $client = $this->connection->getConnection();
+            if (($prepare = $client->prepare($this->sql)) === false) {
+                throw new Exception($client->errorInfo()[1]);
+            }
+            $prepare->execute($this->params);
+            return $prepare->fetchColumn(PDO::FETCH_ASSOC);
         } catch (Throwable $throwable) {
             $result = $this->error($throwable);
             if (str_contains($throwable->getMessage(),'MySQL server has gone away')) {
@@ -135,7 +150,12 @@ class Command extends Component
     public function rowCount(): int|bool
     {
         try {
-            return $this->prepare()->rowCount();
+            $client = $this->connection->getConnection();
+            if (($prepare = $client->prepare($this->sql)) === false) {
+                throw new Exception($client->errorInfo()[1]);
+            }
+            $prepare->execute($this->params);
+            return $prepare->rowCount();
         } catch (Throwable $throwable) {
             $result = $this->error($throwable);
             if (str_contains($throwable->getMessage(),'MySQL server has gone away')) {
@@ -145,21 +165,6 @@ class Command extends Component
         } finally {
             $this->connection->release($client ?? null);
         }
-    }
-
-
-    /**
-     * @return PDOStatement
-     * @throws Exception
-     */
-    protected function prepare(): PDOStatement
-    {
-        $client = $this->connection->getConnection();
-        if (($prepare = $client->prepare($this->sql)) === false) {
-            throw new Exception($client->errorInfo()[1]);
-        }
-        $prepare->execute($this->params);
-        return $prepare;
     }
 
 
