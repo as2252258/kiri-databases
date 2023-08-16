@@ -150,12 +150,9 @@ class Connection extends Component
      */
     protected function getNormalClientHealth(): PDO
     {
-        if (!$this->pool()->hasItem($this->cds)) {
-            return $this->newConnect();
-        }
         [$client, $time] = $this->pool()->get($this->cds);
         if ((time() - $time) > $this->idle_time) {
-            return $this->newConnect();
+            return $this->getNormalClientHealth();
         }
         if ($this->canUse($client)) {
             return $client;
@@ -330,9 +327,9 @@ class Connection extends Component
 
 
     /**
-     * @return PDO
+     * @return array
      */
-    public function newConnect(): PDO
+    public function newConnect(): array
     {
         $options = [
             PDO::ATTR_CASE               => PDO::CASE_NATURAL,
@@ -352,7 +349,7 @@ class Connection extends Component
         foreach ($this->attributes as $key => $attribute) {
             $link->setAttribute($key, $attribute);
         }
-        return $link;
+        return [$link, time()];
     }
 
 
