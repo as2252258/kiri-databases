@@ -85,7 +85,7 @@ class Connection extends Component
      * @var Logger
      */
     #[Container(LoggerInterface::class)]
-    protected Logger $logger;
+    public Logger $logger;
 
     /**
      * @param Pool $connections
