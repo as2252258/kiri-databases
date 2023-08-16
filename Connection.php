@@ -11,19 +11,20 @@ declare(strict_types=1);
 namespace Database;
 
 
-use Closure;
 use Database\Affair\BeginTransaction;
 use Database\Affair\Commit;
 use Database\Affair\Rollback;
 use Database\Mysql\Schema;
 use Exception;
 use Kiri;
+use Kiri\Waite;
 use Kiri\Abstracts\Component;
 use Kiri\Di\Context;
 use Kiri\Pool\Pool;
 use Kiri\Events\EventProvider;
 use Kiri\Exception\NotFindClassException;
 use PDO;
+use Psr\Log\LoggerInterface;
 use ReflectionException;
 use Kiri\Server\Events\OnAfterRequest;
 
@@ -80,8 +81,9 @@ class Connection extends Component
 
     /**
      * @param Pool $connections
+     * @param LoggerInterface $logger
      */
-    public function __construct(public Pool $connections)
+    public function __construct(public Pool $connections, public LoggerInterface $logger)
     {
         parent::__construct();
     }
@@ -126,10 +128,31 @@ class Connection extends Component
     public function getConnection(): PDO
     {
         if (!$this->inTransaction()) {
-            return $this->pool()->get($this->cds);
+            return $this->checkClientHealth();
         } else {
             return $this->getTransactionClient();
         }
+    }
+
+
+    /**
+     * @return PDO
+     * @throws Exception
+     */
+    protected function checkClientHealth(): PDO
+    {
+        /** @var PDO $client */
+        $client = $this->pool()->get($this->cds);
+        try {
+            if (($steam = $client->query('select 1')) !== false) {
+                return $client;
+            }
+            $this->logger->error($steam->errorInfo()[1]);
+        } catch (\Throwable $exception) {
+            $this->logger->error($exception);
+        }
+        Waite::sleep(10);
+        return $this->checkClientHealth();
     }
 
 
