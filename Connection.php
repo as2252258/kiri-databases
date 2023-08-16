@@ -49,6 +49,9 @@ class Connection extends Component
 
     public int $connect_timeout = 30;
 
+
+    public int $waite_time = 3;
+
     public int $idle_time = 600;
 
     public array $pool = ['max' => 10, 'min' => 1];
@@ -150,7 +153,7 @@ class Connection extends Component
      */
     protected function getNormalClientHealth(): PDO
     {
-        [$client, $time] = $this->pool()->get($this->cds);
+        [$client, $time] = $this->pool()->get($this->cds, $this->waite_time);
         if ((time() - $time) < $this->idle_time || $this->canUse($client)) {
             return $client;
 

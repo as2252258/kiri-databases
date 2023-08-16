@@ -65,6 +65,7 @@ class DatabasesProviders extends Providers
             'database'        => $database['database'],
             'connect_timeout' => $database['connect_timeout'] ?? 10,
             'idle_time'       => $database['idle_time'] ?? 300,
+            'waite_time'      => $database['waite_time'] ?? 3,
             'pool'            => $clientPool,
             'attributes'      => $database['attributes'] ?? [],
             'charset'         => $database['charset'] ?? 'utf8mb4'
