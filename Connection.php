@@ -150,13 +150,8 @@ class Connection extends Component
     {
         /** @var PDO $client */
         $client = $this->pool()->get($this->cds);
-        try {
-            if (($steam = $client->query('select 1')) !== false) {
-                return $client;
-            }
-            $this->logger->error($steam->errorInfo()[1]);
-        } catch (\Throwable $exception) {
-            $this->logger->error($exception);
+        if ($this->canUse($client)) {
+            return $client;
         }
         Waite::sleep(10);
         return $this->checkClientHealth();
@@ -178,6 +173,28 @@ class Connection extends Component
         }
         $this->storey++;
         return $this;
+    }
+
+
+    /**
+     * @param PDO|null $client
+     * @return bool
+     */
+    protected function canUse(?PDO $client): bool
+    {
+        if (is_null($client)) {
+            return false;
+        }
+        try {
+            $steam = $client->query('select 1');
+            if ($steam !== false) {
+                return true;
+            }
+            return false;
+        } catch (\Throwable $exception) {
+            $this->logger->error($exception);
+            return false;
+        }
     }
 
 
