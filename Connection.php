@@ -151,12 +151,12 @@ class Connection extends Component
     protected function getNormalClientHealth(): PDO
     {
         [$client, $time] = $this->pool()->get($this->cds);
-        if ((time() - $time) > $this->idle_time) {
-            return $this->getNormalClientHealth();
-        }
-        if ($this->canUse($client)) {
+        if ((time() - $time) < $this->idle_time || $this->canUse($client)) {
             return $client;
+
         }
+        $this->pool()->abandon($this->cds);
+
         Waite::sleep(10);
         return $this->getNormalClientHealth();
     }
