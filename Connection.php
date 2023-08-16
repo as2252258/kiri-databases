@@ -135,7 +135,7 @@ class Connection extends Component
     public function getConnection(): PDO
     {
         if (!$this->inTransaction()) {
-            return $this->checkClientHealth();
+            return $this->getNormalClientHealth();
         } else {
             return $this->getTransactionClient();
         }
@@ -146,7 +146,7 @@ class Connection extends Component
      * @return PDO
      * @throws Exception
      */
-    protected function checkClientHealth(): PDO
+    protected function getNormalClientHealth(): PDO
     {
         /** @var PDO $client */
         $client = $this->pool()->get($this->cds);
@@ -154,7 +154,7 @@ class Connection extends Component
             return $client;
         }
         Waite::sleep(10);
-        return $this->checkClientHealth();
+        return $this->getNormalClientHealth();
     }
 
 
