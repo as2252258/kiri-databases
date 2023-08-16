@@ -302,7 +302,6 @@ class Connection extends Component
         if ($PDO === null || $PDO->inTransaction()) {
             return;
         }
-        $this->logger->debug('release mysql client ' . 'mysql:dbname=' . $this->database . ';host=' . $this->cds);
         $this->pool()->push($this->cds, [$PDO, time()]);
     }
 
@@ -346,7 +345,6 @@ class Connection extends Component
         } else {
             $options[PDO::ATTR_PERSISTENT] = false;
         }
-        $this->logger->debug('create mysql client ' . 'mysql:dbname=' . $this->database . ';host=' . $this->cds);
         $link = new PDO('mysql:dbname=' . $this->database . ';host=' . $this->cds, $this->username, $this->password, $options);
         foreach ($this->attributes as $key => $attribute) {
             $link->setAttribute($key, $attribute);
