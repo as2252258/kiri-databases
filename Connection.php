@@ -302,6 +302,7 @@ class Connection extends Component
         if ($PDO === null || $PDO->inTransaction()) {
             return;
         }
+        $this->logger->debug('release mysql client ' . 'mysql:dbname=' . $this->database . ';host=' . $this->cds);
         $this->pool()->push($this->cds, [$PDO, time()]);
     }
 
