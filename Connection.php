@@ -154,8 +154,8 @@ class Connection extends Component
         if ((time() - $time) > $this->idle_time) {
             return $this->getNormalClientHealth();
         }
+        return $client;
         if ($this->canUse($client)) {
-            return $client;
         }
         Waite::sleep(10);
         return $this->getNormalClientHealth();
