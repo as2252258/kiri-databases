@@ -67,8 +67,7 @@ class DatabasesProviders extends Providers
             'idle_time'       => $database['idle_time'] ?? 300,
             'pool'            => $clientPool,
             'attributes'      => $database['attributes'] ?? [],
-            'charset'         => $database['charset'] ?? 'utf8mb4',
-            'slaveConfig'     => $database['slaveConfig']
+            'charset'         => $database['charset'] ?? 'utf8mb4'
         ];
     }
 
