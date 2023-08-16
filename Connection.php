@@ -345,6 +345,7 @@ class Connection extends Component
         } else {
             $options[PDO::ATTR_PERSISTENT] = false;
         }
+        $this->logger->debug('create mysql client ' . 'mysql:dbname=' . $this->database . ';host=' . $this->cds);
         $link = new PDO('mysql:dbname=' . $this->database . ';host=' . $this->cds, $this->username, $this->password, $options);
         foreach ($this->attributes as $key => $attribute) {
             $link->setAttribute($key, $attribute);
