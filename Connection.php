@@ -51,6 +51,8 @@ class Connection extends Component
 
     public int $read_timeout = 10;
 
+    public int $idle_time = 600;
+
     public array $pool = ['max' => 10, 'min' => 1];
 
 
@@ -149,7 +151,10 @@ class Connection extends Component
     protected function getNormalClientHealth(): PDO
     {
         /** @var PDO $client */
-        $client = $this->pool()->get($this->cds);
+        [$client, $time] = $this->pool()->get($this->cds);
+        if ((time() - $time) > $this->idle_time) {
+            return $this->newConnect();
+        }
         if ($this->canUse($client)) {
             return $client;
         }
@@ -298,7 +303,7 @@ class Connection extends Component
         if ($PDO === null || $PDO->inTransaction()) {
             return;
         }
-        $this->pool()->push($this->cds, $PDO);
+        $this->pool()->push($this->cds, [$PDO, time()]);
     }
 
 
