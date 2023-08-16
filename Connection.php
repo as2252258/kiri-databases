@@ -76,10 +76,12 @@ class Connection extends Component
     /**
      * @var array
      */
-    public array $slaveConfig = [];
     public array $attributes  = [];
 
 
+    /**
+     * @var Schema|null
+     */
     private ?Schema $_schema = null;
 
 
