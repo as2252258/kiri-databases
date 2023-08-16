@@ -76,7 +76,7 @@ class Connection extends Component
     /**
      * @var array
      */
-    public array $attributes  = [];
+    public array $attributes = [];
 
 
     /**
@@ -152,6 +152,9 @@ class Connection extends Component
      */
     protected function getNormalClientHealth(): PDO
     {
+        if (!$this->pool()->hasItem($this->cds)) {
+            return $this->newConnect();
+        }
         /** @var PDO $client */
         [$client, $time] = $this->pool()->get($this->cds);
         if ((time() - $time) > $this->idle_time) {
