@@ -153,7 +153,11 @@ class Connection extends Component
      */
     protected function getNormalClientHealth(): PDO
     {
-        [$client, $time] = $this->pool()->get($this->cds, $this->waite_time);
+        $data = $this->pool()->get($this->cds, $this->waite_time);
+        if ($data === false) {
+            throw new Exception('Pool waite timeout at ' . $this->waite_time);
+        }
+        [$client, $time] = $data;
         if ((time() - $time) < $this->idle_time || $this->canUse($client)) {
             return $client;
 
