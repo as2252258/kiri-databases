@@ -23,8 +23,8 @@ use Kiri\Di\Context;
 use Kiri\Pool\Pool;
 use Kiri\Events\EventProvider;
 use Kiri\Exception\NotFindClassException;
-use Monolog\Logger;
 use PDO;
+use Kiri\Error\StdoutLogger;
 use Psr\Log\LoggerInterface;
 use ReflectionException;
 use Kiri\Server\Events\OnAfterRequest;
@@ -82,10 +82,10 @@ class Connection extends Component
 
 
     /**
-     * @var Logger
+     * @var StdoutLogger
      */
     #[Container(LoggerInterface::class)]
-    public Logger $logger;
+    public StdoutLogger $logger;
 
     /**
      * @param Pool $connections
@@ -192,7 +192,7 @@ class Connection extends Component
             }
             return false;
         } catch (\Throwable $exception) {
-            $this->logger->error($exception);
+            $this->logger->failure($exception);
             return false;
         }
     }
