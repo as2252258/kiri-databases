@@ -49,8 +49,6 @@ class Connection extends Component
 
     public int $connect_timeout = 30;
 
-    public int $read_timeout = 10;
-
     public int $idle_time = 600;
 
     public array $pool = ['max' => 10, 'min' => 1];
