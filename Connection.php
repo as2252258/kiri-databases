@@ -23,10 +23,12 @@ use Kiri\Di\Context;
 use Kiri\Pool\Pool;
 use Kiri\Events\EventProvider;
 use Kiri\Exception\NotFindClassException;
+use Monolog\Logger;
 use PDO;
 use Psr\Log\LoggerInterface;
 use ReflectionException;
 use Kiri\Server\Events\OnAfterRequest;
+use Kiri\Di\Inject\Container;
 
 /**
  * Class Connection
@@ -80,10 +82,15 @@ class Connection extends Component
 
 
     /**
-     * @param Pool $connections
-     * @param LoggerInterface $logger
+     * @var Logger
      */
-    public function __construct(public Pool $connections, public LoggerInterface $logger)
+    #[Container(LoggerInterface::class)]
+    protected Logger $logger;
+
+    /**
+     * @param Pool $connections
+     */
+    public function __construct(public Pool $connections)
     {
         parent::__construct();
     }
