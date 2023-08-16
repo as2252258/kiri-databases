@@ -80,10 +80,11 @@ class Command extends Component
         try {
             return $this->prepare()->fetchAll(PDO::FETCH_ASSOC);
         } catch (Throwable $throwable) {
+            $result = $this->error($throwable);
             if (str_contains($throwable->getMessage(),'MySQL server has gone away')) {
                 return $this->all();
             }
-            return $this->error($throwable);
+            return $result;
         } finally {
             $this->connection->release($client ?? null);
         }
@@ -98,10 +99,11 @@ class Command extends Component
         try {
             return $this->prepare()->fetch(PDO::FETCH_ASSOC);
         } catch (Throwable $throwable) {
+            $result = $this->error($throwable);
             if (str_contains($throwable->getMessage(),'MySQL server has gone away')) {
                 return $this->one();
             }
-            return $this->error($throwable);
+            return $result;
         } finally {
             $this->connection->release($client ?? null);
         }
@@ -116,10 +118,11 @@ class Command extends Component
         try {
             return $this->prepare()->fetchColumn(PDO::FETCH_ASSOC);
         } catch (Throwable $throwable) {
+            $result = $this->error($throwable);
             if (str_contains($throwable->getMessage(),'MySQL server has gone away')) {
                 return $this->fetchColumn();
             }
-            return $this->error($throwable);
+            return $result;
         } finally {
             $this->connection->release($client ?? null);
         }
@@ -134,10 +137,11 @@ class Command extends Component
         try {
             return $this->prepare()->rowCount();
         } catch (Throwable $throwable) {
+            $result = $this->error($throwable);
             if (str_contains($throwable->getMessage(),'MySQL server has gone away')) {
                 return $this->rowCount();
             }
-            return $this->error($throwable);
+            return $result;
         } finally {
             $this->connection->release($client ?? null);
         }
@@ -189,10 +193,11 @@ class Command extends Component
 
             return $result == 0 ? true : (int)$result;
         } catch (Throwable $throwable) {
+            $result = $this->error($throwable);
             if (str_contains($throwable->getMessage(),'MySQL server has gone away')) {
                 return $this->_execute();
             }
-            return $this->error($throwable);
+            return $result;
         } finally {
             $this->connection->release($client ?? null);
         }
