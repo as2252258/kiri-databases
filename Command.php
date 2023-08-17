@@ -143,30 +143,6 @@ class Command extends Component
         }
     }
 
-    /**
-     * @return int|bool
-     * @throws Exception
-     */
-    public function rowCount(): int|bool
-    {
-        try {
-            $client = $this->connection->getConnection();
-            if (($prepare = $client->prepare($this->sql)) === false) {
-                throw new Exception($client->errorInfo()[1]);
-            }
-            $prepare->execute($this->params);
-            return $prepare->rowCount();
-        } catch (Throwable $throwable) {
-            $result = $this->error($throwable);
-            if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
-                return $this->rowCount();
-            }
-            return $result;
-        } finally {
-            $this->connection->release($client ?? null);
-        }
-    }
-
 
     /**
      * @return int|bool
@@ -195,7 +171,9 @@ class Command extends Component
             }
             $result = $client->lastInsertId();
             $prepare->closeCursor();
-
+            if ($prepare->rowCount() < 1) {
+                return trigger_print_error("更新失败", 'mysql');
+            }
             return $result == 0 ? true : (int)$result;
         } catch (Throwable $throwable) {
             $result = $this->error($throwable);
