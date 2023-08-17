@@ -13,6 +13,7 @@ namespace Database;
 use Exception;
 use Kiri\Abstracts\Component;
 use Kiri\Di\Container;
+use Kiri\Di\Context;
 use Kiri\Exception\ConfigException;
 use PDO;
 use PDOStatement;
@@ -25,6 +26,8 @@ use Throwable;
  */
 class Command extends Component
 {
+
+    const RETRY_NAME = 'db:retry:count';
 
     /**
      *
@@ -86,7 +89,7 @@ class Command extends Component
             return $prepare->fetchAll(PDO::FETCH_ASSOC);
         } catch (Throwable $throwable) {
             $result = $this->error($throwable);
-            if (str_contains($throwable->getMessage(),'MySQL server has gone away')) {
+            if (str_contains($throwable->getMessage(), 'MySQL server has gone away') && $this->retry()) {
                 return $this->all();
             }
             return $result;
@@ -110,7 +113,7 @@ class Command extends Component
             return $prepare->fetch(PDO::FETCH_ASSOC);
         } catch (Throwable $throwable) {
             $result = $this->error($throwable);
-            if (str_contains($throwable->getMessage(),'MySQL server has gone away')) {
+            if (str_contains($throwable->getMessage(), 'MySQL server has gone away') && $this->retry()) {
                 return $this->one();
             }
             return $result;
@@ -134,7 +137,7 @@ class Command extends Component
             return $prepare->fetchColumn(PDO::FETCH_ASSOC);
         } catch (Throwable $throwable) {
             $result = $this->error($throwable);
-            if (str_contains($throwable->getMessage(),'MySQL server has gone away')) {
+            if (str_contains($throwable->getMessage(), 'MySQL server has gone away') && $this->retry()) {
                 return $this->fetchColumn();
             }
             return $result;
@@ -158,13 +161,26 @@ class Command extends Component
             return $prepare->rowCount();
         } catch (Throwable $throwable) {
             $result = $this->error($throwable);
-            if (str_contains($throwable->getMessage(),'MySQL server has gone away')) {
+            if (str_contains($throwable->getMessage(), 'MySQL server has gone away') && $this->retry()) {
                 return $this->rowCount();
             }
             return $result;
         } finally {
             $this->connection->release($client ?? null);
         }
+    }
+
+
+    /**
+     * @return bool
+     */
+    protected function retry(): bool
+    {
+        if (Context::increment(self::RETRY_NAME) < 3) {
+            return true;
+        }
+        Context::remove(self::RETRY_NAME);
+        return false;
     }
 
 
@@ -199,7 +215,7 @@ class Command extends Component
             return $result == 0 ? true : (int)$result;
         } catch (Throwable $throwable) {
             $result = $this->error($throwable);
-            if (str_contains($throwable->getMessage(),'MySQL server has gone away')) {
+            if (str_contains($throwable->getMessage(), 'MySQL server has gone away') && $this->retry()) {
                 return $this->_execute();
             }
             return $result;
