@@ -514,7 +514,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
     {
         $changes = \array_diff_assoc($this->_attributes, $this->_oldAttributes);
         if ($this->hasPrimary()) {
-            $condition = [$this->getPrimary() => $this->_oldAttributes[$this->getPrimary()]];
+            $condition = [$this->primary => $this->_oldAttributes[$this->primary]];
         } else {
             $condition = \array_intersect_assoc($this->_oldAttributes, $this->_attributes);
         }
