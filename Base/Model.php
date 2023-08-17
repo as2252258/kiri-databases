@@ -513,8 +513,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
     private function diff(): array
     {
         $changes = \array_diff_assoc($this->_attributes, $this->_oldAttributes);
-        if ($this->hasPrimaryValue()) {
-            $condition = [$this->getPrimary() => $this->getPrimaryValue()];
+        if ($this->hasPrimary()) {
+            $condition = [$this->getPrimary() => $this->_oldAttributes[$this->getPrimary()]];
         } else {
             $condition = \array_intersect_assoc($this->_oldAttributes, $this->_attributes);
         }
