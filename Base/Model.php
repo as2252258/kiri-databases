@@ -188,7 +188,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
      */
     public function hasPrimary(): bool
     {
-        return $this->primary !== NULL && $this->primary !== '';
+        return !empty($this->primary);
     }
 
     /**
@@ -223,6 +223,9 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
      */
     public function getPrimaryValue(): ?int
     {
+        if (!$this->hasPrimary()) {
+            return null;
+        }
         return $this->_oldAttributes[$this->getPrimary()] ?? null;
     }
 
