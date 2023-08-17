@@ -77,7 +77,13 @@ class SqlBuilder extends Component
      */
     public function update(array $attributes): bool|string
     {
-        return $this->__updateBuilder($this->builderParams($attributes));
+        $conditions = $this->query->attributes;
+        $this->query->attributes = [];
+        $data = $this->__updateBuilder($this->builderParams($attributes));
+        foreach ($conditions as $condition) {
+            $this->query->pushParam($condition);
+        }
+        return $data;
     }
 
 
