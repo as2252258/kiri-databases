@@ -223,10 +223,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
      */
     public function getPrimaryValue(): ?int
     {
-        if ($this->hasPrimary()) {
-            return $this->getAttribute($this->getPrimary());
-        }
-        return null;
+        return $this->_oldAttributes[$this->getPrimary()] ?? null;
     }
 
     /**
