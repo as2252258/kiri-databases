@@ -158,10 +158,6 @@ class Connection extends Component
             throw new Exception('Pool waite timeout at ' . $this->waite_time);
         }
 
-        if (is_object($data)) {
-            return $data;
-        }
-
         [$client, $time] = $data;
         if ((time() - $time) < $this->idle_time && $this->canUse($client)) {
             return $client;
