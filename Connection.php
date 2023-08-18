@@ -157,6 +157,11 @@ class Connection extends Component
         if ($data === false) {
             throw new Exception('Pool waite timeout at ' . $this->waite_time);
         }
+
+        if (is_object($data)) {
+            return $data;
+        }
+
         [$client, $time] = $data;
         if ((time() - $time) < $this->idle_time && $this->canUse($client)) {
             return $client;
@@ -262,7 +267,7 @@ class Connection extends Component
             if ($pdo->inTransaction()) {
                 $pdo->commit();
             }
-            $this->pool()->push($this->cds, $pdo);
+            $this->pool()->push($this->cds, [$pdo, time()]);
             Context::remove($this->cds);
         }
     }
@@ -282,7 +287,7 @@ class Connection extends Component
         if ($pdo->inTransaction()) {
             $pdo->rollback();
         }
-        $this->pool()->push($this->cds, $pdo);
+        $this->pool()->push($this->cds, [$pdo, time()]);
         Context::remove($this->cds);
     }
 
