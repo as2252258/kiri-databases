@@ -204,7 +204,6 @@ class Connection extends Component
             }
             return false;
         } catch (\Throwable $exception) {
-            $this->logger->failure($exception);
             return false;
         }
     }
