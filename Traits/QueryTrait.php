@@ -648,9 +648,9 @@ trait QueryTrait
      */
     public function pushParam(mixed $value): static
     {
-        if (is_string($value)) {
-            $value = addslashes($value);
-        }
+//        if (is_string($value)) {
+//            $value = addslashes($value);
+//        }
         $this->attributes[] = $value;
         return $this;
     }
