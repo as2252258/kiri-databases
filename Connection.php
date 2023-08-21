@@ -25,6 +25,7 @@ use Kiri\Events\EventProvider;
 use Kiri\Exception\NotFindClassException;
 use PDO;
 use Kiri\Error\StdoutLogger;
+use PDOStatement;
 use Psr\Log\LoggerInterface;
 use ReflectionException;
 use Kiri\Server\Events\OnAfterRequest;
@@ -199,7 +200,7 @@ class Connection extends Component
         }
         try {
             $steam = $client->query('select 1');
-            if ($steam !== false) {
+            if ($steam instanceof PDOStatement) {
                 return true;
             }
             return false;
