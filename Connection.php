@@ -348,11 +348,6 @@ class Connection extends Component
             PDO::ATTR_TIMEOUT            => $this->connect_timeout,
             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $this->charset
         ];
-//        if (!Context::inCoroutine()) {
-//            $options[PDO::ATTR_PERSISTENT] = true;
-//        } else {
-//            $options[PDO::ATTR_PERSISTENT] = false;
-//        }
         $link = new PDO('mysql:dbname=' . $this->database . ';host=' . $this->cds, $this->username, $this->password, $options);
         foreach ($this->attributes as $key => $attribute) {
             $link->setAttribute($key, $attribute);
