@@ -160,7 +160,6 @@ class Connection extends Component
         }
 
         [$client, $time] = $data;
-        file_put_contents('php://output', ((time() . '        ' . $time) . '      ' . $this->idle_time) . PHP_EOL, FILE_APPEND);
         if ((time() - $time) < $this->idle_time && $this->canUse($client)) {
             return $client;
         }
@@ -310,7 +309,6 @@ class Connection extends Component
      */
     public function release(PDO $PDO): void
     {
-        file_put_contents('php://output', '回收PDO连接. inTransaction ' . (int)$this->inTransaction() . $this->cds, FILE_APPEND);
         if ($this->inTransaction()) {
             return;
         }
@@ -344,7 +342,6 @@ class Connection extends Component
      */
     public function newConnect(): array
     {
-        file_put_contents('php://output', '创建PDO连接.' . $this->cds, FILE_APPEND);
         $options = array_merge($this->attributes, [
             PDO::ATTR_CASE               => PDO::CASE_NATURAL,
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
