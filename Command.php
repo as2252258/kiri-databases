@@ -77,8 +77,8 @@ class Command extends Component
      */
     public function all(): bool|array
     {
+        $client = $this->connection->getConnection();
         try {
-            $client = $this->connection->getConnection();
             if (($prepare = $client->prepare($this->sql)) === false) {
                 throw new Exception($client->errorInfo()[1]);
             }
@@ -91,9 +91,7 @@ class Command extends Component
             }
             return $result;
         } finally {
-            if (isset($client)) {
-                $this->connection->release($client);
-            }
+            $this->connection->release($client);
         }
     }
 
@@ -103,8 +101,8 @@ class Command extends Component
      */
     public function one(): null|bool|array
     {
+        $client = $this->connection->getConnection();
         try {
-            $client = $this->connection->getConnection();
             if (($prepare = $client->prepare($this->sql)) === false) {
                 throw new Exception($client->errorInfo()[1]);
             }
@@ -117,9 +115,7 @@ class Command extends Component
             }
             return $result;
         } finally {
-            if (isset($client)) {
-                $this->connection->release($client);
-            }
+            $this->connection->release($client);
         }
     }
 
@@ -129,8 +125,8 @@ class Command extends Component
      */
     public function fetchColumn(): mixed
     {
+        $client = $this->connection->getConnection();
         try {
-            $client = $this->connection->getConnection();
             if (($prepare = $client->prepare($this->sql)) === false) {
                 throw new Exception($client->errorInfo()[1]);
             }
@@ -143,9 +139,7 @@ class Command extends Component
             }
             return $result;
         } finally {
-            if (isset($client)) {
-                $this->connection->release($client);
-            }
+            $this->connection->release($client);
         }
     }
 
@@ -167,8 +161,8 @@ class Command extends Component
      */
     private function _execute(): bool|int
     {
+        $client = $this->connection->getConnection();
         try {
-            $client = $this->connection->getConnection();
             if (($prepare = $client->prepare($this->sql)) === false) {
                 throw new Exception($client->errorInfo()[1]);
             }
@@ -188,9 +182,7 @@ class Command extends Component
             }
             return $result;
         } finally {
-            if (isset($client)) {
-                $this->connection->release($client);
-            }
+            $this->connection->release($client);
         }
     }
 
