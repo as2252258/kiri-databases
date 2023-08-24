@@ -226,6 +226,7 @@ class Connection extends Component
         return $pdo;
     }
 
+
     /**
      * @return bool
      * @throws Exception
@@ -234,6 +235,7 @@ class Connection extends Component
     {
         return $this->storey > 0;
     }
+
 
     /**
      * @throws Exception
