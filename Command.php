@@ -85,11 +85,10 @@ class Command extends Component
             $prepare->execute($this->params);
             return $prepare->fetchAll(PDO::FETCH_ASSOC);
         } catch (Throwable $throwable) {
-            $result = $this->error($throwable);
-            if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
+            if ($this->isRefresh($throwable)) {
                 return $this->all();
             }
-            return $result;
+            return $this->error($throwable);
         } finally {
             $this->connection->release($client);
         }
@@ -109,11 +108,10 @@ class Command extends Component
             $prepare->execute($this->params);
             return $prepare->fetch(PDO::FETCH_ASSOC);
         } catch (Throwable $throwable) {
-            $result = $this->error($throwable);
-            if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
+            if ($this->isRefresh($throwable)) {
                 return $this->one();
             }
-            return $result;
+            return $this->error($throwable);
         } finally {
             $this->connection->release($client);
         }
@@ -133,11 +131,10 @@ class Command extends Component
             $prepare->execute($this->params);
             return $prepare->fetchColumn(PDO::FETCH_ASSOC);
         } catch (Throwable $throwable) {
-            $result = $this->error($throwable);
-            if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
+            if ($this->isRefresh($throwable)) {
                 return $this->fetchColumn();
             }
-            return $result;
+            return $this->error($throwable);
         } finally {
             $this->connection->release($client);
         }
@@ -176,15 +173,31 @@ class Command extends Component
             }
             return $result == 0 ? true : (int)$result;
         } catch (Throwable $throwable) {
-            $result = $this->error($throwable);
-            if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
+            if ($this->isRefresh($throwable)) {
                 return $this->_execute();
             }
-            return $result;
+            return $this->error($throwable);
         } finally {
             $this->connection->release($client);
         }
     }
+
+
+    /**
+     * @param Throwable $throwable
+     * @return bool
+     */
+    protected function isRefresh(Throwable $throwable): bool
+    {
+        if (str_contains($throwable->getMessage(), 'MySQL server has gone away')) {
+            return true;
+        }
+        if (str_contains($throwable->getMessage(), 'Send of 14 bytes failed with errno=32 Broken pipe')) {
+            return true;
+        }
+        return false;
+    }
+
 
     /**
      * @param Throwable $throwable
