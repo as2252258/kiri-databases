@@ -310,6 +310,7 @@ class Connection extends Component
      */
     public function release(PDO $PDO): void
     {
+        file_put_contents('php://output', '回收PDO连接. inTransaction ' . (int)$PDO->inTransaction() . $this->cds, FILE_APPEND);
         if ($PDO->inTransaction()) {
             return;
         }
