@@ -191,7 +191,6 @@ class Connection extends Component
     }
 
 
-
     /**
      * @return $this
      * @throws Exception
@@ -339,7 +338,7 @@ class Connection extends Component
      */
     public function newConnect(): array
     {
-        $options = [
+        $options = array_merge($this->attributes, [
             PDO::ATTR_CASE               => PDO::CASE_NATURAL,
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_ORACLE_NULLS       => PDO::NULL_NATURAL,
@@ -347,11 +346,8 @@ class Connection extends Component
             PDO::ATTR_EMULATE_PREPARES   => true,
             PDO::ATTR_TIMEOUT            => $this->timeout,
             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $this->charset
-        ];
+        ]);
         $link = new PDO('mysql:dbname=' . $this->database . ';host=' . $this->cds, $this->username, $this->password, $options);
-        foreach ($this->attributes as $key => $attribute) {
-            $link->setAttribute($key, $attribute);
-        }
         return [$link, time()];
     }
 
