@@ -164,7 +164,7 @@ class Connection extends Component
             return $client;
         }
 
-        file_put_contents('php://output', 'PDO连接已失效, 空闲超时或已不可用，重新获取.', FILE_APPEND);
+        $this->logger->error('PDO连接已失效, 空闲超时或已不可用，重新获取.', [$this->cds]);
         $this->pool()->abandon($this->cds);
 
         Waite::sleep(10);
