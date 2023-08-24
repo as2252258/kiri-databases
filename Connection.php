@@ -309,11 +309,9 @@ class Connection extends Component
      */
     public function release(PDO $PDO): void
     {
-        if ($this->inTransaction()) {
-            return;
+        if (!$this->inTransaction()) {
+            $this->pool()->push($this->cds, [$PDO, time()]);
         }
-        file_put_contents('php://output', '回收PDO连接.' . $this->cds, FILE_APPEND);
-        $this->pool()->push($this->cds, [$PDO, time()]);
     }
 
 
