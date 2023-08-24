@@ -342,6 +342,7 @@ class Connection extends Component
      */
     public function newConnect(): array
     {
+        file_put_contents('php://output', '创建PDO连接.' . $this->cds, FILE_APPEND);
         $options = array_merge($this->attributes, [
             PDO::ATTR_CASE               => PDO::CASE_NATURAL,
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
