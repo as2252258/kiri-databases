@@ -53,7 +53,7 @@ class Connection extends Component
 
     public int $waite_time = 3;
 
-    public int $idle_time = 600;
+    public int $idle_time = 60;
 
     public array $pool = ['max' => 10, 'min' => 1];
 
