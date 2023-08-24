@@ -195,6 +195,9 @@ class Command extends Component
         if (str_contains($throwable->getMessage(), 'Send of 14 bytes failed with errno=32 Broken pipe')) {
             return true;
         }
+        if (str_contains($throwable->getMessage(), 'Lost connection to MySQL server during query')) {
+            return true;
+        }
         return false;
     }
 
