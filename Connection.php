@@ -160,6 +160,7 @@ class Connection extends Component
         }
 
         [$client, $time] = $data;
+        $this->logger->error(((time() - $time) . '      ' . $this->idle_time), [$this->cds]);
         if ((time() - $time) < $this->idle_time && $this->canUse($client)) {
             return $client;
         }
