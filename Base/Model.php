@@ -406,9 +406,6 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
      */
     public function setAttributes(array $param): static
     {
-        if (count($param) < 1) {
-            return $this;
-        }
         foreach ($param as $key => $attribute) {
             $this->setAttribute($key, $attribute);
         }
@@ -419,13 +416,9 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
     /**
      * @param array $param
      * @return $this
-     * @throws ReflectionException
      */
     public function setOldAttributes(array $param): static
     {
-        if (count($param) < 1) {
-            return $this;
-        }
         foreach ($param as $key => $attribute) {
             $this->setOldAttribute($key, $attribute);
         }
