@@ -487,11 +487,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
      * @return bool|$this
      * @throws Exception
      */
-    public function save(array $data = []): static|bool
+    public function save(): static|bool
     {
-        if (count($data) > 0) {
-            $this->_attributes = array_merge($this->_attributes, $data);
-        }
         if (!$this->isNewExample) {
             if (!$this->validator($this->rules()) || !$this->beforeSave($this)) {
                 return FALSE;
