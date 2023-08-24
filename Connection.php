@@ -202,7 +202,7 @@ class Connection extends Component
         if ($this->storey == 0) {
             /** @var PDO $pdo */
             $pdo = Context::get($this->cds);
-            if ($pdo instanceof PDO && !$pdo->inTransaction()) {
+            if ($pdo instanceof PDO && !$this->inTransaction()) {
                 $pdo->beginTransaction();
             }
         }
@@ -220,7 +220,7 @@ class Connection extends Component
         $pdo = Context::get($this->cds);
         if ($pdo === null) {
             $pdo = $this->getNormalClientHealth();
-            if ($this->storey > 0 && !$pdo->inTransaction()) {
+            if ($this->storey > 0 && !$this->inTransaction()) {
                 $pdo->beginTransaction();
             }
             Context::set($this->cds, $pdo);
@@ -263,7 +263,7 @@ class Connection extends Component
             if ($pdo === null) {
                 return;
             }
-            if ($pdo->inTransaction()) {
+            if ($this->inTransaction()) {
                 $pdo->commit();
             }
             $this->pool()->push($this->cds, [$pdo, time()]);
@@ -283,7 +283,7 @@ class Connection extends Component
         if ($pdo === null) {
             return;
         }
-        if ($pdo->inTransaction()) {
+        if ($this->inTransaction()) {
             $pdo->rollback();
         }
         $this->pool()->push($this->cds, [$pdo, time()]);
@@ -310,8 +310,8 @@ class Connection extends Component
      */
     public function release(PDO $PDO): void
     {
-        file_put_contents('php://output', '回收PDO连接. inTransaction ' . (int)$PDO->inTransaction() . $this->cds, FILE_APPEND);
-        if ($PDO->inTransaction()) {
+        file_put_contents('php://output', '回收PDO连接. inTransaction ' . (int)$this->inTransaction() . $this->cds, FILE_APPEND);
+        if ($this->inTransaction()) {
             return;
         }
         file_put_contents('php://output', '回收PDO连接.' . $this->cds, FILE_APPEND);
