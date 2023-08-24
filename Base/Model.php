@@ -372,12 +372,11 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
     }
 
     /**
-     * @param $name
-     * @param $value
+     * @param string $name
+     * @param mixed $value
      * @return mixed
-     * @throws ReflectionException
      */
-    public function setAttribute($name, $value): mixed
+    public function setAttribute(string $name, mixed $value): mixed
     {
         $method = 'set' . ucfirst($name) . 'Attribute';
         if (method_exists($this, $method)) {
@@ -387,12 +386,11 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
     }
 
     /**
-     * @param $name
-     * @param $value
+     * @param string $name
+     * @param mixed $value
      * @return mixed
-     * @throws ReflectionException
      */
-    public function setOldAttribute($name, $value): mixed
+    public function setOldAttribute(string $name, mixed $value): mixed
     {
         $method = 'set' . ucfirst($name) . 'Attribute';
         if (method_exists($this, $method)) {
