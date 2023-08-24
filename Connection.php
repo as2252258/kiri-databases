@@ -160,7 +160,7 @@ class Connection extends Component
         }
 
         [$client, $time] = $data;
-        if ((time() - $time) < $this->timeout && $this->canUse($client)) {
+        if ((time() - $time) < $this->idle_time && $this->canUse($client)) {
             return $client;
         }
 
