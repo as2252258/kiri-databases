@@ -48,7 +48,7 @@ class Connection extends Component
 
     public string $database = '';
 
-    public int $connect_timeout = 30;
+    public int $timeout = 30;
 
 
     public int $waite_time = 3;
@@ -160,10 +160,11 @@ class Connection extends Component
         }
 
         [$client, $time] = $data;
-        if ((time() - $time) < $this->idle_time && $this->canUse($client)) {
+        if ((time() - $time) < $this->timeout && $this->canUse($client)) {
             return $client;
-
         }
+
+        $this->logger->alert('PDO连接已失效, 空闲超时或已不可用，重新获取.');
         $this->pool()->abandon($this->cds);
 
         Waite::sleep(10);
@@ -199,11 +200,10 @@ class Connection extends Component
             return false;
         }
         try {
-            $steam = $client->query('select 1');
-            if ($steam instanceof PDOStatement) {
-                return true;
+            if (($steam = $client->query('select 1')) === false) {
+                return false;
             }
-            return false;
+            return $steam->fetch(PDO::FETCH_ASSOC);
         } catch (\Throwable $exception) {
             return false;
         }
@@ -305,9 +305,9 @@ class Connection extends Component
      * 回收链接
      * @throws
      */
-    public function release(?PDO $PDO): void
+    public function release(PDO $PDO): void
     {
-        if ($PDO === null || $PDO->inTransaction()) {
+        if ($PDO->inTransaction()) {
             return;
         }
         $this->pool()->push($this->cds, [$PDO, time()]);
@@ -345,7 +345,7 @@ class Connection extends Component
             PDO::ATTR_ORACLE_NULLS       => PDO::NULL_NATURAL,
             PDO::ATTR_STRINGIFY_FETCHES  => false,
             PDO::ATTR_EMULATE_PREPARES   => true,
-            PDO::ATTR_TIMEOUT            => $this->connect_timeout,
+            PDO::ATTR_TIMEOUT            => $this->timeout,
             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $this->charset
         ];
         $link = new PDO('mysql:dbname=' . $this->database . ';host=' . $this->cds, $this->username, $this->password, $options);
