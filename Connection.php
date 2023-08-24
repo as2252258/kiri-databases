@@ -171,6 +171,7 @@ class Connection extends Component
         return $this->getNormalClientHealth();
     }
 
+
     /**
      * @param PDO|null $client
      * @return bool
