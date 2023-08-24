@@ -171,25 +171,6 @@ class Connection extends Component
         return $this->getNormalClientHealth();
     }
 
-
-    /**
-     * @return $this
-     * @throws Exception
-     */
-    public function beginTransaction(): static
-    {
-        if ($this->storey == 0) {
-            /** @var PDO $pdo */
-            $pdo = Context::get($this->cds);
-            if ($pdo instanceof PDO && !$pdo->inTransaction()) {
-                $pdo->beginTransaction();
-            }
-        }
-        $this->storey++;
-        return $this;
-    }
-
-
     /**
      * @param PDO|null $client
      * @return bool
@@ -207,6 +188,25 @@ class Connection extends Component
         } catch (\Throwable $exception) {
             return false;
         }
+    }
+
+
+
+    /**
+     * @return $this
+     * @throws Exception
+     */
+    public function beginTransaction(): static
+    {
+        if ($this->storey == 0) {
+            /** @var PDO $pdo */
+            $pdo = Context::get($this->cds);
+            if ($pdo instanceof PDO && !$pdo->inTransaction()) {
+                $pdo->beginTransaction();
+            }
+        }
+        $this->storey++;
+        return $this;
     }
 
 
