@@ -313,6 +313,7 @@ class Connection extends Component
         if ($PDO->inTransaction()) {
             return;
         }
+        file_put_contents('php://output', '回收PDO连接.' . $this->cds, FILE_APPEND);
         $this->pool()->push($this->cds, [$PDO, time()]);
     }
 
