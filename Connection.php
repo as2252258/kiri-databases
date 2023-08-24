@@ -160,7 +160,7 @@ class Connection extends Component
         }
 
         [$client, $time] = $data;
-        file_put_contents('php://output', ((time() - $time) . '      ' . $this->idle_time), FILE_APPEND);
+        file_put_contents('php://output', ((time() - $time) . '      ' . $this->idle_time) . PHP_EOL, FILE_APPEND);
         if ((time() - $time) < $this->idle_time && $this->canUse($client)) {
             return $client;
         }
