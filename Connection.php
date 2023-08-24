@@ -48,7 +48,7 @@ class Connection extends Component
 
     public string $database = '';
 
-    public int $timeout = 30;
+    public int $connect_timeout = 30;
 
 
     public int $waite_time = 3;
@@ -344,10 +344,14 @@ class Connection extends Component
             PDO::ATTR_ORACLE_NULLS       => PDO::NULL_NATURAL,
             PDO::ATTR_STRINGIFY_FETCHES  => false,
             PDO::ATTR_EMULATE_PREPARES   => true,
-            PDO::ATTR_TIMEOUT            => $this->timeout,
+            PDO::ATTR_TIMEOUT            => $this->connect_timeout,
             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $this->charset
         ]);
+
         $link = new PDO('mysql:dbname=' . $this->database . ';host=' . $this->cds, $this->username, $this->password, $options);
+        foreach ($this->attributes as $key => $attribute) {
+            $link->setAttribute($key, $attribute);
+        }
         return [$link, time()];
     }
 
