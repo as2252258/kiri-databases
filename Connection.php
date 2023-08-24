@@ -182,10 +182,10 @@ class Connection extends Component
             return false;
         }
         try {
-            if (($steam = $client->query('select 1')) === false) {
+            if ($client->query('select 1') === false) {
                 return false;
             }
-            return $steam->fetch(PDO::FETCH_ASSOC);
+            return true;
         } catch (\Throwable $exception) {
             return false;
         }
