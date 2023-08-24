@@ -160,12 +160,12 @@ class Connection extends Component
         }
 
         [$client, $time] = $data;
-        $this->logger->error(((time() - $time) . '      ' . $this->idle_time), [$this->cds]);
+        file_put_contents('php://output', ((time() - $time) . '      ' . $this->idle_time), FILE_APPEND);
         if ((time() - $time) < $this->idle_time && $this->canUse($client)) {
             return $client;
         }
 
-        $this->logger->error('PDO连接已失效, 空闲超时或已不可用，重新获取.', [$this->cds]);
+        file_put_contents('php://output', 'PDO连接已失效, 空闲超时或已不可用，重新获取.', FILE_APPEND);
         $this->pool()->abandon($this->cds);
 
         Waite::sleep(10);
