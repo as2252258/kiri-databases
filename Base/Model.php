@@ -483,7 +483,6 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
     }
 
     /**
-     * @param array $data
      * @return bool|$this
      * @throws Exception
      */
