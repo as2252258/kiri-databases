@@ -203,7 +203,7 @@ class Connection extends Component
             /** @var PDO $pdo */
             $pdo = Context::get($this->cds);
             if ($pdo == null) {
-                $pdo = Context::set($this->cds, $this->getTransactionClient());
+                $pdo = $this->getTransactionClient();
             }
             if (!$pdo->inTransaction()) {
                 $pdo->beginTransaction();
@@ -250,7 +250,16 @@ class Connection extends Component
     {
         $this->storey--;
         if ($this->storey == 0) {
-            $this->clear();
+            /** @var PDO $pdo */
+            $pdo = Context::get($this->cds);
+            if ($pdo === null) {
+                throw new Exception('Failed to rollback transaction: connection was exists.');
+            }
+            if ($this->inTransaction()) {
+                $pdo->rollback();
+            }
+            $this->pool()->push($this->cds, [$pdo, time()]);
+            Context::remove($this->cds);
         }
     }
 
@@ -264,9 +273,9 @@ class Connection extends Component
         if ($this->storey == 0) {
             $pdo = Context::get($this->cds);
             if ($pdo === null) {
-                return;
+                throw new Exception('Failed to commit transaction: connection was exists.');
             }
-            if ($this->inTransaction()) {
+            if ($pdo->inTransaction()) {
                 $pdo->commit();
             }
             $this->pool()->push($this->cds, [$pdo, time()]);
