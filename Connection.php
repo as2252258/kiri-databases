@@ -114,6 +114,7 @@ class Connection extends Component
         $eventProvider->on(Rollback::class, [$this, 'rollback'], 0);
         $eventProvider->on(Commit::class, [$this, 'commit'], 0);
         $eventProvider->on(OnAfterRequest::class, [$this, 'clear']);
+        $eventProvider->on(OnWorkerExit::class, [$this, 'disconnect']);
     }
 
 
