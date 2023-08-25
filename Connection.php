@@ -17,6 +17,7 @@ use Database\Affair\Rollback;
 use Database\Mysql\Schema;
 use Exception;
 use Kiri;
+use Kiri\Server\Events\OnWorkerExit;
 use Kiri\Waite;
 use Kiri\Abstracts\Component;
 use Kiri\Di\Context;
