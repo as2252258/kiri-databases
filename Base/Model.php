@@ -465,10 +465,13 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
             return false;
         }
 
-        $command = $this->getConnection()->createCommand($generate, $query->attributes);
+        $connection = $this->getConnection()->beginTransaction();
+        $command = $connection->createCommand($generate, $query->attributes);
         if ($command->save()) {
+            $connection->commit();
             return $this->refresh()->afterSave($old, $change);
         } else {
+            $connection->rollback();
             return FALSE;
         }
     }
@@ -479,16 +482,15 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
      */
     public function save(): static|bool
     {
+        if (!$this->validator($this->rules()) || !$this->beforeSave($this)) {
+            return FALSE;
+        }
         if (!$this->isNewExample) {
-            if (!$this->validator($this->rules()) || !$this->beforeSave($this)) {
-                return FALSE;
-            }
-
             [$changes, $condition] = $this->diff();
 
             return $this->updateInternal($condition, $condition, $changes);
         } else {
-            return $this->create();
+            return $this->insert();
         }
     }
 
@@ -506,19 +508,6 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
             $condition = \array_intersect_assoc($this->_oldAttributes, $this->_attributes);
         }
         return [$changes, $condition];
-    }
-
-
-    /**
-     * @return $this|bool
-     * @throws Exception
-     */
-    protected function create(): bool|static
-    {
-        if (!$this->validator($this->rules()) || !$this->beforeSave($this)) {
-            return FALSE;
-        }
-        return $this->insert();
     }
 
 

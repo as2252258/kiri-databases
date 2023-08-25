@@ -201,8 +201,8 @@ class Connection extends Component
     {
         if ($this->storey == 0) {
             /** @var PDO $pdo */
-            $pdo = Context::get($this->cds);
-            if ($pdo instanceof PDO && !$this->inTransaction()) {
+            $pdo = Context::get($this->cds, $this->getTransactionClient());
+            if (!$this->inTransaction()) {
                 $pdo->beginTransaction();
             }
         }
