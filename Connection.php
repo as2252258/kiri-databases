@@ -202,7 +202,7 @@ class Connection extends Component
         if ($this->storey == 0) {
             /** @var PDO $pdo */
             $pdo = Context::get($this->cds, $this->getTransactionClient());
-            if (!$this->inTransaction()) {
+            if (!$pdo->inTransaction()) {
                 $pdo->beginTransaction();
             }
         }
@@ -220,7 +220,7 @@ class Connection extends Component
         $pdo = Context::get($this->cds);
         if ($pdo === null) {
             $pdo = $this->getNormalClientHealth();
-            if ($this->storey > 0 && !$this->inTransaction()) {
+            if ($this->storey > 0 && !$pdo->inTransaction()) {
                 $pdo->beginTransaction();
             }
             Context::set($this->cds, $pdo);
