@@ -143,24 +143,45 @@ class Connection extends Component
         $length = $pool->size($this->cds);
         for ($i = 0; $i < $length; $i++) {
             try {
-                $bool = $pool->get($this->cds);
-                if ($bool === false) {
+                if (($client = $this->pop($pool, false)) === false) {
                     break;
-                }
-                /** @var PDO $client */
-                [$client, $time] = $bool;
-                if ((time() - $time) > $this->idle_time) {
-                    throw new Exception('Client timeout.');
-                }
-                if ($client->query('select 1') === false) {
-                    throw new Exception($client->errorInfo()[1]);
                 }
                 $pool->push($this->cds, [$client, time()]);
             } catch (\Throwable $exception) {
-                $this->logger->error(throwable($exception));
+                if (!str_contains($exception->getMessage(), 'Client timeout.')) {
+                    $this->logger->error(throwable($exception));
+                }
                 $pool->abandon($this->cds);
             }
         }
+    }
+
+
+    /**
+     * @param Pool $pool
+     * @param bool $isWaite
+     * @return PDO|bool
+     * @throws Exception
+     */
+    protected function pop(Pool $pool, bool $isWaite): PDO|bool
+    {
+        if ($isWaite) {
+            $bool = $pool->get($this->cds, $this->waite_time);
+        } else {
+            $bool = $pool->get($this->cds);
+        }
+        if ($bool === false) {
+            return false;
+        }
+        /** @var PDO $client */
+        [$client, $time] = $bool;
+        if ((time() - $time) > $this->idle_time) {
+            throw new Exception('Client timeout.');
+        }
+        if ($client->query('select 1') === false) {
+            throw new Exception($client->errorInfo()[1]);
+        }
+        return $client;
     }
 
 
@@ -202,22 +223,17 @@ class Connection extends Component
      */
     protected function getNormalClientHealth(): PDO
     {
-        $data = $this->pool()->get($this->cds, $this->waite_time);
-        if ($data === false) {
-            throw new Exception('Pool waite timeout at ' . $this->waite_time);
+        try {
+            $data = $this->pop($this->pool(), true);
+            if ($data === false) {
+                throw new Exception('Pool waite timeout at ' . $this->waite_time);
+            }
+            return $data;
+        }catch (\Throwable $exception) {
+            $this->logger->error($exception->getMessage(), [$this->cds]);
+            $this->pool()->abandon($this->cds);
+            return $this->getNormalClientHealth();
         }
-
-        [$client, $time] = $data;
-        if ((time() - $time) < $this->idle_time && $this->canUse($client)) {
-            return $client;
-        }
-
-        $client = null;
-        $data = null;
-        $this->logger->error('PDO连接已失效, 空闲超时或已不可用，重新获取.', [$this->cds]);
-        $this->pool()->abandon($this->cds);
-
-        return $this->getNormalClientHealth();
     }
 
 
