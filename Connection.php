@@ -377,11 +377,11 @@ class Connection extends Component
 
 
     /**
-     * @return array<PDO, int>
+     * @return PDO
      */
-    public function newConnect(): array
+    public function newConnect(): PDO
     {
-        return [new PDO('mysql:dbname=' . $this->database . ';host=' . $this->cds,
+        return new PDO('mysql:dbname=' . $this->database . ';host=' . $this->cds,
             $this->username, $this->password, array_merge($this->attributes, [
                 PDO::ATTR_CASE => PDO::CASE_NATURAL,
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -390,7 +390,7 @@ class Connection extends Component
                 PDO::ATTR_EMULATE_PREPARES => true,
                 PDO::ATTR_TIMEOUT => $this->connect_timeout,
                 PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $this->charset
-            ])), time()];
+            ]));
     }
 
 
