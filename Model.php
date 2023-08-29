@@ -31,11 +31,11 @@ class Model extends Base\Model
 
     /**
      * @param string $column
-     * @param int $value
+     * @param int|float $value
      * @return ModelInterface|false
      * @throws Exception
      */
-    public function increment(string $column, int $value): bool|ModelInterface
+    public function increment(string $column, int|float $value): bool|ModelInterface
     {
         if (!$this->mathematics([$column => $value], '+')) {
             return false;
@@ -47,11 +47,11 @@ class Model extends Base\Model
 
     /**
      * @param string $column
-     * @param int $value
+     * @param int|float $value
      * @return ModelInterface|false
      * @throws Exception
      */
-    public function decrement(string $column, int $value): bool|ModelInterface
+    public function decrement(string $column, int|float $value): bool|ModelInterface
     {
         if (!$this->mathematics([$column => $value], '-')) {
             return false;
