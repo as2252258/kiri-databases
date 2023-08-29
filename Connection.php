@@ -210,6 +210,8 @@ class Connection extends Component
             return $client;
         }
 
+        $client = null;
+        $data = null;
         $this->logger->error('PDO连接已失效, 空闲超时或已不可用，重新获取.', [$this->cds]);
         $this->pool()->abandon($this->cds);
 
