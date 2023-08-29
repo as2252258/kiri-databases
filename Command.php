@@ -15,6 +15,7 @@ use Kiri\Abstracts\Component;
 use Kiri\Di\Container;
 use Kiri\Exception\ConfigException;
 use PDO;
+use PDOStatement;
 use Throwable;
 
 /**
@@ -77,21 +78,7 @@ class Command extends Component
      */
     public function all(): bool|array
     {
-        try {
-            $client = $this->connection->getConnection();
-            if (($prepare = $client->prepare($this->sql)) === false) {
-                throw new Exception($client->errorInfo()[1]);
-            }
-            $prepare->execute($this->params);
-            return $prepare->fetchAll(PDO::FETCH_ASSOC);
-        } catch (Throwable $throwable) {
-            if ($this->isRefresh($throwable)) {
-                return $this->all();
-            }
-            return $this->error($throwable);
-        } finally {
-            $this->connection->release($client ?? null);
-        }
+        return $this->search('fetchAll');
     }
 
     /**
@@ -100,21 +87,7 @@ class Command extends Component
      */
     public function one(): null|bool|array
     {
-        try {
-            $client = $this->connection->getConnection();
-            if (($prepare = $client->prepare($this->sql)) === false) {
-                throw new Exception($client->errorInfo()[1]);
-            }
-            $prepare->execute($this->params);
-            return $prepare->fetch(PDO::FETCH_ASSOC);
-        } catch (Throwable $throwable) {
-            if ($this->isRefresh($throwable)) {
-                return $this->one();
-            }
-            return $this->error($throwable);
-        } finally {
-            $this->connection->release($client ?? null);
-        }
+        return $this->search('fetch');
     }
 
     /**
@@ -123,20 +96,33 @@ class Command extends Component
      */
     public function fetchColumn(): mixed
     {
+        return $this->search('fetchColumn');
+    }
+
+
+    /**
+     * @param string $method
+     * @return mixed
+     */
+    protected function search(string $method): mixed
+    {
         try {
             $client = $this->connection->getConnection();
             if (($prepare = $client->prepare($this->sql)) === false) {
                 throw new Exception($client->errorInfo()[1]);
             }
             $prepare->execute($this->params);
-            return $prepare->fetchColumn(PDO::FETCH_ASSOC);
+            $data = $prepare->{$method}(PDO::FETCH_ASSOC);
+            $this->connection->release($client);
+            return $data;
         } catch (Throwable $throwable) {
             if ($this->isRefresh($throwable)) {
-                return $this->fetchColumn();
+                return $this->search($method);
+            }
+            if (isset($client)) {
+                $this->connection->release($client);
             }
             return $this->error($throwable);
-        } finally {
-            $this->connection->release($client ?? null);
         }
     }
 
@@ -171,14 +157,16 @@ class Command extends Component
             if ($prepare->rowCount() < 1) {
                 return trigger_print_error("更新失败", 'mysql');
             }
+            $this->connection->release($client);
             return $result == 0 ? true : (int)$result;
         } catch (Throwable $throwable) {
             if ($this->isRefresh($throwable)) {
                 return $this->_execute();
             }
+            if (isset($client)) {
+                $this->connection->release($client);
+            }
             return $this->error($throwable);
-        } finally {
-            $this->connection->release($client ?? null);
         }
     }
 
