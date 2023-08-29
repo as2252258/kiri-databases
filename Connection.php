@@ -164,11 +164,10 @@ class Connection extends Component
      */
     protected function validator(Pool $pool): PDO|bool
     {
-        if (($bool = $pool->get($this->cds)) === false) {
+        /** @var $client PDO */
+        if (($client = $pool->get($this->cds)) === false) {
             return false;
         }
-        /** @var PDO $client */
-        [$client, $time] = $bool;
         if ($client->query('select 1') === false) {
             throw new Exception($client->errorInfo()[1]);
         }
@@ -218,7 +217,7 @@ class Connection extends Component
         if ($data === false) {
             throw new Exception('Client Waite timeout.');
         }
-        return $data[0];
+        return $data;
     }
 
 
@@ -287,8 +286,7 @@ class Connection extends Component
             if ($pdo->inTransaction()) {
                 $pdo->rollback();
             }
-            $this->pool()->push($this->cds, [$pdo, time()]);
-            Context::remove($this->cds);
+            $this->release($pdo);
         }
     }
 
@@ -307,8 +305,7 @@ class Connection extends Component
             if ($pdo->inTransaction()) {
                 $pdo->commit();
             }
-            $this->pool()->push($this->cds, [$pdo, time()]);
-            Context::remove($this->cds);
+            $this->release($pdo);
         }
     }
 
@@ -327,8 +324,7 @@ class Connection extends Component
         if ($this->inTransaction()) {
             $pdo->rollback();
         }
-        $this->pool()->push($this->cds, [$pdo, time()]);
-        Context::remove($this->cds);
+        $this->release($pdo);
     }
 
 
@@ -349,10 +345,10 @@ class Connection extends Component
      * 回收链接
      * @throws
      */
-    public function release(PDO $PDO): void
+    public function release(PDO $pdo): void
     {
         if (!$this->inTransaction()) {
-            $this->pool()->push($this->cds, [$PDO, time()]);
+            $this->pool()->push($this->cds, $pdo);
         }
     }
 
