@@ -127,7 +127,7 @@ class Connection extends Component
      */
     public function tick(): void
     {
-        Timer::tick(10000, fn() => $this->checkClientHealth($this->pool()));
+        Timer::tick(120000, fn() => $this->checkClientHealth($this->pool()));
     }
 
 
