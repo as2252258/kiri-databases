@@ -51,12 +51,14 @@ class Connection extends Component
 
     public string $database = '';
 
-    public int $connect_timeout = 30;
+    public int $timeout = 30;
 
 
     public int $waite_time = 3;
 
-    public int $idle_time = 60;
+    public int $tick_time = 60;
+
+    public int $idle_count = 3;
 
     public array $pool = ['max' => 10, 'min' => 1];
 
@@ -70,9 +72,6 @@ class Connection extends Component
      * enable database cache
      */
     public bool $enableCache = false;
-
-
-    private ?PDO $_pdo = null;
 
 
     /**
@@ -129,7 +128,7 @@ class Connection extends Component
      */
     public function tick(): void
     {
-        $this->timerId = Timer::tick(120000, fn() => $this->checkClientHealth($this->pool()));
+        $this->timerId = Timer::tick($this->tick_time, fn() => $this->checkClientHealth($this->pool()));
     }
 
 
@@ -140,6 +139,7 @@ class Connection extends Component
      */
     protected function checkClientHealth(Pool $pool): void
     {
+        $pool->flush($this->cds, $this->pool['min'] ?? 1);
         $length = $pool->size($this->cds);
         for ($i = 0; $i < $length; $i++) {
             try {
@@ -151,7 +151,6 @@ class Connection extends Component
                 if (!str_contains($exception->getMessage(), 'Client timeout.')) {
                     $this->logger->error(throwable($exception), [$this->cds]);
                 }
-                $pool->abandon($this->cds);
             }
         }
     }
@@ -383,13 +382,13 @@ class Connection extends Component
     {
         return new PDO('mysql:dbname=' . $this->database . ';host=' . $this->cds,
             $this->username, $this->password, array_merge($this->attributes, [
-                PDO::ATTR_CASE => PDO::CASE_NATURAL,
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_ORACLE_NULLS => PDO::NULL_NATURAL,
-                PDO::ATTR_STRINGIFY_FETCHES => false,
-                PDO::ATTR_EMULATE_PREPARES => true,
-                PDO::ATTR_TIMEOUT => $this->connect_timeout,
-                PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $this->charset
+                PDO::ATTR_CASE                  => PDO::CASE_NATURAL,
+                PDO::ATTR_ERRMODE               => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_ORACLE_NULLS          => PDO::NULL_NATURAL,
+                PDO::ATTR_STRINGIFY_FETCHES     => false,
+                PDO::ATTR_EMULATE_PREPARES      => true,
+                PDO::ATTR_TIMEOUT               => $this->timeout,
+                PDO::MYSQL_ATTR_INIT_COMMAND    => 'SET NAMES ' . $this->charset
             ]));
     }
 
