@@ -63,6 +63,8 @@ class Connection extends Component
 
     private int $storey = 0;
 
+    protected int $timerId = -1;
+
     /**
      * @var bool
      * enable database cache
@@ -127,7 +129,7 @@ class Connection extends Component
      */
     public function tick(): void
     {
-        Timer::tick(120000, fn() => $this->checkClientHealth($this->pool()));
+        $this->timerId = Timer::tick(120000, fn() => $this->checkClientHealth($this->pool()));
     }
 
 
@@ -390,6 +392,9 @@ class Connection extends Component
      */
     public function disconnect(): void
     {
+        if ($this->timerId > -1) {
+            Timer::clear($this->timerId);
+        }
         $this->pool()->close($this->cds);
     }
 
