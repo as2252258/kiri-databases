@@ -109,7 +109,7 @@ class Command extends Component
         try {
             $client = $this->connection->getConnection();
             if (($prepare = $client->prepare($this->sql)) === false) {
-                throw new Exception($client->errorInfo()[1]);
+                throw new Exception('(' . $prepare->errorInfo()[0] . ')' . $client->errorInfo()[2]);
             }
             $prepare->execute($this->params);
             $data = $prepare->{$method}(PDO::FETCH_ASSOC);
@@ -150,7 +150,7 @@ class Command extends Component
                 throw new Exception($client->errorInfo()[1]);
             }
             if ($prepare->execute($this->params) === false) {
-                throw new Exception($prepare->errorInfo()[1]);
+                throw new Exception('(' . $prepare->errorInfo()[0] . ')' . $prepare->errorInfo()[2]);
             }
             $result = $client->lastInsertId();
             $prepare->closeCursor();
