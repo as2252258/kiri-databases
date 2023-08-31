@@ -147,7 +147,7 @@ class Command extends Component
         try {
             $client = $this->connection->getConnection();
             if (($prepare = $client->prepare($this->sql)) === false) {
-                throw new Exception($client->errorInfo()[1]);
+                throw new Exception('(' . $prepare->errorInfo()[0] . ')' . $prepare->errorInfo()[2]);
             }
             if ($prepare->execute($this->params) === false) {
                 throw new Exception('(' . $prepare->errorInfo()[0] . ')' . $prepare->errorInfo()[2]);
