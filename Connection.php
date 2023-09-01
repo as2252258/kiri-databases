@@ -380,8 +380,8 @@ class Connection extends Component
      */
     public function newConnect(): PDO
     {
-        return new PDO('mysql:dbname=' . $this->database . ';host=' . $this->cds,
-            $this->username, $this->password, array_merge($this->attributes, [
+        $pdo = new PDO('mysql:dbname=' . $this->database . ';host=' . $this->cds,
+            $this->username, $this->password, [
                 PDO::ATTR_CASE                  => PDO::CASE_NATURAL,
                 PDO::ATTR_ERRMODE               => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_ORACLE_NULLS          => PDO::NULL_NATURAL,
@@ -389,7 +389,11 @@ class Connection extends Component
                 PDO::ATTR_EMULATE_PREPARES      => true,
                 PDO::ATTR_TIMEOUT               => $this->timeout,
                 PDO::MYSQL_ATTR_INIT_COMMAND    => 'SET NAMES ' . $this->charset
-            ]));
+            ]);
+        array_walk($this->attributes, function ($value, $key) use ($pdo) {
+            $pdo->setAttribute($key, $value);
+        });
+        return $pdo;
     }
 
 
