@@ -434,15 +434,13 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
     {
         [$sql, $param] = SqlBuilder::builder(static::query())->insert($this->_attributes);
 
-        $connection = $this->getConnection()->beginTransaction();
+        $connection = $this->getConnection();
         $dbConnection = $connection->createCommand($sql, $param);
 
         $lastId = $dbConnection->save();
         if ($lastId === false) {
-            $connection->rollback();
             return false;
         } else {
-            $connection->commit();
             if ($this->hasPrimary()) {
                 $this->_attributes[$this->getPrimary()] = $lastId;
             }
@@ -469,13 +467,11 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, T
             return false;
         }
 
-        $connection = $this->getConnection()->beginTransaction();
+        $connection = $this->getConnection();
         $command = $connection->createCommand($generate, $query->attributes);
         if ($command->save()) {
-            $connection->commit();
             return $this->refresh()->afterSave($old, $change);
         } else {
-            $connection->rollback();
             return FALSE;
         }
     }

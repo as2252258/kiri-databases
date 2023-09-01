@@ -282,7 +282,7 @@ class Connection extends Component
             if ($pdo === null) {
                 throw new Exception('Failed to rollback transaction: connection was exists.');
             }
-            if ($pdo->inTransaction()) {
+            if ($this->inTransaction()) {
                 $pdo->rollback();
             }
             $this->release($pdo);
@@ -301,7 +301,7 @@ class Connection extends Component
             if ($pdo === null) {
                 throw new Exception('Failed to commit transaction: connection was exists.');
             }
-            if ($pdo->inTransaction()) {
+            if ($this->inTransaction()) {
                 $pdo->commit();
             }
             $this->release($pdo);
