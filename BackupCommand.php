@@ -137,9 +137,10 @@ class BackupCommand extends Command
 		for ($i = 0; $i < 200; $i++) {
 			Coroutine::create(function () use ($channel, $path, $dbname, $tableName) {
 				while ($channel->errCode != SWOOLE_CHANNEL_CLOSED) {
-					$value = json_decode($channel->pop(), true);
-					
-					if ($value === null) {
+                    if (($data = $channel->pop()) === false) {
+                        break;
+                    }
+					if (($value = json_decode($data, true)) === null) {
 						continue;
 					}
 					
@@ -175,7 +176,7 @@ class BackupCommand extends Command
 				$database = \Kiri::service()->get($dbname);
 				
 				$data = $database->createCommand("SELECT * FROM $tableName LIMIT $offset,$size")->all();
-				if (count($data) < 1) {
+				if (is_bool($data) || count($data) < 1) {
 					return;
 				}
 				$channel->push(json_encode($data));
