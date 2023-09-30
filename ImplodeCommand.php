@@ -70,23 +70,9 @@ class ImplodeCommand extends Command
                         continue;
                     }
                     $waite->add();
-                    [$one, $two] = explode('VALUES', $line);
-                    $foreach = explode(',', $two);
 
-                    $array = [];
-                    foreach ($foreach as $item) {
-                        $values = explode('),(', trim($item, '()'));
-                        $tmp = [];
-                        foreach ($values as $date) {
-                            if (is_string($date)) {
-                                $tmp[] = '\'' . html_entity_decode(trim($date, '\'')) . '\'';
-                            } else {
-                                $tmp[] = $data;
-                            }
-                        }
-                        $array[] = implode(',', $tmp);
-                    }
-                    $insert = $one . ' VALUES ('.implode('),(', $array).')';
+                    $insert = str_replace($line,'&quot;','"');
+                    $insert = str_replace($insert,'&#039;',"\'");
                     Coroutine::create(function () use ($waite, $insert, $data) {
                         Coroutine\defer(fn() => $waite->done());
                         $data->createCommand($insert)->exec();
