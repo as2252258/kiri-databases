@@ -70,7 +70,6 @@ class ImplodeCommand extends Command
                         continue;
                     }
                     $waite->add();
-
                     $insert = str_replace($line,'&quot;','"');
                     $insert = str_replace($insert,'&#039;',"\'");
                     Coroutine::create(function () use ($waite, $insert, $data) {
