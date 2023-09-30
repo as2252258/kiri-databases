@@ -19,16 +19,28 @@ use Symfony\Component\Console\Output\OutputInterface;
 class ImplodeCommand extends Command
 {
 
+
+    /**
+     * @var string
+     */
     public string $command = 'db:implode';
 
 
+    /**
+     * @var string
+     */
     public string $description = 'php kiri.php db:implode --database users /Users/admin/snowflake-bi/test.sql';
 
 
+    /**
+     * @var LocalService
+     */
     private LocalService $service;
 
-    public array $percentStatus = [];
 
+    /**
+     * @var Channel 
+     */
     protected Channel $channel;
 
 
