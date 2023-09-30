@@ -62,15 +62,31 @@ class ImplodeCommand extends Command
                 $path = APP_PATH . $path;
             }
 
-            $waite = new Coroutine\WaitGroup();
+            $waite  = new Coroutine\WaitGroup();
             $stream = fopen($path, 'r');
             if ($stream) {
                 while (($line = fgets($stream)) !== false) {
-                    $insert = html_entity_decode($line);
-                    if (!str_starts_with(strtoupper($insert), 'INSERT INTO')) {
+                    if (!str_starts_with(strtoupper($line), 'INSERT INTO')) {
                         continue;
                     }
                     $waite->add();
+                    [$one, $two] = explode('VALUES', $line);
+                    $foreach = explode(',', $two);
+
+                    $array = [];
+                    foreach ($foreach as $item) {
+                        $values = explode(',', trim($item, '()'));
+                        $tmp = [];
+                        foreach ($values as $date) {
+                            if (is_string($date)) {
+                                $tmp[] = '\'' . html_entity_decode(trim($date, '\'')) . '\'';
+                            } else {
+                                $tmp[] = $data;
+                            }
+                        }
+                        $array[] = implode(',', $tmp);
+                    }
+                    $insert = $one . ' VALUES ('.implode('),(', $array).')';
                     Coroutine::create(function () use ($waite, $insert, $data) {
                         Coroutine\defer(fn() => $waite->done());
                         $data->createCommand($insert)->exec();
