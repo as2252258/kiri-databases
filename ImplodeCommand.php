@@ -63,24 +63,21 @@ class ImplodeCommand extends Command
             }
 
             $waite = new Coroutine\WaitGroup();
-
-
             $stream = fopen($path, 'r');
-            if (!$stream) {
-                return 0;
-            }
-            while (($line = fgets($stream)) !== false) {
-                $insert = html_entity_decode($line);
-                if (!str_starts_with(strtoupper($insert), 'INSERT INTO')) {
-                    continue;
+            if ($stream) {
+                while (($line = fgets($stream)) !== false) {
+                    $insert = html_entity_decode($line);
+                    if (!str_starts_with(strtoupper($insert), 'INSERT INTO')) {
+                        continue;
+                    }
+                    $waite->add();
+                    Coroutine::create(function () use ($waite, $insert, $data) {
+                        Coroutine\defer(fn() => $waite->done());
+                        $data->createCommand($insert)->exec();
+                    });
                 }
-                $waite->add();
-                Coroutine::create(function () use ($waite, $insert, $data) {
-                    Coroutine\defer(fn() => $waite->done());
-                    $data->createCommand($insert)->exec();
-                });
+                fclose($stream);
             }
-            fclose($stream);
             $waite->wait();
 
             $output->write('dump data success');
