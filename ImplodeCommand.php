@@ -22,7 +22,7 @@ class ImplodeCommand extends Command
     public string $command = 'db:implode';
 
 
-    public string $description = 'php kiri.php db:implode --database users --table u_user /Users/admin/snowflake-bi/test.sql';
+    public string $description = 'php kiri.php db:implode --database users /Users/admin/snowflake-bi/test.sql';
 
 
     private LocalService $service;
@@ -38,11 +38,11 @@ class ImplodeCommand extends Command
     protected function configure()
     {
         $this->service = \Kiri::getDi()->get(LocalService::class);
-        $this->setName('db:backup')
+        $this->setName('db:implode')
              ->addOption('data', 'd', InputArgument::OPTIONAL)
              ->addArgument('path', InputArgument::REQUIRED, "save to path", null)
              ->addOption('database', 'db', InputArgument::OPTIONAL)
-             ->setDescription('php kiri.php db:backup --database users --table u_user --data 1 /Users/admin/snowflake-bi/test.sql');
+             ->setDescription('php kiri.php db:implode --database users /Users/admin/snowflake-bi/test.sql');
     }
 
 
