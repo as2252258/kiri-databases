@@ -56,7 +56,6 @@ class ImplodeCommand extends Command
              ->addArgument('path', InputArgument::REQUIRED, "save to path", null)
              ->addOption('database', 'db', InputArgument::OPTIONAL)
              ->setDescription('php kiri.php db:implode --database users /Users/admin/snowflake-bi/test.sql');
-
         $this->data = array_flip(get_html_translation_table(ENT_QUOTES | ENT_SUBSTITUTE));
     }
 
