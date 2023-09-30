@@ -26,6 +26,7 @@ class DatabasesProviders extends Providers
     {
         $main = Kiri::getDi()->get(Kiri\Application::class);
         $main->command(BackupCommand::class);
+        $main->command(ImplodeCommand::class);
 
         $databases = \config('databases.connections', []);
         if (empty($databases)) {
