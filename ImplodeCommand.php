@@ -70,13 +70,13 @@ class ImplodeCommand extends Command
                 return 0;
             }
             while (($line = fgets($stream)) !== false) {
-                $insert = html_entity_decode($line);
+                $insert = html_entity_decode(str_replace($line,'&#039;','\\\''));
                 if (!str_starts_with(strtoupper($insert), 'INSERT INTO')) {
                     continue;
                 }
                 Coroutine::create(function () use ($waite, $insert, $data) {
                     Coroutine\defer(fn() => $waite->done());
-                    $exec = $data->createCommand(str_replace($insert,'&#039;','\\\''))->exec();
+                    $exec = $data->createCommand($insert)->exec();
                     exit('exec sql result: ' . $exec);
                 });
             }
