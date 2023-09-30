@@ -76,7 +76,7 @@ class ImplodeCommand extends Command
                 }
                 Coroutine::create(function () use ($waite, $insert, $data) {
                     Coroutine\defer(fn() => $waite->done());
-                    $exec = $data->createCommand($insert)->exec();
+                    $exec = $data->createCommand(addslashes($insert))->exec();
                     exit('exec sql result: ' . $exec);
                 });
             }
