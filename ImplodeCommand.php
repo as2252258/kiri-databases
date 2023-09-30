@@ -75,7 +75,7 @@ class ImplodeCommand extends Command
 
                     $array = [];
                     foreach ($foreach as $item) {
-                        $values = explode(',', trim($item, '()'));
+                        $values = explode('),(', trim($item, '()'));
                         $tmp = [];
                         foreach ($values as $date) {
                             if (is_string($date)) {
