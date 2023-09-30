@@ -39,7 +39,6 @@ class ImplodeCommand extends Command
     {
         $this->service = \Kiri::getDi()->get(LocalService::class);
         $this->setName('db:implode')
-             ->addOption('data', 'd', InputArgument::OPTIONAL)
              ->addArgument('path', InputArgument::REQUIRED, "save to path", null)
              ->addOption('database', 'db', InputArgument::OPTIONAL)
              ->setDescription('php kiri.php db:implode --database users /Users/admin/snowflake-bi/test.sql');
