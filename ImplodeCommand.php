@@ -81,8 +81,6 @@ class ImplodeCommand extends Command
                 });
             }
             fclose($stream);
-
-
             $waite->wait();
 
             $output->write('dump data success');
