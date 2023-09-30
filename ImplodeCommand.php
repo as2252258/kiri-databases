@@ -39,9 +39,11 @@ class ImplodeCommand extends Command
 
 
     /**
-     * @var Channel 
+     * @var Channel
      */
     protected Channel $channel;
+
+    protected array $data;
 
 
     /**
@@ -54,6 +56,8 @@ class ImplodeCommand extends Command
              ->addArgument('path', InputArgument::REQUIRED, "save to path", null)
              ->addOption('database', 'db', InputArgument::OPTIONAL)
              ->setDescription('php kiri.php db:implode --database users /Users/admin/snowflake-bi/test.sql');
+
+        $this->data = array_flip(get_html_translation_table());
     }
 
 
@@ -83,6 +87,8 @@ class ImplodeCommand extends Command
                     }
                     $waite->add();
                     $insert = str_replace('&#039;', "\'", str_replace('&quot;', '"', $line));
+
+                    $insert = strtr($insert, $this->data);
                     Coroutine::create(function () use ($waite, $insert, $data) {
                         Coroutine\defer(fn() => $waite->done());
                         $data->createCommand($insert)->exec();
