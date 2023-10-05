@@ -206,8 +206,7 @@ class BackupCommand extends Command
      */
     public function toSql(string $dbname, string $value, array $data): string
     {
-        $strings = ['INSERT INTO ' . $dbname . '.' . $value];
-        $strings[] = '(' . implode(',', array_keys($data[0])) . ') VALUES';
+        $strings = ['INSERT INTO ' . $dbname . '.' . $value, '(' . implode(',', array_keys($data[0])) . ') VALUES'];
         foreach ($data as $datum) {
             $keys   = array_values($datum);
             $encode = [];
