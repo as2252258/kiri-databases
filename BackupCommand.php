@@ -208,7 +208,6 @@ class BackupCommand extends Command
 	{
 		$strings = ['INSERT INTO ' . $dbname . '.' . $value];
 		foreach ($data as $datum) {
-			
 			if (count($strings) == 1) {
 				$keys      = array_keys($datum);
 				$strings[] = '(' . implode(',', $keys) . ') VALUES';
@@ -217,9 +216,9 @@ class BackupCommand extends Command
 				$encode = [];
 				foreach ($keys as $val) {
 					if (is_string($val)) {
-						$encode[] = '\'' . htmlentities($val) . '\'';
+						$encode[] = '\'' . addcslashes($val,'\'') . '\'';
 					} else {
-						$encode[] = $val;
+						$encode[] = $val === '' ? '\'\'' : $val;
 					}
 				}
 				$strings[] = '(' . implode(',', $encode) . '),';
