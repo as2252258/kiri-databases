@@ -216,7 +216,7 @@ class BackupCommand extends Command
 				$encode = [];
 				foreach ($keys as $val) {
 					if (is_string($val)) {
-						$encode[] = '\'' . addcslashes($val,'\'') . '\'';
+						$encode[] = '\'' . $val . '\'';
 					} else {
 						$encode[] = $val === '' ? '\'\'' : $val;
 					}
