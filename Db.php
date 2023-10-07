@@ -124,7 +124,7 @@ class Db implements ISqlBuilder
      */
     public static function table($table): Db|static
     {
-        $connection = new Db();
+        $connection             = new Db();
         $connection->connection = current(\config('databases.connections'));
         $connection->from($table);
         return $connection;
