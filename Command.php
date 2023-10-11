@@ -145,15 +145,7 @@ class Command extends Component
     private function _execute(): bool|int
     {
         try {
-            $client = $this->connection->getConnection();
-            if (($prepare = $client->prepare($this->sql)) === false) {
-                throw new Exception('(' . $prepare->errorInfo()[0] . ')' . $prepare->errorInfo()[2]);
-            }
-            if ($prepare->execute($this->params) === false) {
-                throw new Exception('(' . $prepare->errorInfo()[0] . ')' . $prepare->errorInfo()[2]);
-            }
-            $result = $client->lastInsertId();
-            $prepare->closeCursor();
+            [$client, $prepare, $result] = $this->_prepare();
             if ($prepare->rowCount() < 1) {
                 return trigger_print_error("更新失败", 'mysql');
             }
@@ -168,6 +160,50 @@ class Command extends Component
             }
             return $this->error($throwable);
         }
+    }
+
+
+    /**
+     * @return bool|int
+     * @throws ConfigException
+     * @throws Exception
+     */
+    private function _delete(): bool|int
+    {
+        try {
+            [$client, $prepare, $result] = $this->_prepare();
+
+            $this->connection->release($client);
+            return $result == 0 ? true : (int)$result;
+        } catch (Throwable $throwable) {
+            if ($this->isRefresh($throwable)) {
+                return $this->_execute();
+            }
+            if (isset($client)) {
+                $this->connection->release($client);
+            }
+            return $this->error($throwable);
+        }
+    }
+
+
+    /**
+     * @return array
+     * @throws Exception
+     */
+    private function _prepare(): array
+    {
+        $client = $this->connection->getConnection();
+        if (($prepare = $client->prepare($this->sql)) === false) {
+            throw new Exception('(' . $prepare->errorInfo()[0] . ')' . $prepare->errorInfo()[2]);
+        }
+        if ($prepare->execute($this->params) === false) {
+            throw new Exception('(' . $prepare->errorInfo()[0] . ')' . $prepare->errorInfo()[2]);
+        }
+        $result = $client->lastInsertId();
+        $prepare->closeCursor();
+
+        return [$client, $prepare, $result];
     }
 
 
@@ -206,7 +242,7 @@ class Command extends Component
      */
     public function delete(): int|bool
     {
-        return $this->_execute();
+        return $this->_delete();
     }
 
     /**
