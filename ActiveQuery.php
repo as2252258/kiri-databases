@@ -339,9 +339,7 @@ class ActiveQuery extends Component implements ISqlBuilder
     {
         $sql = $this->builder->delete();
         if ($getSql === FALSE) {
-            $result = (bool)$this->execute($sql, $this->attributes)->delete();
-            $this->modelClass->optimize();
-            return $result;
+            return (bool)$this->execute($sql, $this->attributes)->delete();
         }
         return $sql;
     }
