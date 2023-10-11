@@ -145,11 +145,14 @@ class Command extends Component
     private function _execute(): bool|int
     {
         try {
-            [$client, $prepare, $result] = $this->_prepare();
-            if ($prepare->rowCount() < 1) {
+            [$client, $prepare] = $this->_prepare();
+            $result = $client->lastInsertId();
+            $prepare->closeCursor();
+            $rowCount = $prepare->rowCount();
+            $this->connection->release($client);
+            if ($rowCount < 1) {
                 return trigger_print_error("更新失败", 'mysql');
             }
-            $this->connection->release($client);
             return $result == 0 ? true : (int)$result;
         } catch (Throwable $throwable) {
             if ($this->isRefresh($throwable)) {
@@ -171,10 +174,10 @@ class Command extends Component
     private function _delete(): bool|int
     {
         try {
-            [$client, $prepare, $result] = $this->_prepare();
-
+            [$client, $prepare] = $this->_prepare();
+            $prepare->closeCursor();
             $this->connection->release($client);
-            return $result == 0 ? true : (int)$result;
+            return true;
         } catch (Throwable $throwable) {
             if ($this->isRefresh($throwable)) {
                 return $this->_execute();
@@ -200,10 +203,7 @@ class Command extends Component
         if ($prepare->execute($this->params) === false) {
             throw new Exception('(' . $prepare->errorInfo()[0] . ')' . $prepare->errorInfo()[2]);
         }
-        $result = $client->lastInsertId();
-        $prepare->closeCursor();
-
-        return [$client, $prepare, $result];
+        return [$client, $prepare];
     }
 
 
