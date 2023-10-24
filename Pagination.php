@@ -54,8 +54,8 @@ class Pagination extends Component
     {
         unset($this->activeQuery, $this->_callback, $this->_group);
         $this->_offset = 0;
-        $this->_limit = 100;
-        $this->_max = 0;
+        $this->_limit  = 100;
+        $this->_max    = 0;
         $this->_length = 0;;
     }
 
@@ -196,14 +196,9 @@ class Pagination extends Component
         if ($this->_max > 0 && $this->_length + $this->_limit > $this->_max) {
             $this->_limit = $this->_length + $this->_limit - $this->_max;
         }
-        $data = $this->activeQuery->offset($this->_offset)->limit($this->_limit)->get();
+        $data          = $this->activeQuery->offset($this->_offset)->limit($this->_limit)->get();
         $this->_offset += $this->_limit;
-
-        if (is_array($data)) {
-            $size = count($data);
-        } else {
-            $size = $data->size();
-        }
+        $size          = $data->size();
         $this->_length += $size;
         return [$size, $data];
     }

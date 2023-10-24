@@ -6,6 +6,10 @@ namespace Database\Traits;
 interface Relation
 {
 
+
+    /**
+     * @return mixed
+     */
 	public function get(): mixed;
 
 }

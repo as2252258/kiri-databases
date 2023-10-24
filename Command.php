@@ -15,7 +15,6 @@ use Kiri\Abstracts\Component;
 use Kiri\Di\Container;
 use Kiri\Exception\ConfigException;
 use PDO;
-use PDOStatement;
 use Throwable;
 
 /**

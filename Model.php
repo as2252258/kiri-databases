@@ -107,7 +107,7 @@ class Model extends Base\Model
             /** @var static $select */
             $select = static::query()->where($condition)->first();
             if ($select === null) {
-                $select = static::populate(array_merge($condition, $attributes))->create();
+                $select = static::populate(array_merge($condition, $attributes))->save();
             }
             return $select;
         }, $condition, $attributes);
@@ -129,7 +129,8 @@ class Model extends Base\Model
             if (empty($select)) {
                 $select = static::populate($condition);
             }
-            return $select->save($attributes);
+            $select->attributes = $attributes;
+            return $select->save();
         }, $condition, $attributes);
     }
 

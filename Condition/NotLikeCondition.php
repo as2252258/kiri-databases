@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace Database\Condition;
 
-use Kiri\Core\Str;
-
 /**
  * Class NotLikeCondition
  * @package Database\Condition

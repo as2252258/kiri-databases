@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Database\Condition;
 
-use Database\ActiveQuery;
 use Exception;
 use JetBrains\PhpStorm\Pure;
 
