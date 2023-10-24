@@ -39,8 +39,8 @@ class ActiveQuery extends Component implements ISqlBuilder
      * @var array
      * 参数绑定
      */
-    public array  $attributes = [];
-    protected mixed $_mock = null;
+    public array    $attributes = [];
+    protected mixed $_mock      = null;
 
 
     /**
@@ -62,7 +62,7 @@ class ActiveQuery extends Component implements ISqlBuilder
      */
     public function clear(): void
     {
-        $this->db = NULL;
+        $this->db       = NULL;
         $this->useCache = FALSE;
     }
 
@@ -179,19 +179,17 @@ class ActiveQuery extends Component implements ISqlBuilder
 
 
     /**
-     * @return array|Collection
+     * @return Collection
      * @throws Exception
      */
-    public function get(): Collection|array
+    public function get(): Collection
     {
         $data = $this->execute($this->builder->all(), $this->attributes)->all();
-        if ($data === false) {
+        if ($data !== false) {
+            return new Collection($this, $data, $this->modelClass);
+        } else {
             return new Collection($this, [], $this->modelClass);
         }
-
-        $collect = new Collection($this, $data, $this->modelClass);
-
-        return $this->asArray ? $collect->toArray() : $collect;
     }
 
 
@@ -261,11 +259,8 @@ class ActiveQuery extends Component implements ISqlBuilder
     public function populate($data): ModelInterface|array
     {
         $model = $this->modelClass->populates($data);
-        if ($this->asArray) {
-            return $model->toArray();
-        } else {
-            return $model;
-        }
+
+        return $this->asArray ? $model->toArray() : $model;
     }
 
 
@@ -290,10 +285,11 @@ class ActiveQuery extends Component implements ISqlBuilder
             return true;
         }
         $generate = $this->builder->update($data);
-        if (is_bool($generate)) {
+        if (!is_bool($generate)) {
+            return (bool)$this->execute($generate, $this->attributes)->exec();
+        } else {
             return $generate;
         }
-        return (bool)$this->execute($generate, $this->attributes)->exec();
     }
 
     /**
@@ -304,7 +300,6 @@ class ActiveQuery extends Component implements ISqlBuilder
     public function insert(array $data): bool
     {
         [$sql, $params] = $this->builder->insert($data, TRUE);
-
 
         return (bool)$this->execute($sql, $params)->exec();
     }
@@ -340,7 +335,8 @@ class ActiveQuery extends Component implements ISqlBuilder
         $sql = $this->builder->delete();
         if ($getSql === FALSE) {
             return (bool)$this->execute($sql, $this->attributes)->delete();
+        } else {
+            return $sql;
         }
-        return $sql;
     }
 }
