@@ -17,14 +17,13 @@ use Exception;
 use JetBrains\PhpStorm\Pure;
 use Kiri\Abstracts\Component;
 use ReturnTypeWillChange;
-use Kiri\ToArray;
 use Traversable;
 
 /**
  * Class AbstractCollection
  * @package Database\Base
  */
-abstract class AbstractCollection extends Component implements \IteratorAggregate, \ArrayAccess, ToArray
+abstract class AbstractCollection extends Component implements \IteratorAggregate, \ArrayAccess, \Arrayable
 {
 
 	/**

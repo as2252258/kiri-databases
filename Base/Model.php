@@ -25,7 +25,6 @@ use Exception;
 use Kiri;
 use Kiri\Abstracts\Component;
 use ReturnTypeWillChange;
-use Kiri\ToArray;
 use ReflectionException;
 use validator\Validator;
 
@@ -38,7 +37,7 @@ use validator\Validator;
  * @property array $attributes
  * @property array $oldAttributes
  */
-abstract class Model extends Component implements ModelInterface, ArrayAccess, ToArray
+abstract class Model extends Component implements ModelInterface, ArrayAccess, \Arrayable
 {
 
     /** @var array */

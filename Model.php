@@ -273,7 +273,7 @@ class Model extends Base\Model
         $with = $this->getWith();
         foreach ($with as $value) {
             $join = $this->withRelate($value);
-            if ($join instanceof Kiri\ToArray) {
+            if ($join instanceof \Arrayable) {
                 $join = $join->toArray();
             }
             $data[$value] = $join;
