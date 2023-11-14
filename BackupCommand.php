@@ -232,29 +232,23 @@ class BackupCommand extends Command
     public function buildLine($key, $percent): string
     {
         $repeatTimes = 100;
-        if ($percent > 100) {
-            $percent = 100;
-        }
+        if ($percent > 100) $percent = 100;
         if ($percent > 0) {
             $hasColor = str_repeat('■', $percent);
         } else {
             $hasColor = '';
         }
-
         if ($repeatTimes - $percent > 0) {
             $noColor = str_repeat(' ', $repeatTimes - $percent);
         } else {
             $noColor = '';
         }
-
-        $buffer = "[{$hasColor}{$noColor}]";
         if ($percent !== 100) {
             $percentString = sprintf("[  %s %-6s]", $key, $percent . '%');
         } else {
             $percentString = sprintf("[  %s %-5s]", $key, 'OK');;
         }
-
-        return $percentString . $buffer . "\r";
+        return $percentString . "[{$hasColor}{$noColor}]" . "\r";
     }
 
     /**
@@ -290,7 +284,6 @@ class BackupCommand extends Command
             $this->outputProgress(true);
             return;
         }
-
         $this->outputProgress(true);
         usleep(50000);
     }

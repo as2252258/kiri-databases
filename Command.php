@@ -24,21 +24,9 @@ use Throwable;
 class Command extends Component
 {
 
-    const RETRY_NAME = 'db:retry:count';
-
-    /**
-     *
-     */
-    const DB_ERROR_MESSAGE = 'The system is busy, please try again later.';
-
-    /** @var Connection */
     public Connection $connection;
-
-    /** @var ?string */
-    public ?string $sql = '';
-
-    /** @var array */
-    public array $params = [];
+    public ?string    $sql    = '';
+    public array      $params = [];
 
 
     /**

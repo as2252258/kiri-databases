@@ -11,7 +11,6 @@ namespace Database;
 
 
 use Exception;
-use Kiri;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 

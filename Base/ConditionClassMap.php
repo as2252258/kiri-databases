@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+
 namespace Database\Base;
 
 
@@ -21,51 +22,51 @@ use Database\Condition\RLikeCondition;
 class ConditionClassMap
 {
 
-	public static array $conditionMap = [
-		'IN'          => [
-			'class' => InCondition::class
-		],
-		'NOT IN'      => [
-			'class' => NotInCondition::class
-		],
-		'LIKE'        => [
-			'class' => LikeCondition::class
-		],
-		'NOT LIKE'    => [
-			'class' => NotLikeCondition::class
-		],
-		'LLike'       => [
-			'class' => LLikeCondition::class
-		],
-		'RLike'       => [
-			'class' => RLikeCondition::class
-		],
-		'EQ'          => [
-			'class' => MathematicsCondition::class,
-			'type'  => 'EQ'
-		],
-		'NEQ'         => [
-			'class' => MathematicsCondition::class,
-			'type'  => 'NEQ'
-		],
-		'GT'          => [
-			'class' => MathematicsCondition::class,
-			'type'  => 'GT'
-		],
-		'EGT'         => [
-			'class' => MathematicsCondition::class,
-			'type'  => 'EGT'
-		],
-		'LT'          => [
-			'class' => MathematicsCondition::class,
-			'type'  => 'LT'
-		],
-		'ELT'         => [
-			'class' => MathematicsCondition::class,
-			'type'  => 'ELT'
-		],
-		'BETWEEN'     => BetweenCondition::class,
-		'NOT BETWEEN' => NotBetweenCondition::class,
-	];
+    public static array $conditionMap = [
+        'IN'          => [
+            'class' => InCondition::class
+        ],
+        'NOT IN'      => [
+            'class' => NotInCondition::class
+        ],
+        'LIKE'        => [
+            'class' => LikeCondition::class
+        ],
+        'NOT LIKE'    => [
+            'class' => NotLikeCondition::class
+        ],
+        'LLike'       => [
+            'class' => LLikeCondition::class
+        ],
+        'RLike'       => [
+            'class' => RLikeCondition::class
+        ],
+        'EQ'          => [
+            'class' => MathematicsCondition::class,
+            'type'  => 'EQ'
+        ],
+        'NEQ'         => [
+            'class' => MathematicsCondition::class,
+            'type'  => 'NEQ'
+        ],
+        'GT'          => [
+            'class' => MathematicsCondition::class,
+            'type'  => 'GT'
+        ],
+        'EGT'         => [
+            'class' => MathematicsCondition::class,
+            'type'  => 'EGT'
+        ],
+        'LT'          => [
+            'class' => MathematicsCondition::class,
+            'type'  => 'LT'
+        ],
+        'ELT'         => [
+            'class' => MathematicsCondition::class,
+            'type'  => 'ELT'
+        ],
+        'BETWEEN'     => BetweenCondition::class,
+        'NOT BETWEEN' => NotBetweenCondition::class,
+    ];
 
 }

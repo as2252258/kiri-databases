@@ -51,27 +51,17 @@ class ActiveQuery extends Component implements ISqlBuilder
     public function __construct($model)
     {
         $this->modelClass = $model;
-
-        $this->builder = SqlBuilder::builder($this);
+        $this->builder    = SqlBuilder::builder($this);
         parent::__construct();
     }
 
 
     /**
-     * 清除不完整数据
-     */
-    public function clear(): void
-    {
-        $this->db       = NULL;
-        $this->useCache = FALSE;
-    }
-
-    /**
-     * @param $key
-     * @param $value
+     * @param string $key
+     * @param mixed $value
      * @return $this
      */
-    public function addParam($key, $value): static
+    public function addParam(string $key, mixed $value): static
     {
         $this->attributes[$key] = $value;
         return $this;
@@ -87,13 +77,11 @@ class ActiveQuery extends Component implements ISqlBuilder
     #[ArrayShape([])]
     public function pagination(int $size = 20, int $page = 1): array
     {
-        $page = max(1, $page);
-        $size = max(1, $size);
-
+        $page   = max(1, $page);
+        $size   = max(1, $size);
         $offset = ($page - 1) * $size;
-
-        $count = $this->count();
-        $lists = $this->offset($offset)->limit($size)->get()->toArray();
+        $count  = $this->count();
+        $lists  = $this->offset($offset)->limit($size)->get()->toArray();
         return [
             'code'    => 0,
             'message' => 'ok',

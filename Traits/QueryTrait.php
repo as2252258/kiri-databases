@@ -53,15 +53,15 @@ trait QueryTrait
      */
     public function clear(): void
     {
-        $this->where = [];
+        $this->where  = [];
         $this->select = [];
-        $this->join = [];
-        $this->order = [];
+        $this->join   = [];
+        $this->order  = [];
         $this->offset = 0;
-        $this->limit = 500;
-        $this->group = '';
-        $this->from = '';
-        $this->alias = 't1';
+        $this->limit  = 500;
+        $this->group  = '';
+        $this->from   = '';
+        $this->alias  = 't1';
         $this->filter = [];
     }
 
@@ -325,7 +325,7 @@ trait QueryTrait
             if (is_array($val)) {
                 $tmp[] = $this->toString($array);
             } else {
-                $tmp[] = $key . '=:' . $key;
+                $tmp[]                        = $key . '=:' . $key;
                 $this->attributes[':' . $key] = $val;
             }
         }
@@ -363,7 +363,7 @@ trait QueryTrait
      */
     public function distance(string $lngField, string $latField, int $lng1, int $lat1): static
     {
-        $sql = "ROUND(6378.138 * 2 * ASIN(SQRT(POW(SIN(($lat1 * PI() / 180 - $lat1 * PI() / 180) / 2),2) + COS($lat1 * PI() / 180) * COS($latField * PI() / 180) * POW(SIN(($lng1 * PI() / 180 - $lngField * PI() / 180) / 2),2))) * 1000) AS distance";
+        $sql            = "ROUND(6378.138 * 2 * ASIN(SQRT(POW(SIN(($lat1 * PI() / 180 - $lat1 * PI() / 180) / 2),2) + COS($lat1 * PI() / 180) * COS($latField * PI() / 180) * POW(SIN(($lng1 * PI() / 180 - $lngField * PI() / 180) / 2),2))) * 1000) AS distance";
         $this->select[] = $sql;
         return $this;
     }

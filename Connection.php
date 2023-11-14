@@ -40,31 +40,23 @@ use Swoole\Timer;
 class Connection extends Component
 {
 
-    public string $id = 'db';
-    public string $cds = '';
-    public string $password = '';
-    public string $username = '';
-    public string $charset = 'utf-8';
-
+    public string $id          = 'db';
+    public string $cds         = '';
+    public string $password    = '';
+    public string $username    = '';
+    public string $charset     = 'utf-8';
     public string $tablePrefix = '';
-
-    public string $database = '';
-
-    public int $timeout = 30;
-
-
-    public int $waite_time = 3;
-
-    public int $tick_time = 60;
-
-    public int $idle_count = 3;
-
-    public array $pool = ['max' => 10, 'min' => 1];
+    public string $database    = '';
+    public int    $timeout     = 30;
+    public int    $waite_time  = 3;
+    public int    $tick_time   = 60;
+    public int    $idle_count  = 3;
+    public array  $pool        = ['max' => 10, 'min' => 1];
+    private int   $storey      = 0;
+    protected int $timerId     = -1;
 
 
-    private int $storey = 0;
-
-    protected int $timerId = -1;
+    const ERROR_MSG = 'Failed to rollback transaction: connection was exists.';
 
     /**
      * @var bool
@@ -182,10 +174,7 @@ class Connection extends Component
     public function getSchema(): Schema
     {
         if ($this->_schema === null) {
-            $this->_schema = Kiri::createObject([
-                'class' => Schema::class,
-                'db' => $this
-            ]);
+            $this->_schema = Kiri::createObject(['class' => Schema::class, 'db' => $this]);
         }
         return $this->_schema;
     }
@@ -279,7 +268,7 @@ class Connection extends Component
             /** @var PDO $pdo */
             $pdo = Context::get($this->cds);
             if ($pdo === null) {
-                throw new Exception('Failed to rollback transaction: connection was exists.');
+                throw new Exception(self::ERROR_MSG);
             }
             if ($this->inTransaction()) {
                 $pdo->rollback();
@@ -298,7 +287,7 @@ class Connection extends Component
         if ($this->storey == 0) {
             $pdo = Context::get($this->cds);
             if ($pdo === null) {
-                throw new Exception('Failed to commit transaction: connection was exists.');
+                throw new Exception(self::ERROR_MSG);
             }
             if ($this->inTransaction()) {
                 $pdo->commit();
@@ -334,8 +323,7 @@ class Connection extends Component
      */
     public function createCommand($sql = null, array $attributes = []): Command
     {
-        $command = new Command(['connection' => $this, 'sql' => $sql]);
-        return $command->bindValues($attributes);
+        return (new Command(['connection' => $this, 'sql' => $sql]))->bindValues($attributes);
     }
 
 
@@ -381,12 +369,12 @@ class Connection extends Component
     {
         $pdo = new PDO('mysql:dbname=' . $this->database . ';host=' . $this->cds,
             $this->username, $this->password, [
-                PDO::ATTR_CASE => PDO::CASE_NATURAL,
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_ORACLE_NULLS => PDO::NULL_NATURAL,
-                PDO::ATTR_STRINGIFY_FETCHES => false,
-                PDO::ATTR_EMULATE_PREPARES => true,
-                PDO::ATTR_TIMEOUT => $this->timeout,
+                PDO::ATTR_CASE               => PDO::CASE_NATURAL,
+                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_ORACLE_NULLS       => PDO::NULL_NATURAL,
+                PDO::ATTR_STRINGIFY_FETCHES  => false,
+                PDO::ATTR_EMULATE_PREPARES   => true,
+                PDO::ATTR_TIMEOUT            => $this->timeout,
                 PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $this->charset
             ]);
         foreach ($this->attributes as $key => $attribute) {

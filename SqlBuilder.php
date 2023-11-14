@@ -77,9 +77,9 @@ class SqlBuilder extends Component
      */
     public function update(array $attributes): bool|string
     {
-        $conditions = $this->query->attributes;
+        $conditions              = $this->query->attributes;
         $this->query->attributes = [];
-        $data = $this->__updateBuilder($this->builderParams($attributes));
+        $data                    = $this->__updateBuilder($this->builderParams($attributes));
         foreach ($conditions as $condition) {
             $this->query->pushParam($condition);
         }
@@ -132,7 +132,7 @@ class SqlBuilder extends Component
         $update .= '(' . implode(',', $this->getFields($attributes)) . ') VALUES ';
 
         $order = 0;
-        $keys = [];
+        $keys  = [];
         foreach ($attributes as $attribute) {
             $_keys = $this->builderParams($attribute, true, $order);
 
@@ -197,8 +197,7 @@ class SqlBuilder extends Component
         if (is_null($value)) {
             return $keys;
         }
-        if (is_string($value) && (str_starts_with($value, '+ ') ||
-                str_starts_with($value, '- '))) {
+        if (is_string($value) && (str_starts_with($value, '+ ') || str_starts_with($value, '- '))) {
             $keys[] = $key . '=' . $key . ' ' . $value;
         } else {
             $this->query->pushParam($value);

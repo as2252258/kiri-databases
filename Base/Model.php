@@ -136,7 +136,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
      */
     public function clean(): void
     {
-        $this->_attributes = [];
+        $this->_attributes    = [];
         $this->_oldAttributes = [];
     }
 
@@ -432,11 +432,9 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
     private function insert(): bool|static
     {
         [$sql, $param] = SqlBuilder::builder(static::query())->insert($this->_attributes);
-
-        $connection = $this->getConnection();
+        $connection   = $this->getConnection();
         $dbConnection = $connection->createCommand($sql, $param);
-
-        $lastId = $dbConnection->save();
+        $lastId       = $dbConnection->save();
         if ($lastId === false) {
             return false;
         } else {
@@ -467,7 +465,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
         }
 
         $connection = $this->getConnection();
-        $command = $connection->createCommand($generate, $query->attributes);
+        $command    = $connection->createCommand($generate, $query->attributes);
         if ($command->save()) {
             return $this->refresh()->afterSave($old, $change);
         } else {
@@ -516,7 +514,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
      */
     public function populates($value): static
     {
-        $this->_attributes = $value;
+        $this->_attributes    = $value;
         $this->_oldAttributes = $value;
         $this->setIsNowExample();
         return $this;
@@ -594,8 +592,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
      */
     public function getTable(): string
     {
-        $connection = static::getConnection();
-
+        $connection  = static::getConnection();
         $tablePrefix = $connection->tablePrefix;
         if (empty($this->table)) {
             throw new Exception('You need add static method `tableName` and return table name.');
@@ -762,8 +759,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
      */
     #[ReturnTypeWillChange] public function offsetUnset(mixed $offset)
     {
-        if (!isset($this->_attributes[$offset])
-            && !isset($this->_oldAttributes[$offset])) {
+        if (!isset($this->_attributes[$offset]) && !isset($this->_oldAttributes[$offset])) {
             return;
         }
         unset($this->_attributes[$offset]);
@@ -786,8 +782,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
      */
     public function getColumns(): Columns
     {
-        return $this->getConnection()->getSchema()->getColumns()
-            ->table($this->getTable());
+        return $this->getConnection()->getSchema()->getColumns()->table($this->getTable());
     }
 
 
@@ -798,8 +793,8 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
      */
     public static function populate(array $data): static
     {
-        $model = new static();
-        $model->_attributes = $data;
+        $model                 = new static();
+        $model->_attributes    = $data;
         $model->_oldAttributes = $data;
         $model->setIsNowExample();
         return $model;

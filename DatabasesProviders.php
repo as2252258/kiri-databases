@@ -57,19 +57,19 @@ class DatabasesProviders extends Providers
     {
         $clientPool = $database['pool'] ?? ['min' => 1, 'max' => 5, 'tick' => 60];
         return [
-            'id'              => $database['id'],
-            'cds'             => $database['cds'],
-            'class'           => Connection::class,
-            'username'        => $database['username'],
-            'password'        => $database['password'],
-            'tablePrefix'     => $database['tablePrefix'],
-            'database'        => $database['database'],
-            'timeout'         => $database['timeout'] ?? 10,
-            'tick_time'       => $database['tick_time'] ?? 60,
-            'waite_time'      => $database['waite_time'] ?? 3,
-            'pool'            => $clientPool,
-            'attributes'      => $database['attributes'] ?? [],
-            'charset'         => $database['charset'] ?? 'utf8mb4'
+            'id'          => $database['id'],
+            'cds'         => $database['cds'],
+            'class'       => Connection::class,
+            'username'    => $database['username'],
+            'password'    => $database['password'],
+            'tablePrefix' => $database['tablePrefix'],
+            'database'    => $database['database'],
+            'timeout'     => $database['timeout'] ?? 10,
+            'tick_time'   => $database['tick_time'] ?? 60,
+            'waite_time'  => $database['waite_time'] ?? 3,
+            'pool'        => $clientPool,
+            'attributes'  => $database['attributes'] ?? [],
+            'charset'     => $database['charset'] ?? 'utf8mb4'
         ];
     }
 

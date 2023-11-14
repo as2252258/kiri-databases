@@ -25,32 +25,12 @@ use Kiri\Core\Json;
 class Columns extends Component
 {
 
-    /**
-     * @var array
-     * field types
-     */
-    private array $columns = [];
 
-    /**
-     * @var string
-     * tableName
-     */
-    public string $table = '';
-
-    /**
-     * @var array
-     * field primary key
-     */
-    private array $_primary = [];
-
-    /**
-     * @var array
-     * by mysql field auto_increment
-     */
+    private array $columns         = [];
+    public string $table           = '';
+    private array $_primary        = [];
     private array $_auto_increment = [];
-
-
-    private array $_fields = [];
+    private array $_fields         = [];
 
 
     /**
