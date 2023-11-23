@@ -215,11 +215,7 @@ class Connection extends Component
     public function beginTransaction(): static
     {
         if ($this->storey == 0) {
-            /** @var PDO $pdo */
-            $pdo = Context::get($this->cds);
-            if ($pdo == null) {
-                $pdo = $this->getTransactionClient();
-            }
+            $pdo = $this->getTransactionClient();
             if (!$pdo->inTransaction()) {
                 $pdo->beginTransaction();
             }
@@ -261,14 +257,8 @@ class Connection extends Component
     {
         $this->storey--;
         if ($this->storey == 0) {
-            /** @var PDO $pdo */
-            $pdo = Context::get($this->cds);
-            if ($pdo === null) {
-                throw new Exception(self::ERROR_MSG);
-            }
-            if ($this->inTransaction()) {
-                $pdo->rollback();
-            }
+            $pdo = $this->getTransactionClient();
+            $pdo->rollback();
             $this->release($pdo);
         }
     }
@@ -281,13 +271,8 @@ class Connection extends Component
     {
         $this->storey--;
         if ($this->storey == 0) {
-            $pdo = Context::get($this->cds);
-            if ($pdo === null) {
-                throw new Exception(self::ERROR_MSG);
-            }
-            if ($this->inTransaction()) {
-                $pdo->commit();
-            }
+            $pdo = $this->getTransactionClient();
+            $pdo->commit();
             $this->release($pdo);
         }
     }
