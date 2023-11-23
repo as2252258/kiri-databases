@@ -258,7 +258,9 @@ class Connection extends Component
         $this->storey--;
         if ($this->storey == 0) {
             $pdo = $this->getTransactionClient();
-            $pdo->rollback();
+            if ($pdo->inTransaction()) {
+                $pdo->rollback();
+            }
             $this->release($pdo);
         }
     }
@@ -272,7 +274,9 @@ class Connection extends Component
         $this->storey--;
         if ($this->storey == 0) {
             $pdo = $this->getTransactionClient();
-            $pdo->commit();
+            if ($pdo->inTransaction()) {
+                $pdo->commit();
+            }
             $this->release($pdo);
         }
     }
