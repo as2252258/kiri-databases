@@ -361,16 +361,6 @@ class Connection extends Component
             PDO::ATTR_TIMEOUT            => $this->timeout,
             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $this->charset
         ]);
-        return $this->setAttributes($pdo);
-    }
-
-
-    /**
-     * @param PDO $pdo
-     * @return PDO
-     */
-    protected function setAttributes(PDO $pdo): PDO
-    {
         foreach ($this->attributes as $key => $attribute) {
             $pdo->setAttribute($key, $attribute);
         }
