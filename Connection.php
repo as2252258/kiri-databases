@@ -40,46 +40,25 @@ use Swoole\Timer;
 class Connection extends Component
 {
 
-    public string $id          = 'db';
-    public string $cds         = '';
-    public string $password    = '';
-    public string $username    = '';
-    public string $charset     = 'utf-8';
-    public string $tablePrefix = '';
-    public string $database    = '';
-    public int    $timeout     = 30;
-    public int    $waite_time  = 3;
-    public int    $tick_time   = 60;
-    public int    $idle_count  = 3;
-    public array  $pool        = ['max' => 10, 'min' => 1];
-    private int   $storey      = 0;
-    protected int $timerId     = -1;
-
-
-    const ERROR_MSG = 'Failed to rollback transaction: connection was exists.';
-
-    /**
-     * @var bool
-     * enable database cache
-     */
-    public bool $enableCache = false;
-
-
-    /**
-     * @var string
-     */
-    public string $cacheDriver = 'redis';
-
-    /**
-     * @var array
-     */
-    public array $attributes = [];
-
-
-    /**
-     * @var Schema|null
-     */
-    private ?Schema $_schema = null;
+    public string   $id          = 'db';
+    public string   $cds         = '';
+    public string   $password    = '';
+    public string   $username    = '';
+    public string   $charset     = 'utf-8';
+    public string   $tablePrefix = '';
+    public string   $database    = '';
+    public int      $timeout     = 30;
+    public int      $waite_time  = 3;
+    public int      $tick_time   = 60;
+    public int      $idle_count  = 3;
+    public int      $idle_time   = 60;
+    public array    $pool        = ['max' => 10, 'min' => 1];
+    private int     $storey      = 0;
+    protected int   $timerId     = -1;
+    public bool     $enableCache = false;
+    public string   $cacheDriver = 'redis';
+    public array    $attributes  = [];
+    private ?Schema $_schema     = null;
 
 
     /**
