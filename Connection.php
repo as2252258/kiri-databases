@@ -352,16 +352,25 @@ class Connection extends Component
      */
     public function newConnect(): PDO
     {
-        $pdo = new PDO('mysql:dbname=' . $this->database . ';host=' . $this->cds,
-            $this->username, $this->password, [
-                PDO::ATTR_CASE               => PDO::CASE_NATURAL,
-                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_ORACLE_NULLS       => PDO::NULL_NATURAL,
-                PDO::ATTR_STRINGIFY_FETCHES  => false,
-                PDO::ATTR_EMULATE_PREPARES   => true,
-                PDO::ATTR_TIMEOUT            => $this->timeout,
-                PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $this->charset
-            ]);
+        $pdo = new PDO('mysql:dbname=' . $this->database . ';host=' . $this->cds, $this->username, $this->password, [
+            PDO::ATTR_CASE               => PDO::CASE_NATURAL,
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_ORACLE_NULLS       => PDO::NULL_NATURAL,
+            PDO::ATTR_STRINGIFY_FETCHES  => false,
+            PDO::ATTR_EMULATE_PREPARES   => true,
+            PDO::ATTR_TIMEOUT            => $this->timeout,
+            PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $this->charset
+        ]);
+        return $this->setAttributes($pdo);
+    }
+
+
+    /**
+     * @param PDO $pdo
+     * @return PDO
+     */
+    protected function setAttributes(PDO $pdo): PDO
+    {
         foreach ($this->attributes as $key => $attribute) {
             $pdo->setAttribute($key, $attribute);
         }
