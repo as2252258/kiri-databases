@@ -5,7 +5,6 @@ namespace Database;
 
 use Co\Channel;
 use Exception;
-use Kiri\Di\LocalService;
 use Swoole\Coroutine;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -32,11 +31,6 @@ class ImplodeCommand extends Command
     public string $description = 'php kiri.php db:implode --database users /Users/admin/snowflake-bi/test.sql';
 
 
-    /**
-     * @var LocalService
-     */
-    private LocalService $service;
-
 
     /**
      * @var Channel
@@ -51,7 +45,6 @@ class ImplodeCommand extends Command
      */
     protected function configure()
     {
-        $this->service = \Kiri::getDi()->get(LocalService::class);
         $this->setName('db:implode')
              ->addArgument('path', InputArgument::REQUIRED, "save to path", null)
              ->addOption('database', 'db', InputArgument::OPTIONAL)
@@ -70,7 +63,7 @@ class ImplodeCommand extends Command
     {
         try {
             /** @var Connection $data */
-            $data = $this->service->get($input->getOption('database'));
+            $data = \Kiri::getDi()->get(DatabasesProviders::class)->get($input->getOption('database'));
 
             $path = $input->getArgument('path');
             if (!str_starts_with($path, '/')) {

@@ -17,6 +17,7 @@ use ArrayAccess;
 use Database\ActiveQuery;
 use Database\Collection;
 use Database\Connection;
+use Database\DatabasesProviders;
 use Database\ModelInterface;
 use Database\Mysql\Columns;
 use Database\Relation;
@@ -330,7 +331,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
      */
     public function getConnection(): Connection
     {
-        return Kiri::service()->get($this->connection);
+        return Kiri::getDi()->get(DatabasesProviders::class)->get($this->connection);
     }
 
 
@@ -432,17 +433,14 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
     private function insert(): bool|static
     {
         [$sql, $param] = SqlBuilder::builder(static::query())->insert($this->_attributes);
-        $connection   = $this->getConnection();
-        $dbConnection = $connection->createCommand($sql, $param);
-        $lastId       = $dbConnection->save();
+        $lastId = $this->getConnection()->createCommand($sql, $param)->save();
         if ($lastId === false) {
             return false;
-        } else {
-            if ($this->hasPrimary()) {
-                $this->_attributes[$this->getPrimary()] = $lastId;
-            }
-            return $this;
         }
+        if ($this->hasPrimary()) {
+            $this->_attributes[$this->getPrimary()] = $lastId;
+        }
+        return $this;
     }
 
 
@@ -463,14 +461,10 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
         if ($generate === false) {
             return false;
         }
-
-        $connection = $this->getConnection();
-        $command    = $connection->createCommand($generate, $query->attributes);
-        if ($command->save()) {
-            return $this->refresh()->afterSave($old, $change);
-        } else {
+        if (!$this->getConnection()->createCommand($generate, $query->attributes)->save()) {
             return FALSE;
         }
+        return $this->refresh()->afterSave($old, $change);
     }
 
     /**
@@ -592,7 +586,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
      */
     public function getTable(): string
     {
-        $connection  = static::getConnection();
+        $connection  = $this->getConnection();
         $tablePrefix = $connection->tablePrefix;
         if (empty($this->table)) {
             throw new Exception('You need add static method `tableName` and return table name.');

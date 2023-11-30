@@ -49,7 +49,7 @@ class Db implements ISqlBuilder
     {
         $db = new Db();
         if (is_string($dbname)) {
-            $dbname = Kiri::service()->get($dbname);
+            $dbname = \Kiri::getDi()->get(DatabasesProviders::class)->get($dbname);
         }
         $db->connection = $dbname;
         return $db;
@@ -118,11 +118,11 @@ class Db implements ISqlBuilder
 
 
     /**
-     * @param $table
-     *
+     * @param string $table
+     * @param string $database
      * @return static
      */
-    public static function table($table): Db|static
+    public static function table(string $table, string $database = 'db'): Db|static
     {
         $connection             = new Db();
         $connection->connection = current(\config('databases.connections'));
@@ -264,10 +264,11 @@ class Db implements ISqlBuilder
             return $connection;
         }
         $databases = \config('databases.connections', []);
+        $providers = \Kiri::getDi()->get(DatabasesProviders::class);
         if (empty($databases) || !is_array($databases)) {
             throw new Exception('Please configure the database link.');
         }
-        return Kiri::service()->get($databases[$database]);
+        return $providers->get($databases[$database]);
     }
 
 

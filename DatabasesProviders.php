@@ -7,7 +7,6 @@ namespace Database;
 use Exception;
 use Kiri;
 use Kiri\Abstracts\Providers;
-use Kiri\Di\LocalService;
 
 /**
  * Class DatabasesProviders
@@ -18,22 +17,25 @@ class DatabasesProviders extends Providers
 
 
     /**
-     * @param LocalService $application
+     * @var array
+     */
+    protected array $connections = [];
+
+
+    /**
      * @return void
      * @throws
      */
-    public function onImport(LocalService $application): void
+    public function onImport(): void
     {
         $main = Kiri::getDi()->get(Kiri\Application::class);
-        $main->command(BackupCommand::class);
-        $main->command(ImplodeCommand::class);
-
+        $main->command(BackupCommand::class, ImplodeCommand::class);
         $databases = \config('databases.connections', []);
-        if (empty($databases)) {
+        if (count($databases) < 1) {
             return;
         }
         foreach ($databases as $key => $database) {
-            $application->set($key, Kiri::createObject($this->_settings($database)));
+            $this->set($key, $this->_settings($database));
         }
     }
 
@@ -45,7 +47,19 @@ class DatabasesProviders extends Providers
      */
     public function get($name): Connection
     {
-        return Kiri::service()->get($name);
+        return $this->connections[$name];
+    }
+
+
+    /**
+     * @param $key
+     * @param array $connection
+     * @return void
+     * @throws Exception
+     */
+    protected function set($key, array $connection): void
+    {
+        $this->connections[$key] = Kiri::createObject($connection);
     }
 
 

@@ -5,7 +5,6 @@ namespace Database;
 
 use Co\Channel;
 use Exception;
-use Kiri\Di\LocalService;
 use Swoole\Coroutine;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -25,7 +24,6 @@ class BackupCommand extends Command
     public string $description = 'php kiri.php db:backup --database users --table u_user --data 1 /Users/admin/snowflake-bi/test.sql';
 
 
-    private LocalService $service;
 
     public array $percentStatus = [];
 
@@ -35,7 +33,6 @@ class BackupCommand extends Command
      */
     protected function configure()
     {
-        $this->service = \Kiri::getDi()->get(LocalService::class);
         $this->setName('db:backup')
              ->addOption('data', 'd', InputArgument::OPTIONAL)
              ->addArgument('path', InputArgument::REQUIRED, "save to path", null)
@@ -55,7 +52,7 @@ class BackupCommand extends Command
     {
         try {
             /** @var Connection $data */
-            $data = $this->service->get($input->getOption('database'));
+            $data = \Kiri::getDi()->get(DatabasesProviders::class)->get($input->getOption('database'));
 
             $table = $input->getOption('table');
             if ($table !== null) {
@@ -159,7 +156,7 @@ class BackupCommand extends Command
         });
 
         /** @var Connection $database */
-        $database = \Kiri::service()->get($dbname);
+        $database = \Kiri::getDi()->get(DatabasesProviders::class)->get($dbname);
 
         $total = $database->createCommand("SELECT COUNT(*) as total FROM " . $tableName)->one()['total'];
 
@@ -173,7 +170,7 @@ class BackupCommand extends Command
                     $wait->done();
                 });
                 /** @var Connection $database */
-                $database = \Kiri::service()->get($dbname);
+                $database = \Kiri::getDi()->get(DatabasesProviders::class)->get($dbname);
 
                 $data = $database->createCommand("SELECT * FROM $tableName LIMIT $offset,$size")->all();
                 if (is_bool($data) || count($data) < 1) {
