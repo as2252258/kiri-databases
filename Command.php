@@ -135,12 +135,8 @@ class Command extends Component
             [$client, $prepare] = $this->_prepare();
             $result = $client->lastInsertId();
             $prepare->closeCursor();
-            $rowCount = $prepare->rowCount();
             $this->connection->release($client);
-            if ($rowCount < 1) {
-                return trigger_print_error("更新失败", 'mysql');
-            }
-            return $result == 0 ? true : (int)$result;
+            return $result == 0 ? $prepare->rowCount() > 0 : (int)$result;
         } catch (Throwable $throwable) {
             if ($this->isRefresh($throwable)) {
                 return $this->_execute();
