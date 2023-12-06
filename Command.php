@@ -15,6 +15,7 @@ use Kiri\Abstracts\Component;
 use Kiri\Di\Container;
 use Kiri\Exception\ConfigException;
 use PDO;
+use PDOStatement;
 use Throwable;
 
 /**
@@ -90,26 +91,24 @@ class Command extends Component
     /**
      * @param string $method
      * @return mixed
+     * @throws Exception
      */
     protected function search(string $method): mixed
     {
+        $client = $this->connection->getConnection();
         try {
-            $client = $this->connection->getConnection();
             if (($prepare = $client->prepare($this->sql)) === false) {
                 throw new Exception('(' . $prepare->errorInfo()[0] . ')' . $client->errorInfo()[2]);
             }
             $prepare->execute($this->params);
-            $data = $prepare->{$method}(PDO::FETCH_ASSOC);
-            $this->connection->release($client);
-            return $data;
+            return $prepare->{$method}(PDO::FETCH_ASSOC);
         } catch (Throwable $throwable) {
             if ($this->isRefresh($throwable)) {
                 return $this->search($method);
             }
-            if (isset($client)) {
-                $this->connection->release($client);
-            }
             return $this->error($throwable);
+        } finally {
+            $this->connection->release($client);
         }
     }
 
@@ -131,26 +130,7 @@ class Command extends Component
      */
     private function _execute(): bool|int
     {
-        try {
-            /** @var PDO $client */
-            [$client, $prepare] = $this->_prepare();
-            $result = $client->lastInsertId();
-            $prepare->closeCursor();
-            $this->connection->release($client);
-            if ($result == 0) {
-                return $prepare->rowCount() > 0;
-            } else {
-                return (int)$result;
-            }
-        } catch (Throwable $throwable) {
-            if ($this->isRefresh($throwable)) {
-                return $this->_execute();
-            }
-            if (isset($client)) {
-                $this->connection->release($client);
-            }
-            return $this->error($throwable);
-        }
+        return $this->_prepare();
     }
 
 
@@ -161,37 +141,37 @@ class Command extends Component
      */
     private function _delete(): bool|int
     {
-        try {
-            [$client, $prepare] = $this->_prepare();
-            $prepare->closeCursor();
-            $this->connection->release($client);
-            return true;
-        } catch (Throwable $throwable) {
-            if ($this->isRefresh($throwable)) {
-                return $this->_execute();
-            }
-            if (isset($client)) {
-                $this->connection->release($client);
-            }
-            return $this->error($throwable);
-        }
+        return $this->_prepare();
     }
 
 
     /**
-     * @return array
+     * @return PDOStatement|int
      * @throws Exception
      */
-    private function _prepare(): array
+    private function _prepare(): bool|int
     {
         $client = $this->connection->getConnection();
-        if (($prepare = $client->prepare($this->sql)) === false) {
-            throw new Exception('(' . $prepare->errorInfo()[0] . ')' . $prepare->errorInfo()[2]);
+        try {
+            if (($prepare = $client->prepare($this->sql)) === false) {
+                throw new Exception('(' . $prepare->errorInfo()[0] . ')' . $prepare->errorInfo()[2]);
+            }
+            if ($prepare->execute($this->params) === false) {
+                throw new Exception('(' . $prepare->errorInfo()[0] . ')' . $prepare->errorInfo()[2]);
+            }
+            $prepare->closeCursor();
+
+            $result = $client->lastInsertId();
+
+            return $result == 0 ? $prepare->rowCount() > 0 : (int)$result;
+        } catch (Throwable $throwable) {
+            if ($this->isRefresh($throwable)) {
+                return $this->_prepare();
+            }
+            return $this->error($throwable);
+        } finally {
+            $this->connection->release($client);
         }
-        if ($prepare->execute($this->params) === false) {
-            throw new Exception('(' . $prepare->errorInfo()[0] . ')' . $prepare->errorInfo()[2]);
-        }
-        return [$client, $prepare];
     }
 
 
