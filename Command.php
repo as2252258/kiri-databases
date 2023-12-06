@@ -132,11 +132,16 @@ class Command extends Component
     private function _execute(): bool|int
     {
         try {
+            /** @var PDO $client */
             [$client, $prepare] = $this->_prepare();
             $result = $client->lastInsertId();
             $prepare->closeCursor();
             $this->connection->release($client);
-            return $result == 0 ? $prepare->rowCount() > 0 : (int)$result;
+            if ($result == 0) {
+                return $prepare->rowCount() > 0;
+            } else {
+                return (int)$result;
+            }
         } catch (Throwable $throwable) {
             if ($this->isRefresh($throwable)) {
                 return $this->_execute();
