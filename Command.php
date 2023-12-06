@@ -47,7 +47,7 @@ class Command extends Component
      */
     public function incrOrDecr(): int|bool
     {
-        return $this->_execute();
+        return $this->_prepare();
     }
 
     /**
@@ -56,7 +56,7 @@ class Command extends Component
      */
     public function save(): int|bool
     {
-        return $this->_execute();
+        return $this->_prepare();
     }
 
 
@@ -100,7 +100,9 @@ class Command extends Component
             if (($prepare = $client->prepare($this->sql)) === false) {
                 throw new Exception('(' . $prepare->errorInfo()[0] . ')' . $client->errorInfo()[2]);
             }
+
             $prepare->execute($this->params);
+
             return $prepare->{$method}(PDO::FETCH_ASSOC);
         } catch (Throwable $throwable) {
             if ($this->isRefresh($throwable)) {
@@ -118,28 +120,6 @@ class Command extends Component
      * @throws Exception
      */
     public function flush(): int|bool
-    {
-        return $this->_execute();
-    }
-
-
-    /**
-     * @return bool|int
-     * @throws ConfigException
-     * @throws Exception
-     */
-    private function _execute(): bool|int
-    {
-        return $this->_prepare();
-    }
-
-
-    /**
-     * @return bool|int
-     * @throws ConfigException
-     * @throws Exception
-     */
-    private function _delete(): bool|int
     {
         return $this->_prepare();
     }
@@ -210,7 +190,7 @@ class Command extends Component
      */
     public function delete(): int|bool
     {
-        return $this->_delete();
+        return $this->_prepare();
     }
 
     /**
@@ -219,7 +199,7 @@ class Command extends Component
      */
     public function exec(): int|bool
     {
-        return $this->_execute();
+        return $this->_prepare();
     }
 
     /**
