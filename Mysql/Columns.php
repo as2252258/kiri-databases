@@ -13,7 +13,6 @@ namespace Database\Mysql;
 
 use Database\Connection;
 use Database\SqlBuilder;
-use Exception;
 use JetBrains\PhpStorm\Pure;
 use Kiri\Abstracts\Component;
 use Kiri\Core\Json;
@@ -44,7 +43,7 @@ class Columns extends Component
     /**
      * @param string $table
      * @return $this
-     * @throws Exception
+     * @throws
      */
     public function table(string $table): static
     {
@@ -64,7 +63,7 @@ class Columns extends Component
      * @param $key
      * @param $val
      * @return string|int|bool|float
-     * @throws Exception
+     * @throws
      */
     public function fieldFormat($key, $val): string|int|bool|float
     {
@@ -115,7 +114,7 @@ class Columns extends Component
      * @param string $name
      * @param $value
      * @return mixed
-     * @throws Exception
+     * @throws
      */
     public function _decode(string $name, $value): mixed
     {
@@ -127,7 +126,7 @@ class Columns extends Component
      * @param $val
      * @param null $format
      * @return float|bool|int|string
-     * @throws Exception
+     * @throws
      */
     public function encode($val, $format = null): float|bool|int|string
     {
@@ -195,7 +194,7 @@ class Columns extends Component
 
     /**
      * @return mixed
-     * @throws Exception
+     * @throws
      */
     public function getFields(): array
     {
@@ -209,7 +208,7 @@ class Columns extends Component
     /**
      * @param string $name
      * @return bool
-     * @throws Exception
+     * @throws
      */
     public function hasField(string $name): bool
     {
@@ -219,7 +218,7 @@ class Columns extends Component
 
     /**
      * @return int|string|null
-     * @throws Exception
+     * @throws
      */
     public function getAutoIncrement(): int|string|null
     {
@@ -229,7 +228,7 @@ class Columns extends Component
     /**
      * @return array|null|string
      *
-     * @throws Exception
+     * @throws
      */
     public function getPrimaryKeys(): array|string|null
     {
@@ -242,7 +241,7 @@ class Columns extends Component
     /**
      * @return array|null|string
      *
-     * @throws Exception
+     * @throws
      */
     #[Pure] public function getFirstPrimary(): array|string|null
     {
@@ -259,7 +258,7 @@ class Columns extends Component
      * @param $name
      * @param null $index
      * @return array
-     * @throws Exception
+     * @throws
      */
     private function columns($name, $index = null): array
     {
@@ -272,7 +271,7 @@ class Columns extends Component
 
     /**
      * @return array|static
-     * @throws Exception
+     * @throws
      */
     private function getColumns(): array|static
     {
@@ -283,14 +282,14 @@ class Columns extends Component
     /**
      * @param $table
      * @return array|Columns
-     * @throws Exception
+     * @throws
      */
     private function structure($table): array|static
     {
         if (!isset($this->columns[$table]) || empty($this->columns[$table])) {
             $column = $this->db->createCommand(SqlBuilder::builder(null)->columns($table))->all();
             if (empty($column)) {
-                throw new Exception("The table " . $table . " not exists.");
+                throw new \Exception("The table " . $table . " not exists.");
             }
             return $this->columns[$table] = $this->resolve($column, $table);
         }
@@ -319,7 +318,7 @@ class Columns extends Component
      * @param $item
      * @param $table
      */
-    private function addPrimary($item, $table)
+    private function addPrimary($item, $table): void
     {
         if (!isset($this->_primary[$table])) {
             $this->_primary[$table] = [];
@@ -335,7 +334,7 @@ class Columns extends Component
      * @param $item
      * @param $table
      */
-    private function addIncrement($item, $table)
+    private function addIncrement($item, $table): void
     {
         if ($item['Extra'] !== 'auto_increment') {
             return;
@@ -363,7 +362,7 @@ class Columns extends Component
     /**
      * @param null $field
      * @return array|string|null
-     * @throws Exception
+     * @throws
      */
     public function get_fields($field = null): array|string|null
     {
@@ -379,7 +378,7 @@ class Columns extends Component
 
     /**
      * @return array
-     * @throws Exception
+     * @throws
      */
     public function getAllField(): array
     {

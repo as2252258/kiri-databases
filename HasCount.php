@@ -14,14 +14,14 @@ use Kiri;
 class HasCount extends HasBase
 {
 
-	/**
-	 * @return array|null|ModelInterface
-	 * @throws Exception
-	 */
-	public function get(): array|ModelInterface|null
-	{
-		$relation = Kiri::getDi()->get(Relation::class);
-		return $relation->get($this->name);
-	}
+    /**
+     * @return array|null|ModelInterface
+     * @throws
+     */
+    public function get(): array|ModelInterface|null
+    {
+        $relation = Kiri::getDi()->get(Relation::class);
+        return $relation->get($this->name);
+    }
 
 }

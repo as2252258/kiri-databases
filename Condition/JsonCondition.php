@@ -12,9 +12,13 @@ class JsonCondition extends Condition
 {
 
 
-	public function builder()
-	{
+    /**
+     * @return bool
+     */
+	public function builder(): bool
+    {
 		// TODO: Implement builder() method.
+        return \json_validate($this->value);
 	}
 
 }

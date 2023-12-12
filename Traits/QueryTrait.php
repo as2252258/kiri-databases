@@ -38,8 +38,6 @@ trait QueryTrait
 
     public bool $lock = false;
 
-    public bool $ifNotWhere = false;
-
 
     private SqlBuilder $builder;
 
@@ -308,28 +306,6 @@ trait QueryTrait
             $tableName = $model->getTable();
         }
         return $this->join("INNER JOIN " . $tableName, $alias, $onCondition, $param);
-    }
-
-    /**
-     * @param $array
-     *
-     * @return string
-     */
-    private function toString($array): string
-    {
-        $tmp = [];
-        if (!is_array($array)) {
-            return $array;
-        }
-        foreach ($array as $key => $val) {
-            if (is_array($val)) {
-                $tmp[] = $this->toString($array);
-            } else {
-                $tmp[]                        = $key . '=:' . $key;
-                $this->attributes[':' . $key] = $val;
-            }
-        }
-        return implode(' AND ', $tmp);
     }
 
     /**

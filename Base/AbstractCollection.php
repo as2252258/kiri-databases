@@ -26,153 +26,155 @@ use Traversable;
 abstract class AbstractCollection extends Component implements \IteratorAggregate, \ArrayAccess, \Arrayable
 {
 
-	/**
-	 * @var ModelInterface[]
-	 */
-	protected array $_item = [];
+    /**
+     * @var ModelInterface[]
+     */
+    protected array $_item = [];
 
 
-	/**
-	 * @var ModelInterface|string|null
-	 */
-	protected ModelInterface|string|null $model;
+    /**
+     * @var ModelInterface|string|null
+     */
+    protected ModelInterface|string|null $model;
 
 
-	/**
-	 * @var ActiveQuery
-	 */
-	protected ActiveQuery $query;
+    /**
+     * @var ActiveQuery
+     */
+    protected ActiveQuery $query;
 
 
-	public function clean()
-	{
-		unset($this->query, $this->model, $this->_item);
-	}
+    public function clean(): void
+    {
+        unset($this->query, $this->model, $this->_item);
+    }
 
 
-	/**
-	 * Collection constructor.
-	 *
-	 * @param $query
-	 * @param array $array
-	 * @param ModelInterface|null $model
-	 * @throws Exception
-	 */
-	public function __construct($query, array $array = [], ModelInterface $model = null)
-	{
-		$this->_item = $array;
-		$this->query = $query;
-		$this->model = $model;
+    /**
+     * Collection constructor.
+     *
+     * @param $query
+     * @param array $array
+     * @param ModelInterface|null $model
+     * @throws
+     */
+    public function __construct($query, array $array = [], ModelInterface $model = null)
+    {
+        $this->_item = $array;
+        $this->query = $query;
+        $this->model = $model;
 
-		parent::__construct();
-	}
-
-
-	/**
-	 * @return int
-	 */
-	#[Pure] public function getLength(): int
-	{
-		return count($this->_item);
-	}
+        parent::__construct();
+    }
 
 
-	/**
-	 * @param $item
-	 */
-	public function setItems($item)
-	{
-		$this->_item = $item;
-	}
+    /**
+     * @return int
+     */
+    #[Pure] public function getLength(): int
+    {
+        return count($this->_item);
+    }
 
 
-	/**
-	 * @param $model
-	 */
-	public function setModel($model)
-	{
-		$this->model = $model;
-	}
-
-	/**
-	 * @param $item
-	 */
-	public function addItem($item)
-	{
-		$this->_item[] = $item;
-	}
-
-	/**
-	 * @return Traversable|CollectionIterator|ArrayIterator
-	 * @throws Exception
-	 */
-	public function getIterator(): Traversable|CollectionIterator|ArrayIterator
-	{
-		return new CollectionIterator($this->model, $this->_item);
-	}
+    /**
+     * @param $item
+     */
+    public function setItems($item): void
+    {
+        $this->_item = $item;
+    }
 
 
-	/**
-	 * @return mixed
-	 * @throws Exception
-	 */
-	public function getModel(): ModelInterface
-	{
-		return $this->model;
-	}
+    /**
+     * @param $model
+     */
+    public function setModel($model): void
+    {
+        $this->model = $model;
+    }
+
+    /**
+     * @param $item
+     */
+    public function addItem($item): void
+    {
+        $this->_item[] = $item;
+    }
+
+    /**
+     * @return Traversable|CollectionIterator|ArrayIterator
+     * @throws
+     */
+    public function getIterator(): Traversable|CollectionIterator|ArrayIterator
+    {
+        return new CollectionIterator($this->model, $this->_item);
+    }
 
 
-	/**
-	 * @return ActiveQuery
-	 */
-	public function makeNewQuery(): ActiveQuery
-	{
-		return $this->model::query();
-	}
+    /**
+     * @return mixed
+     * @throws
+     */
+    public function getModel(): ModelInterface
+    {
+        return $this->model;
+    }
 
 
-	/**
-	 * @param mixed $offset
-	 * @return bool
-	 */
-	public function offsetExists(mixed $offset): bool
-	{
-		return !empty($this->_item) && isset($this->_item[$offset]);
-	}
-
-	/**
-	 * @param mixed $offset
-	 * @return ModelInterface|null
-	 * @throws Exception
-	 */
-	public function offsetGet(mixed $offset): ?ModelInterface
-	{
-		if (!$this->offsetExists($offset)) {
-			return NULL;
-		}
-		if (!($this->_item[$offset] instanceof ModelInterface)) {
-			return $this->model->populates($this->_item[$offset]);
-		}
-		return $this->_item[$offset];
-	}
-
-	/**
-	 * @param mixed $offset
-	 * @param mixed $value
-	 */
-	#[ReturnTypeWillChange] public function offsetSet(mixed $offset, mixed $value)
-	{
-		$this->_item[$offset] = $value;
-	}
+    /**
+     * @return ActiveQuery
+     */
+    public function makeNewQuery(): ActiveQuery
+    {
+        return $this->model::query();
+    }
 
 
-	/**
-	 * @param mixed $offset
-	 */
-	#[ReturnTypeWillChange] public function offsetUnset(mixed $offset)
-	{
-		if ($this->offsetExists($offset)) {
-			unset($this->_item[$offset]);
-		}
-	}
+    /**
+     * @param mixed $offset
+     * @return bool
+     */
+    public function offsetExists(mixed $offset): bool
+    {
+        return !empty($this->_item) && isset($this->_item[$offset]);
+    }
+
+    /**
+     * @param mixed $offset
+     * @return ModelInterface|null
+     * @throws
+     */
+    public function offsetGet(mixed $offset): ?ModelInterface
+    {
+        if (!$this->offsetExists($offset)) {
+            return NULL;
+        }
+        if (!($this->_item[$offset] instanceof ModelInterface)) {
+            return $this->model->populates($this->_item[$offset]);
+        }
+        return $this->_item[$offset];
+    }
+
+    /**
+     * @param mixed $offset
+     * @param mixed $value
+     */
+    #[ReturnTypeWillChange]
+    public function offsetSet(mixed $offset, mixed $value): void
+    {
+        $this->_item[$offset] = $value;
+    }
+
+
+    /**
+     * @param mixed $offset
+     */
+    #[ReturnTypeWillChange]
+    public function offsetUnset(mixed $offset): void
+    {
+        if ($this->offsetExists($offset)) {
+            unset($this->_item[$offset]);
+        }
+    }
 }

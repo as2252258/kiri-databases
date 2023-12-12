@@ -13,17 +13,17 @@ class NotInCondition extends Condition
 {
 
 
-	/**
-	 * @return string|null
-	 * @throws \Exception
-	 */
-	#[Pure] public function builder(): ?string
-	{
-		if (!is_array($this->value)) {
-			throw new \Exception('Builder data by a empty string. need array');
-		}
-		$value = '\'' . implode('\',\'', $this->value) . '\'';
-		return '`' . $this->column . '` not in(' . $value . ')';
-	}
+    /**
+     * @return string|null
+     * @throws
+     */
+    #[Pure] public function builder(): ?string
+    {
+        if (!is_array($this->value)) {
+            throw new \Exception('Builder data by a empty string. need array');
+        }
+        $value = '\'' . implode('\',\'', $this->value) . '\'';
+        return '`' . $this->column . '` not in(' . $value . ')';
+    }
 
 }

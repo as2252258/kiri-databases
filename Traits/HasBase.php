@@ -26,54 +26,54 @@ use Kiri;
  */
 abstract class HasBase implements \Database\Traits\Relation
 {
-	
-	/** @var ModelInterface|Collection */
-	protected mixed $data = null;
-	
-	/**
-	 * @var ModelInterface
-	 */
-	protected mixed $model;
-	
-	
-	protected mixed $value = 0;
-	
-	
-	/**
-	 * HasBase constructor.
-	 * @param string $name
-	 */
-	public function __construct(public string $name)
-	{
-	}
 
-	/**
-	 * @param $name
-	 * @param $arguments
-	 * @return static
-	 * @throws \ReflectionException
-	 */
-	public function __call($name, $arguments)
-	{
-		if ($name !== 'get') {
-			$relation = Kiri::getDi()->get(Relation::class);
-			$relation->getQuery($this->name)->$name(...$arguments);
-			return $this;
-		} else {
-			return $this->get();
-		}
-	}
-	
-	
-	/**
-	 * @param $name
-	 * @return mixed
-	 */
-	public function __get($name): mixed
-	{
-		if ($this->data === null) {
-			$this->data = $this->get();
-		}
-		return $this->data;
-	}
+    /** @var ModelInterface|Collection */
+    protected mixed $data = null;
+
+    /**
+     * @var ModelInterface
+     */
+    protected mixed $model;
+
+
+    protected mixed $value = 0;
+
+
+    /**
+     * HasBase constructor.
+     * @param string $name
+     */
+    public function __construct(public string $name)
+    {
+    }
+
+    /**
+     * @param $name
+     * @param $arguments
+     * @return static
+     * @throws
+     */
+    public function __call($name, $arguments)
+    {
+        if ($name !== 'get') {
+            $relation = Kiri::getDi()->get(Relation::class);
+            $relation->getQuery($this->name)->$name(...$arguments);
+            return $this;
+        } else {
+            return $this->get();
+        }
+    }
+
+
+    /**
+     * @param $name
+     * @return mixed
+     */
+    public function __get($name): mixed
+    {
+        if ($this->data === null) {
+            $this->data = $this->get();
+        }
+        return $this->data;
+    }
 }

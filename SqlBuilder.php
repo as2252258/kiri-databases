@@ -6,7 +6,6 @@ namespace Database;
 
 
 use Database\Traits\Builder;
-use Exception;
 use JetBrains\PhpStorm\Pure;
 use Kiri\Abstracts\Component;
 
@@ -41,7 +40,7 @@ class SqlBuilder extends Component
     /**
      * @param ISqlBuilder|null $query
      * @return $this
-     * @throws Exception
+     * @throws
      */
     public static function builder(ISqlBuilder|null $query): static
     {
@@ -51,7 +50,7 @@ class SqlBuilder extends Component
 
     /**
      * @return string
-     * @throws Exception
+     * @throws
      */
     public function getCondition(): string
     {
@@ -62,7 +61,7 @@ class SqlBuilder extends Component
     /**
      * @param array $compiler
      * @return string
-     * @throws Exception
+     * @throws
      */
     public function hashCompiler(array $compiler): string
     {
@@ -73,7 +72,7 @@ class SqlBuilder extends Component
     /**
      * @param array $attributes
      * @return bool|array
-     * @throws Exception
+     * @throws
      */
     public function update(array $attributes): bool|string
     {
@@ -91,7 +90,7 @@ class SqlBuilder extends Component
      * @param array $attributes
      * @param string $opera
      * @return bool|array
-     * @throws Exception
+     * @throws
      */
     public function mathematics(array $attributes, string $opera = '+'): bool|string
     {
@@ -106,7 +105,7 @@ class SqlBuilder extends Component
     /**
      * @param array $string
      * @return string|bool
-     * @throws Exception
+     * @throws
      */
     private function __updateBuilder(array $string): string|bool
     {
@@ -121,7 +120,7 @@ class SqlBuilder extends Component
      * @param array $attributes
      * @param false $isBatch
      * @return array
-     * @throws Exception
+     * @throws
      */
     public function insert(array $attributes, bool $isBatch = false): array
     {
@@ -145,7 +144,7 @@ class SqlBuilder extends Component
 
     /**
      * @return string
-     * @throws Exception
+     * @throws
      */
     public function delete(): string
     {
@@ -209,7 +208,7 @@ class SqlBuilder extends Component
 
     /**
      * @return string
-     * @throws Exception
+     * @throws
      */
     public function one(): string
     {
@@ -222,7 +221,7 @@ class SqlBuilder extends Component
 
     /**
      * @return string
-     * @throws Exception
+     * @throws
      */
     public function all(): string
     {
@@ -235,7 +234,7 @@ class SqlBuilder extends Component
 
     /**
      * @return string
-     * @throws Exception
+     * @throws
      */
     public function count(): string
     {
@@ -255,7 +254,7 @@ class SqlBuilder extends Component
 
     /**
      * @return string
-     * @throws Exception
+     * @throws
      */
     private function _prefix(): string
     {
@@ -292,7 +291,7 @@ class SqlBuilder extends Component
     /**
      * @param false $isCount
      * @return string
-     * @throws Exception
+     * @throws
      */
     public function get(bool $isCount = false): string
     {
@@ -305,7 +304,7 @@ class SqlBuilder extends Component
 
     /**
      * @return string
-     * @throws Exception
+     * @throws
      */
     public function truncate(): string
     {
@@ -315,7 +314,7 @@ class SqlBuilder extends Component
 
     /**
      * @return string
-     * @throws Exception
+     * @throws
      */
     private function conditionToString(): string
     {

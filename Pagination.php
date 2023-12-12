@@ -38,7 +38,7 @@ class Pagination extends Component
      * PaginationIteration constructor.
      * @param ActiveQuery $activeQuery
      * @param array $config
-     * @throws Exception
+     * @throws
      */
     public function __construct(ActiveQuery $activeQuery, array $config = [])
     {
@@ -71,9 +71,9 @@ class Pagination extends Component
 
     /**
      * @param array|Closure $callback
-     * @throws Exception
+     * @throws
      */
-    public function setCallback(array|Closure $callback)
+    public function setCallback(array|Closure $callback): void
     {
         if (!is_callable($callback, true)) {
             throw new Exception('非法回调函数~');
@@ -129,7 +129,7 @@ class Pagination extends Component
     /**
      * @param array $param
      * @return void
-     * @throws Exception
+     * @throws
      */
     public function plunk(array $param = []): void
     {
@@ -141,7 +141,7 @@ class Pagination extends Component
      * 轮训
      * @param $param
      * @return array
-     * @throws Exception
+     * @throws
      */
     public function loop($param): array
     {
@@ -175,7 +175,7 @@ class Pagination extends Component
     /**
      * @param $data
      * @param $param
-     * @throws Exception
+     * @throws
      */
     private function executed($data, $param): void
     {
@@ -189,7 +189,7 @@ class Pagination extends Component
 
     /**
      * @return array|Collection
-     * @throws Exception
+     * @throws
      */
     private function get(): Collection|array
     {

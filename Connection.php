@@ -283,7 +283,7 @@ class Connection extends Component
      * @param null $sql
      * @param array $attributes
      * @return Command
-     * @throws Exception
+     * @throws
      */
     public function createCommand($sql = null, array $attributes = []): Command
     {

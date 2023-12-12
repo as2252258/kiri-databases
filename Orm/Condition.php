@@ -5,7 +5,6 @@ namespace Database\Orm;
 
 
 use Database\Traits\Builder;
-use Exception;
 
 /**
  * Trait Condition
@@ -15,15 +14,15 @@ trait Condition
 {
 
 
-	use Builder;
+    use Builder;
 
-	/**
-	 * @param $query
-	 * @return string
-	 * @throws Exception
-	 */
-	public function getWhere($query): string
-	{
-		return $this->where($query);
-	}
+    /**
+     * @param $query
+     * @return string
+     * @throws
+     */
+    public function getWhere($query): string
+    {
+        return $this->where($query);
+    }
 }

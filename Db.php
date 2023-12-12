@@ -15,11 +15,6 @@ use Database\Affair\Commit;
 use Database\Affair\Rollback;
 use Database\Traits\QueryTrait;
 use Exception;
-use Kiri;
-use Kiri\Exception\ConfigException;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
-use ReflectionException;
 use Throwable;
 
 /**
@@ -43,7 +38,7 @@ class Db implements ISqlBuilder
     /**
      * @param string|Connection $dbname
      * @return Db
-     * @throws Exception
+     * @throws
      */
     public static function connect(string|Connection $dbname): Db
     {
@@ -57,9 +52,7 @@ class Db implements ISqlBuilder
 
     /**
      * @return void
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     * @throws ReflectionException
+     * @throws
      */
     public static function beginTransaction(): void
     {
@@ -71,9 +64,7 @@ class Db implements ISqlBuilder
      * @param Closure $closure
      * @param mixed ...$params
      * @return mixed
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     * @throws Exception
+     * @throws
      */
     public static function Transaction(Closure $closure, ...$params): mixed
     {
@@ -95,9 +86,7 @@ class Db implements ISqlBuilder
 
     /**
      * @return void
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     * @throws ReflectionException
+     * @throws
      */
     public static function commit(): void
     {
@@ -107,9 +96,7 @@ class Db implements ISqlBuilder
 
     /**
      * @return void
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     * @throws ReflectionException
+     * @throws
      */
     public static function rollback(): void
     {
@@ -147,7 +134,7 @@ class Db implements ISqlBuilder
 
     /**
      * @return array|bool
-     * @throws Exception
+     * @throws
      */
     public function get(): array|bool
     {
@@ -156,7 +143,7 @@ class Db implements ISqlBuilder
 
     /**
      * @return array|bool|null
-     * @throws Exception
+     * @throws
      */
     public function first(): array|bool|null
     {
@@ -165,7 +152,7 @@ class Db implements ISqlBuilder
 
     /**
      * @return bool|int
-     * @throws Exception
+     * @throws
      */
     public function count(): bool|int
     {
@@ -174,7 +161,7 @@ class Db implements ISqlBuilder
 
     /**
      * @return bool|int
-     * @throws Exception
+     * @throws
      */
     public function exists(): bool|int
     {
@@ -185,7 +172,7 @@ class Db implements ISqlBuilder
      * @param string $sql
      * @param array $attributes
      * @return array|bool|int|string|null
-     * @throws Exception
+     * @throws
      */
     public function query(string $sql, array $attributes = []): int|bool|array|string|null
     {
@@ -196,7 +183,7 @@ class Db implements ISqlBuilder
      * @param string $sql
      * @param array $attributes
      * @return array|bool|int|string|null
-     * @throws Exception
+     * @throws
      */
     public function one(string $sql, array $attributes = []): int|bool|array|string|null
     {
@@ -206,8 +193,7 @@ class Db implements ISqlBuilder
 
     /**
      * @return bool|int
-     * @throws ConfigException
-     * @throws Exception
+     * @throws
      */
     public function delete(): bool|int
     {
@@ -217,7 +203,7 @@ class Db implements ISqlBuilder
     /**
      * @param string $table
      * @return array|bool|null
-     * @throws Exception
+     * @throws
      */
     public static function show(string $table): array|bool|null
     {
@@ -240,7 +226,7 @@ class Db implements ISqlBuilder
      * @param Connection|null $connection
      * @param string $database
      * @return array|null
-     * @throws Exception
+     * @throws
      */
     public static function desc(string $table, ?Connection $connection = null, string $database = 'db'): ?array
     {
@@ -256,7 +242,7 @@ class Db implements ISqlBuilder
      * @param null|Connection $connection
      * @param string $database
      * @return mixed
-     * @throws Exception
+     * @throws
      */
     public static function getDefaultConnection(?Connection $connection = null, string $database = 'db'): Connection
     {

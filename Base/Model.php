@@ -173,7 +173,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
 
     /**
      * @return string
-     * @throws Exception
+     * @throws
      * get last exception or other error
      */
     public function getLastError(): string
@@ -184,7 +184,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
 
     /**
      * @return bool
-     * @throws Exception
+     * @throws
      */
     public function hasPrimary(): bool
     {
@@ -193,7 +193,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
 
     /**
      * @return null|string
-     * @throws Exception
+     * @throws
      */
     public function getPrimary(): ?string
     {
@@ -206,7 +206,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
 
     /**
      * @return bool
-     * @throws Exception
+     * @throws
      */
     public function hasPrimaryValue(): bool
     {
@@ -219,7 +219,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
 
     /**
      * @return int|null
-     * @throws Exception
+     * @throws
      */
     public function getPrimaryValue(): ?int
     {
@@ -233,7 +233,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
      * @param int|string|array $param
      * @param null $db
      * @return Model|null
-     * @throws Exception
+     * @throws
      */
     public static function findOne(int|string|array $param, $db = NULL): ?static
     {
@@ -254,7 +254,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
      * @param int $param
      * @param null $db
      * @return Model|null
-     * @throws Exception
+     * @throws
      */
     public static function primary(int $param, $db = NULL): ?static
     {
@@ -267,7 +267,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
 
     /**
      * @return mixed
-     * @throws Exception
+     * @throws
      */
     public function optimize(): mixed
     {
@@ -287,7 +287,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
     /**
      * @param int|string|array $condition
      * @return static|null
-     * @throws Exception
+     * @throws
      */
     public static function first(int|string|array $condition): ?static
     {
@@ -298,7 +298,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
     /**
      * @param string|array $condition
      * @return Collection
-     * @throws Exception
+     * @throws
      */
     public static function all(string|array $condition): Collection
     {
@@ -315,7 +315,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
 
     /**
      * @return ActiveQuery
-     * @throws Exception
+     * @throws
      */
     public static function query(): ActiveQuery
     {
@@ -327,7 +327,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
 
     /**
      * @return Connection
-     * @throws Exception
+     * @throws
      */
     public function getConnection(): Connection
     {
@@ -340,7 +340,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
      * @param array $attributes
      *
      * @return bool
-     * @throws Exception
+     * @throws
      */
     protected static function deleteByCondition(array|string|null $condition = NULL, array $attributes = []): bool
     {
@@ -356,7 +356,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
 
     /**
      * @return array
-     * @throws Exception
+     * @throws
      */
     public function getAttributes(): array
     {
@@ -402,7 +402,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
     /**
      * @param array $param
      * @return $this
-     * @throws Exception
+     * @throws
      */
     public function setAttributes(array $param): static
     {
@@ -428,7 +428,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
 
     /**
      * @return $this|bool
-     * @throws Exception
+     * @throws
      */
     private function insert(): bool|static
     {
@@ -449,7 +449,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
      * @param array $condition
      * @param array $change
      * @return $this|bool
-     * @throws Exception
+     * @throws
      */
     protected function updateInternal(array $old, array $condition, array $change): bool|static
     {
@@ -469,7 +469,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
 
     /**
      * @return bool|$this
-     * @throws Exception
+     * @throws
      */
     public function save(): static|bool
     {
@@ -488,7 +488,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
 
     /**
      * @return array<array, array>
-     * @throws Exception
+     * @throws
      */
     private function diff(): array
     {
@@ -518,7 +518,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
     /**
      * @param array $rule
      * @return bool
-     * @throws Exception
+     * @throws
      */
     public function validator(array $rule): bool
     {
@@ -536,7 +536,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
     /**
      * @param $rule
      * @return Validator
-     * @throws Exception
+     * @throws
      */
     private function resolve($rule): Validator
     {
@@ -552,7 +552,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
     /**
      * @param string $name
      * @return null
-     * @throws Exception
+     * @throws
      */
     public function getAttribute(string $name)
     {
@@ -562,7 +562,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
 
     /**
      * @return Relation|null
-     * @throws ReflectionException
+     * @throws
      */
     public function getRelation(): ?Relation
     {
@@ -573,7 +573,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
     /**
      * @param $attribute
      * @return bool
-     * @throws Exception
+     * @throws
      */
     public function has($attribute): bool
     {
@@ -582,7 +582,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
 
     /**ƒ
      * @return string
-     * @throws Exception
+     * @throws
      */
     public function getTable(): string
     {
@@ -613,7 +613,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
     /**
      * @param self $model
      * @return bool
-     * @throws Exception
+     * @throws
      */
     public function beforeSave(self $model): bool
     {
@@ -633,7 +633,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
     /**
      * @param $name
      * @param $value
-     * @throws Exception
+     * @throws
      */
     public function __set($name, $value): void
     {
@@ -652,7 +652,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
     /**
      * @param $name
      * @return mixed
-     * @throws Exception
+     * @throws
      */
     public function __get($name): mixed
     {
@@ -669,7 +669,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
      * @param $name
      * @param null $value
      * @return mixed
-     * @throws Exception
+     * @throws
      */
     protected function withPropertyOverride($name, $value = null): mixed
     {
@@ -720,7 +720,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
     /**
      * @param mixed $offset
      * @return bool
-     * @throws Exception
+     * @throws
      */
     public function offsetExists(mixed $offset): bool
     {
@@ -730,7 +730,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
     /**
      * @param mixed $offset
      * @return mixed
-     * @throws Exception
+     * @throws
      */
     public function offsetGet(mixed $offset): mixed
     {
@@ -740,18 +740,18 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
     /**
      * @param mixed $offset
      * @param mixed $value
-     * @throws Exception
+     * @throws
      */
-    #[ReturnTypeWillChange] public function offsetSet(mixed $offset, mixed $value)
+    #[ReturnTypeWillChange] public function offsetSet(mixed $offset, mixed $value): void
     {
         $this->__set($offset, $value);
     }
 
     /**
      * @param mixed $offset
-     * @throws Exception
+     * @throws
      */
-    #[ReturnTypeWillChange] public function offsetUnset(mixed $offset)
+    #[ReturnTypeWillChange] public function offsetUnset(mixed $offset): void
     {
         if (!isset($this->_attributes[$offset]) && !isset($this->_oldAttributes[$offset])) {
             return;
@@ -772,7 +772,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
 
     /**
      * @return Columns
-     * @throws Exception
+     * @throws
      */
     public function getColumns(): Columns
     {

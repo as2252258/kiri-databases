@@ -22,13 +22,13 @@ use Kiri;
 class HasMany extends HasBase
 {
 
-	/**
-	 * @return array|null|Collection
-	 * @throws Exception
-	 */
-	public function get(): array|Collection|null
-	{
-		$relation = Kiri::getDi()->get(Relation::class);
-		return $relation->get($this->name);
-	}
+    /**
+     * @return array|null|Collection
+     * @throws
+     */
+    public function get(): array|Collection|null
+    {
+        $relation = Kiri::getDi()->get(Relation::class);
+        return $relation->get($this->name);
+    }
 }

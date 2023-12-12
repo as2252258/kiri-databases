@@ -11,8 +11,6 @@ namespace Database;
 
 
 use Exception;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
 
 defined('SAVE_FAIL') or define('SAVE_FAIL', 3227);
 defined('FIND_OR_CREATE_MESSAGE') or define('FIND_OR_CREATE_MESSAGE', 'Create a new model, but the data cannot be empty.');
@@ -32,7 +30,7 @@ class Model extends Base\Model
      * @param string $column
      * @param int|float $value
      * @return ModelInterface|false
-     * @throws Exception
+     * @throws
      */
     public function increment(string $column, int|float $value): bool|ModelInterface
     {
@@ -48,7 +46,7 @@ class Model extends Base\Model
      * @param string $column
      * @param int|float $value
      * @return ModelInterface|false
-     * @throws Exception
+     * @throws
      */
     public function decrement(string $column, int|float $value): bool|ModelInterface
     {
@@ -63,7 +61,7 @@ class Model extends Base\Model
     /**
      * @param array $columns
      * @return ModelInterface|false
-     * @throws Exception
+     * @throws
      */
     public function increments(array $columns): bool|static
     {
@@ -80,7 +78,7 @@ class Model extends Base\Model
     /**
      * @param array $columns
      * @return ModelInterface|false
-     * @throws Exception
+     * @throws
      */
     public function decrements(array $columns): bool|static
     {
@@ -97,8 +95,7 @@ class Model extends Base\Model
      * @param array $condition
      * @param array $attributes
      * @return bool|static
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
+     * @throws
      */
     public static function findOrCreate(array $condition, array $attributes): bool|static
     {
@@ -117,8 +114,7 @@ class Model extends Base\Model
      * @param array $condition
      * @param array $attributes
      * @return bool|static
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
+     * @throws
      */
     public static function createOrUpdate(array $condition, array $attributes = []): bool|static
     {
@@ -138,14 +134,14 @@ class Model extends Base\Model
      * @param $columns
      * @param $action
      * @return array|bool|int|string|null
-     * @throws Exception
+     * @throws
      */
     private function mathematics($columns, $action): int|bool|array|string|null
     {
         $condition = [$this->getPrimary() => $this->getPrimaryValue()];
 
         $activeQuery = static::query()->where($condition);
-        $create = SqlBuilder::builder($activeQuery)->mathematics($columns, $action);
+        $create      = SqlBuilder::builder($activeQuery)->mathematics($columns, $action);
         if (is_bool($create)) {
             return false;
         }
@@ -156,7 +152,7 @@ class Model extends Base\Model
     /**
      * @param array $params
      * @return ModelInterface|bool
-     * @throws Exception
+     * @throws
      */
     public function update(array $params): static|bool
     {
@@ -175,7 +171,7 @@ class Model extends Base\Model
     /**
      * @param array $data
      * @return bool
-     * @throws Exception
+     * @throws
      */
     public static function inserts(array $data): bool
     {
@@ -187,7 +183,7 @@ class Model extends Base\Model
 
     /**
      * @return bool
-     * @throws Exception
+     * @throws
      */
     public function delete(): bool
     {
@@ -209,7 +205,7 @@ class Model extends Base\Model
      * @param array $attributes
      *
      * @return bool
-     * @throws Exception
+     * @throws
      */
     public static function updateAll(mixed $condition, array $attributes = []): bool
     {
@@ -220,7 +216,7 @@ class Model extends Base\Model
     /**
      * @param $condition
      * @return array|Collection
-     * @throws Exception
+     * @throws
      */
     public static function get($condition): Collection|array
     {
@@ -233,7 +229,7 @@ class Model extends Base\Model
      * @param array $attributes
      *
      * @return array|Collection
-     * @throws Exception
+     * @throws
      */
     public static function findAll($condition, array $attributes = []): array|Collection
     {
@@ -247,7 +243,7 @@ class Model extends Base\Model
 
     /**
      * @return array
-     * @throws Exception
+     * @throws
      */
     public function toArray(): array
     {
@@ -286,7 +282,7 @@ class Model extends Base\Model
      * @param $foreignKey
      * @param $localKey
      * @return string
-     * @throws Exception
+     * @throws
      */
     private function _hasBase(ModelInterface|string $modelName, $foreignKey, $localKey): string
     {
@@ -309,7 +305,7 @@ class Model extends Base\Model
      * @param $foreignKey
      * @param $localKey
      * @return HasOne|ActiveQuery
-     * @throws Exception
+     * @throws
      */
     public function hasOne(ModelInterface|string $modelName, $foreignKey, $localKey): HasOne|ActiveQuery
     {
@@ -322,7 +318,7 @@ class Model extends Base\Model
      * @param $foreignKey
      * @param $localKey
      * @return ActiveQuery|HasCount
-     * @throws Exception
+     * @throws
      */
     public function hasCount(ModelInterface|string $modelName, $foreignKey, $localKey): ActiveQuery|HasCount
     {
@@ -335,7 +331,7 @@ class Model extends Base\Model
      * @param $foreignKey
      * @param $localKey
      * @return ActiveQuery|HasMany
-     * @throws Exception
+     * @throws
      */
     public function hasMany(ModelInterface|string $modelName, $foreignKey, $localKey): ActiveQuery|HasMany
     {
@@ -347,7 +343,7 @@ class Model extends Base\Model
      * @param $foreignKey
      * @param $localKey
      * @return ActiveQuery|HasMany
-     * @throws Exception
+     * @throws
      */
     public function hasIn(ModelInterface|string $modelName, $foreignKey, $localKey): ActiveQuery|HasMany
     {

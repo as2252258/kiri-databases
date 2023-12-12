@@ -13,7 +13,6 @@ namespace Database;
 use Exception;
 use Kiri\Abstracts\Component;
 use Kiri\Di\Container;
-use Kiri\Exception\ConfigException;
 use PDO;
 use PDOStatement;
 use Throwable;
@@ -32,7 +31,7 @@ class Command extends Component
 
     /**
      * @param array $params
-     * @throws Exception
+     * @throws
      */
     public function __construct(array $params = [])
     {
@@ -43,7 +42,7 @@ class Command extends Component
 
     /**
      * @return int|bool
-     * @throws Exception
+     * @throws
      */
     public function incrOrDecr(): int|bool
     {
@@ -52,7 +51,7 @@ class Command extends Component
 
     /**
      * @return int|bool
-     * @throws Exception
+     * @throws
      */
     public function save(): int|bool
     {
@@ -62,7 +61,7 @@ class Command extends Component
 
     /**
      * @return bool|array
-     * @throws Exception
+     * @throws
      */
     public function all(): bool|array
     {
@@ -71,7 +70,7 @@ class Command extends Component
 
     /**
      * @return bool|array|null
-     * @throws Exception
+     * @throws
      */
     public function one(): null|bool|array
     {
@@ -80,7 +79,7 @@ class Command extends Component
 
     /**
      * @return mixed
-     * @throws Exception
+     * @throws
      */
     public function fetchColumn(): mixed
     {
@@ -91,7 +90,7 @@ class Command extends Component
     /**
      * @param string $method
      * @return mixed
-     * @throws Exception
+     * @throws
      */
     protected function search(string $method): mixed
     {
@@ -117,7 +116,7 @@ class Command extends Component
 
     /**
      * @return int|bool
-     * @throws Exception
+     * @throws
      */
     public function flush(): int|bool
     {
@@ -127,7 +126,7 @@ class Command extends Component
 
     /**
      * @return PDOStatement|int
-     * @throws Exception
+     * @throws
      */
     private function _prepare(): bool|int
     {
@@ -186,7 +185,7 @@ class Command extends Component
 
     /**
      * @return int|bool
-     * @throws Exception
+     * @throws
      */
     public function delete(): int|bool
     {
@@ -195,7 +194,7 @@ class Command extends Component
 
     /**
      * @return int|bool
-     * @throws Exception
+     * @throws
      */
     public function exec(): int|bool
     {
@@ -217,7 +216,7 @@ class Command extends Component
     /**
      * @param $sql
      * @return $this
-     * @throws Exception
+     * @throws
      */
     public function setSql($sql): static
     {

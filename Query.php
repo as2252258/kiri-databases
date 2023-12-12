@@ -11,7 +11,6 @@ namespace Database;
 
 
 use Database\Traits\QueryTrait;
-use Exception;
 
 /**
  * Class Query
@@ -20,35 +19,35 @@ use Exception;
 class Query implements ISqlBuilder
 {
 
-	use QueryTrait;
+    use QueryTrait;
 
 
-	/**
-	 * @throws Exception
-	 */
-	public function __construct()
-	{
-		$this->builder = SqlBuilder::builder($this);
-	}
+    /**
+     * @throws
+     */
+    public function __construct()
+    {
+        $this->builder = SqlBuilder::builder($this);
+    }
 
-	/**
-	 * @return string
-	 * @throws Exception
-	 */
-	public function getSql(): string
-	{
-		return $this->builder->get();
-	}
+    /**
+     * @return string
+     * @throws
+     */
+    public function getSql(): string
+    {
+        return $this->builder->get();
+    }
 
 
-	/**
-	 * @return string
-	 * @throws Exception
-	 */
-	public function getCondition(): string
-	{
-		return $this->builder->getCondition();
-	}
+    /**
+     * @return string
+     * @throws
+     */
+    public function getCondition(): string
+    {
+        return $this->builder->getCondition();
+    }
 
 
 }

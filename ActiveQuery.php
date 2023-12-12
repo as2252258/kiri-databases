@@ -143,7 +143,7 @@ class ActiveQuery extends Component implements ISqlBuilder
 
     /**
      * @return ModelInterface|array|null
-     * @throws Exception
+     * @throws
      */
     public function first(): ModelInterface|null|array
     {
@@ -168,7 +168,7 @@ class ActiveQuery extends Component implements ISqlBuilder
 
     /**
      * @return Collection
-     * @throws Exception
+     * @throws
      */
     public function get(): Collection
     {
@@ -242,7 +242,7 @@ class ActiveQuery extends Component implements ISqlBuilder
     /**
      * @param $data
      * @return ModelInterface|array
-     * @throws Exception
+     * @throws
      */
     public function populate($data): ModelInterface|array
     {
@@ -316,7 +316,7 @@ class ActiveQuery extends Component implements ISqlBuilder
     /**
      * @param bool $getSql
      * @return bool|string
-     * @throws Exception
+     * @throws
      */
     public function delete(bool $getSql = FALSE): bool|string
     {

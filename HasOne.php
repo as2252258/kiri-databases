@@ -20,14 +20,14 @@ use Kiri;
  */
 class HasOne extends HasBase
 {
-	
-	/**
-	 * @return array|null|ModelInterface
-	 * @throws Exception
-	 */
-	public function get(): array|ModelInterface|null
-	{
-		$relation = Kiri::getDi()->get(Relation::class);
-		return $relation->first($this->name);
-	}
+
+    /**
+     * @return array|null|ModelInterface
+     * @throws
+     */
+    public function get(): array|ModelInterface|null
+    {
+        $relation = Kiri::getDi()->get(Relation::class);
+        return $relation->first($this->name);
+    }
 }

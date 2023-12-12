@@ -31,7 +31,6 @@ class ImplodeCommand extends Command
     public string $description = 'php kiri.php db:implode --database users /Users/admin/snowflake-bi/test.sql';
 
 
-
     /**
      * @var Channel
      */
@@ -43,7 +42,7 @@ class ImplodeCommand extends Command
     /**
      *
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('db:implode')
              ->addArgument('path', InputArgument::REQUIRED, "save to path", null)
@@ -57,7 +56,7 @@ class ImplodeCommand extends Command
      * @param InputInterface $input
      * @param OutputInterface $output
      * @return int
-     * @throws Exception
+     * @throws
      */
     public function execute(InputInterface $input, OutputInterface $output): int
     {
