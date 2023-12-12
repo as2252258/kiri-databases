@@ -235,6 +235,9 @@ class Connection extends Component
     {
         $this->storey--;
         if ($this->storey == 0) {
+            if (!Context::exists($this->cds)) {
+                return;
+            }
             $pdo = $this->getTransactionClient();
             if ($pdo->inTransaction()) {
                 $pdo->rollback();
@@ -251,6 +254,9 @@ class Connection extends Component
     {
         $this->storey--;
         if ($this->storey == 0) {
+            if (!Context::exists($this->cds)) {
+                return;
+            }
             $pdo = $this->getTransactionClient();
             if ($pdo->inTransaction()) {
                 $pdo->commit();
