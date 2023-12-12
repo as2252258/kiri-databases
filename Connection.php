@@ -193,11 +193,8 @@ class Connection extends Component
      */
     public function beginTransaction(): static
     {
-        if ($this->storey == 0) {
-            $pdo = $this->getTransactionClient();
-            if (!$pdo->inTransaction()) {
-                $pdo->beginTransaction();
-            }
+        if ($this->storey < 0 ) {
+            $this->storey = 0;
         }
         $this->storey++;
         return $this;
@@ -214,9 +211,9 @@ class Connection extends Component
         if ($pdo === null) {
             /** @var PDO $pdo */
             $pdo = Context::set($this->cds, $this->getNormalClientHealth());
-            if ($this->storey > 0 && !$pdo->inTransaction()) {
-                $pdo->beginTransaction();
-            }
+        }
+        if ($this->storey > 0 && !$pdo->inTransaction()) {
+            $pdo->beginTransaction();
         }
         return $pdo;
     }
