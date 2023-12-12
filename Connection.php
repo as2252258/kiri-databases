@@ -78,7 +78,7 @@ class Connection extends Component
 
     /**
      * @return void
-     * @throws Exception
+     * @throws
      */
     public function init(): void
     {
@@ -105,7 +105,7 @@ class Connection extends Component
     /**
      * @param Pool $pool
      * @return void
-     * @throws Exception
+     * @throws
      */
     protected function checkClientHealth(Pool $pool): void
     {
@@ -129,7 +129,7 @@ class Connection extends Component
     /**
      * @param Pool $pool
      * @return PDO|bool
-     * @throws Exception
+     * @throws
      */
     protected function validator(Pool $pool): PDO|bool
     {
@@ -146,9 +146,7 @@ class Connection extends Component
 
     /**
      * @return mixed
-     * @throws ReflectionException
-     * @throws NotFindClassException
-     * @throws Exception
+     * @throws
      */
     public function getSchema(): Schema
     {
@@ -161,7 +159,7 @@ class Connection extends Component
 
     /**
      * @return PDO
-     * @throws Exception
+     * @throws
      */
     public function getConnection(): PDO
     {
@@ -175,7 +173,7 @@ class Connection extends Component
 
     /**
      * @return PDO
-     * @throws Exception
+     * @throws
      */
     protected function getNormalClientHealth(): PDO
     {
@@ -189,11 +187,11 @@ class Connection extends Component
 
     /**
      * @return $this
-     * @throws Exception
+     * @throws
      */
     public function beginTransaction(): static
     {
-        if ($this->storey < 0 ) {
+        if ($this->storey < 0) {
             $this->storey = 0;
         }
         $this->storey++;
@@ -203,7 +201,7 @@ class Connection extends Component
 
     /**
      * @return PDO
-     * @throws Exception
+     * @throws
      */
     public function getTransactionClient(): PDO
     {
@@ -221,7 +219,7 @@ class Connection extends Component
 
     /**
      * @return bool
-     * @throws Exception
+     * @throws
      */
     public function inTransaction(): bool
     {
@@ -230,7 +228,7 @@ class Connection extends Component
 
 
     /**
-     * @throws Exception
+     * @throws
      * 事务回滚
      */
     public function rollback(): void
@@ -246,7 +244,7 @@ class Connection extends Component
     }
 
     /**
-     * @throws Exception
+     * @throws
      * 事务提交
      */
     public function commit(): void
@@ -264,7 +262,7 @@ class Connection extends Component
 
     /**
      * @return void
-     * @throws Exception
+     * @throws
      */
     public function clear(): void
     {
@@ -316,7 +314,7 @@ class Connection extends Component
 
 
     /**
-     * @throws Exception
+     * @throws
      */
     public function disconnect(): void
     {
