@@ -87,10 +87,7 @@ class Db extends QueryTrait implements ISqlBuilder
      */
     public static function table(string $table, string $database = 'db'): Db|static
     {
-        $connection             = new Db();
-        $connection->connection = current(\config('databases.connections'));
-        $connection->from($table);
-        return $connection;
+        return self::connect($database)->from($table);
     }
 
 
@@ -109,30 +106,11 @@ class Db extends QueryTrait implements ISqlBuilder
 
 
     /**
-     * @return array|bool
-     * @throws
-     */
-    public function get(): array|bool
-    {
-        return $this->connection->createCommand(SqlBuilder::builder($this)->all())->all();
-    }
-
-    /**
-     * @return array|bool|null
-     * @throws
-     */
-    public function first(): array|bool|null
-    {
-        return $this->connection->createCommand(SqlBuilder::builder($this)->all())->one();
-    }
-
-    /**
      * @return int
      */
     public function count(): int
     {
-        $count = $this->connection->createCommand(SqlBuilder::builder($this)->count())->one();
-        return current($count);
+        return $this->connection->createCommand(SqlBuilder::builder($this)->count())->rowCount();
     }
 
     /**
@@ -140,8 +118,7 @@ class Db extends QueryTrait implements ISqlBuilder
      */
     public function exists(): bool
     {
-        $fetchColumn = $this->connection->createCommand(SqlBuilder::builder($this)->one())->fetchColumn();
-        return !empty($fetchColumn);
+        return $this->connection->createCommand(SqlBuilder::builder($this)->one())->rowCount() > 0;
     }
 
     /**
@@ -150,7 +127,7 @@ class Db extends QueryTrait implements ISqlBuilder
      * @return array|bool|int|string|null
      * @throws
      */
-    public function query(string $sql, array $attributes = []): int|bool|array|string|null
+    public function fetchAll(string $sql, array $attributes = []): int|bool|array|string|null
     {
         return $this->connection->createCommand($sql, $attributes)->all();
     }
@@ -160,7 +137,7 @@ class Db extends QueryTrait implements ISqlBuilder
      * @param array $attributes
      * @return array|null
      */
-    public function one(string $sql, array $attributes = []): ?array
+    public function fetch(string $sql, array $attributes = []): ?array
     {
         return $this->connection->createCommand($sql, $attributes)->one();
     }
@@ -188,7 +165,6 @@ class Db extends QueryTrait implements ISqlBuilder
 
         $table = ['	const TABLE = \'select * from %s  where REFERENCED_TABLE_NAME=%s\';'];
         return $connection->createCommand((new Query())
-            ->select('*')
             ->from('INFORMATION_SCHEMA.KEY_COLUMN_USAGE')
             ->where(['REFERENCED_TABLE_NAME' => $table])
             ->build())->one();

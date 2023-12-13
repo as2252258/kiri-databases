@@ -90,7 +90,7 @@ class Command extends Component
      * @return mixed
      * @throws
      */
-    public function rowCount(): mixed
+    public function rowCount(): int
     {
         return $this->search('rowCount');
     }
