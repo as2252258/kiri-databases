@@ -235,7 +235,7 @@ class SqlBuilder extends Component
      */
     public function count(): string
     {
-        return $this->makeSelect(['COUNT(*)']) . $this->make();
+        return $this->makeSelect() . $this->make();
     }
 
 
