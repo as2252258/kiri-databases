@@ -235,7 +235,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
      * @return Model|null
      * @throws
      */
-    public static function findOne(int|string|array $param, $db = NULL): ?static
+    public static function findOne(int|string|array $param, $db = NULL): static|null|bool
     {
         $model = static::instance();
 
