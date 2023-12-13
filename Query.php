@@ -19,13 +19,6 @@ use Database\Traits\QueryTrait;
 class Query extends QueryTrait implements ISqlBuilder
 {
 
-
-    /**
-     * @var SqlBuilder
-     */
-    protected SqlBuilder $builder;
-
-
     /**
      * @throws
      */

@@ -16,6 +16,7 @@ use Database\Base\ActiveQueryInterface;
 use Database\ISqlBuilder;
 use Database\ModelInterface;
 use Database\Query;
+use Database\SqlBuilder;
 use Exception;
 use Kiri;
 use Kiri\Abstracts\Component;
@@ -26,17 +27,18 @@ use Kiri\Abstracts\Component;
  */
 class QueryTrait extends Component implements ActiveQueryInterface, ISqlBuilder
 {
-    protected array  $where  = [];
-    protected array  $select = [];
-    protected array  $join   = [];
-    protected array  $order  = [];
-    protected int    $offset = 0;
-    protected int    $limit  = 0;
-    protected string $group  = '';
-    protected string $from   = '';
-    protected string $alias  = 't1';
-    protected array  $filter = [];
-    protected bool   $lock   = false;
+    protected array      $where  = [];
+    protected array      $select = [];
+    protected array      $join   = [];
+    protected array      $order  = [];
+    protected int        $offset = 0;
+    protected int        $limit  = 0;
+    protected string     $group  = '';
+    protected string     $from   = '';
+    protected string     $alias  = 't1';
+    protected array      $filter = [];
+    protected bool       $lock   = false;
+    protected SqlBuilder $builder;
 
 
     /**

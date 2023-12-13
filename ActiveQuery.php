@@ -20,24 +20,10 @@ class ActiveQuery extends QueryTrait implements ISqlBuilder
 {
 
 
-    /** @var bool */
-    public bool $asArray = FALSE;
-
-    /** @var bool */
-    public bool $useCache = FALSE;
-
-    /**
-     * @var Connection|null
-     */
-    public ?Connection $db = NULL;
-
-
-    /**
-     * @var array
-     * 参数绑定
-     */
-    public array    $attributes = [];
-    protected mixed $_mock      = null;
+    public bool        $asArray    = FALSE;
+    public ?Connection $db         = NULL;
+    public array       $attributes = [];
+    protected mixed    $_mock      = null;
 
 
     /**
