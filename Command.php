@@ -133,7 +133,7 @@ class Command extends Component
 
             $errorMsg = $throwable->getMessage() . PHP_EOL . '                 Sql: ' . $this->sql . '.' . json_encode($this->params);
 
-            return $this->getLogger()->failure($errorMsg, 'mysql');
+            return $this->getLogger()->failure($errorMsg . PHP_EOL, 'mysql');
         } finally {
             $this->connection->release($client);
         }
@@ -174,7 +174,7 @@ class Command extends Component
 
             $errorMsg = $throwable->getMessage() . PHP_EOL . '                 Sql: ' . $this->sql . '.' . json_encode($this->params);
 
-            return $this->getLogger()->failure($errorMsg, 'mysql');
+            return $this->getLogger()->failure($errorMsg . PHP_EOL, 'mysql');
         } finally {
             $this->connection->release($client);
         }
