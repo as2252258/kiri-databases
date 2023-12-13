@@ -131,7 +131,7 @@ class Command extends Component
         } catch (Throwable $throwable) {
             if ($this->isRefresh($throwable)) return $this->search($method);
 
-            $errorMsg = $throwable->getMessage() . PHP_EOL . '                      Exec: ' . $this->sql . '.' . json_encode($this->params);
+            $errorMsg = $throwable->getMessage() . PHP_EOL . '                 Sql: ' . $this->sql . '.' . json_encode($this->params);
 
             return $this->getLogger()->failure($errorMsg, 'mysql');
         } finally {
@@ -172,7 +172,7 @@ class Command extends Component
         } catch (Throwable $throwable) {
             if ($this->isRefresh($throwable)) return $this->_prepare();
 
-            $errorMsg = $throwable->getMessage() . PHP_EOL . '                      Exec: ' . $this->sql . '.' . json_encode($this->params);
+            $errorMsg = $throwable->getMessage() . PHP_EOL . '                 Sql: ' . $this->sql . '.' . json_encode($this->params);
 
             return $this->getLogger()->failure($errorMsg, 'mysql');
         } finally {
