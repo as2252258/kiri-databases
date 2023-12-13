@@ -235,7 +235,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
      * @return Model|null
      * @throws
      */
-    public static function findOne(int|string|array $param, $db = NULL): static|null|bool
+    public static function findOne(int|string|array $param, $db = NULL): ?static
     {
         $model = static::instance();
 
@@ -248,7 +248,11 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
         } else {
             $query->whereRaw($param);
         }
-        return $query->first();
+        $data = $query->first();
+        if ($data === false) {
+            throw new Exception($model->getLastError());
+        }
+        return $data;
     }
 
 
