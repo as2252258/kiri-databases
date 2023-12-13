@@ -119,7 +119,7 @@ class SqlBuilder extends Component
      * @return array
      * @throws
      */
-    public function insert(array $attributes, bool $isBatch = false): array
+    public function insert(array $attributes, bool $isBatch = false): string
     {
         $update = 'INSERT INTO ' . $this->query->from;
         if ($isBatch === false) {
@@ -133,7 +133,7 @@ class SqlBuilder extends Component
 
             $keys[] = implode(',', $_keys);
         }
-        return [$update . '(' . implode('),(', $keys) . ')', $this->query->params];
+        return $update . '(' . implode('),(', $keys) . ')';
     }
 
 
