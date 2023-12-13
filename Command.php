@@ -121,6 +121,8 @@ class Command extends Component
                 throw new Exception('(' . $prepare->errorInfo()[0] . ')' . $client->errorInfo()[2]);
             }
 
+            $prepare->execute($this->params);
+
             $result = $method == 'rowCount' ? $prepare->rowCount() : $prepare->{$method}(PDO::FETCH_ASSOC);
             $prepare->closeCursor();
 
