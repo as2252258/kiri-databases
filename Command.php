@@ -131,7 +131,9 @@ class Command extends Component
         } catch (Throwable $throwable) {
             if ($this->isRefresh($throwable)) return $this->search($method);
 
-            return $this->println($throwable)->failure($throwable->getMessage(), 'mysql');
+            $errorMsg = $this->sql . '.' . json_encode($this->params) . PHP_EOL . $throwable->getMessage();
+
+            return $this->getLogger()->failure($errorMsg, 'mysql');
         } finally {
             $this->connection->release($client);
         }
@@ -170,23 +172,12 @@ class Command extends Component
         } catch (Throwable $throwable) {
             if ($this->isRefresh($throwable)) return $this->_prepare();
 
-            return $this->println($throwable)->failure($throwable->getMessage(), 'mysql');
+            $errorMsg = $this->sql . '.' . json_encode($this->params) . PHP_EOL . $throwable->getMessage();
+
+            return $this->getLogger()->failure($errorMsg, 'mysql');
         } finally {
             $this->connection->release($client);
         }
-    }
-
-
-    /**
-     * @param Throwable $throwable
-     * @return StdoutLogger
-     */
-    protected function println(Throwable $throwable): StdoutLogger
-    {
-        $logger = $this->getLogger();
-        $error  = $this->sql . '.' . json_encode($this->params) . PHP_EOL . throwable($throwable);
-        file_put_contents('php://output', '[' . date('Y-m-d H:i:s') . '] ' . $error, FILE_APPEND);
-        return $logger;
     }
 
 
