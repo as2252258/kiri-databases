@@ -317,7 +317,10 @@ class SqlBuilder extends Component
 
     private function makeLimit(): string
     {
-        return ' LIMIT ' . $this->query->offset . ',' . $this->query->limit;
+        if ($this->query->offset >= 0 && $this->query->limit >= 1) {
+            return ' LIMIT ' . $this->query->offset . ',' . $this->query->limit;
+        }
+        return '';
     }
 
 

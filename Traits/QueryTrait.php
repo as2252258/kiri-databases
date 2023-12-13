@@ -31,8 +31,8 @@ abstract class QueryTrait extends Component implements ActiveQueryInterface, ISq
     public array         $select = ['*'];
     public array         $join   = [];
     public array         $order  = [];
-    public int           $offset = 0;
-    public int           $limit  = 0;
+    public int           $offset = -1;
+    public int           $limit  = -1;
     public string        $group  = '';
     public string        $from   = '';
     public string        $alias  = 't1';
