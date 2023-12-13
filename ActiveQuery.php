@@ -178,11 +178,10 @@ class ActiveQuery extends QueryTrait implements ISqlBuilder
     /**
      * @param array $data
      * @return bool
-     * @throws
      */
     public function insert(array $data): bool
     {
-        [$sql, $params] = $this->builder->insert($data, TRUE);
+        [$sql, $params] = $this->builder->insert($data, isset($data[0]));
 
         return (bool)$this->buildCommand($sql, $params)->exec();
     }
