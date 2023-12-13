@@ -13,6 +13,7 @@ namespace Database;
 use Exception;
 use Kiri\Abstracts\Component;
 use Kiri\Di\Container;
+use Kiri\Error\StdoutLogger;
 use PDO;
 use Throwable;
 
@@ -130,10 +131,7 @@ class Command extends Component
         } catch (Throwable $throwable) {
             if ($this->isRefresh($throwable)) return $this->search($method);
 
-            $logger = $this->getLogger();
-
-            $logger->error($this->sql . '.' . json_encode($this->params) . PHP_EOL . throwable($throwable));
-            return $logger->failure($throwable->getMessage(), 'mysql');
+            return $this->println($throwable)->failure($throwable->getMessage(), 'mysql');
         } finally {
             $this->connection->release($client);
         }
@@ -172,13 +170,23 @@ class Command extends Component
         } catch (Throwable $throwable) {
             if ($this->isRefresh($throwable)) return $this->_prepare();
 
-            $logger = $this->getLogger();
-
-            $logger->error($this->sql . '.' . json_encode($this->params) . PHP_EOL . throwable($throwable));
-            return $logger->failure($throwable->getMessage(), 'mysql');
+            return $this->println($throwable)->failure($throwable->getMessage(), 'mysql');
         } finally {
             $this->connection->release($client);
         }
+    }
+
+
+    /**
+     * @param Throwable $throwable
+     * @return StdoutLogger
+     */
+    protected function println(Throwable $throwable): StdoutLogger
+    {
+        $logger = $this->getLogger();
+        $error  = $this->sql . '.' . json_encode($this->params) . PHP_EOL . throwable($throwable);
+        file_put_contents('php://output', '[' . date('Y-m-d H:i:s') . '] ' . $error . PHP_EOL, FILE_APPEND);
+        return $logger;
     }
 
 
