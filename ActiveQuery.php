@@ -57,7 +57,7 @@ class ActiveQuery extends QueryTrait implements ISqlBuilder
         if (is_array($data)) {
             return $this->populate($data);
         }
-        return $data;
+        return null;
     }
 
     /**
