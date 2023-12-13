@@ -185,7 +185,7 @@ class Command extends Component
     {
         $logger = $this->getLogger();
         $error  = $this->sql . '.' . json_encode($this->params) . PHP_EOL . throwable($throwable);
-        file_put_contents('php://output', '[' . date('Y-m-d H:i:s') . '] ' . $error . PHP_EOL, FILE_APPEND);
+        file_put_contents('php://output', '[' . date('Y-m-d H:i:s') . '] ' . $error, FILE_APPEND);
         return $logger;
     }
 
