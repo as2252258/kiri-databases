@@ -131,7 +131,7 @@ class Command extends Component
         } catch (Throwable $throwable) {
             if ($this->isRefresh($throwable)) return $this->search($method);
 
-            $errorMsg = $this->sql . '.' . json_encode($this->params) . PHP_EOL . $throwable->getMessage();
+            $errorMsg = $throwable->getMessage() . PHP_EOL . '                      Exec: ' . $this->sql . '.' . json_encode($this->params);
 
             return $this->getLogger()->failure($errorMsg, 'mysql');
         } finally {
