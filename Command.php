@@ -14,7 +14,6 @@ use Exception;
 use Kiri\Abstracts\Component;
 use Kiri\Di\Container;
 use PDO;
-use PDOStatement;
 use Throwable;
 
 /**
@@ -27,7 +26,6 @@ class Command extends Component
     public Connection $connection;
     public ?string    $sql    = '';
     public array      $params = [];
-
 
     /**
      * @param array $params
@@ -123,13 +121,10 @@ class Command extends Component
                 throw new Exception('(' . $prepare->errorInfo()[0] . ')' . $client->errorInfo()[2]);
             }
 
-            $prepare->execute($this->params);
+            $result = $method == 'rowCount' ? $prepare->rowCount() : $prepare->{$method}(PDO::FETCH_ASSOC);
             $prepare->closeCursor();
 
-            if ($method == 'rowCount') {
-                return $prepare->rowCount();
-            }
-            return $prepare->{$method}(PDO::FETCH_ASSOC);
+            return $result;
         } catch (Throwable $throwable) {
             if ($this->isRefresh($throwable)) {
                 return $this->search($method);
