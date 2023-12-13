@@ -128,10 +128,12 @@ class Command extends Component
 
             return $result;
         } catch (Throwable $throwable) {
-            if ($this->isRefresh($throwable)) {
-                return $this->search($method);
-            }
-            return $this->getLogger()->failure(throwable($throwable), 'mysql');
+            if ($this->isRefresh($throwable)) return $this->search($method);
+
+            $logger = $this->getLogger();
+
+            $logger->error($this->sql . '.' . json_encode($this->params) . PHP_EOL . throwable($throwable));
+            return $logger->failure($throwable->getMessage(), 'mysql');
         } finally {
             $this->connection->release($client);
         }
@@ -168,10 +170,12 @@ class Command extends Component
 
             return $result == 0 ? $prepare->rowCount() : (int)$result;
         } catch (Throwable $throwable) {
-            if ($this->isRefresh($throwable)) {
-                return $this->_prepare();
-            }
-            return $this->getLogger()->failure(throwable($throwable), 'mysql');
+            if ($this->isRefresh($throwable)) return $this->_prepare();
+
+            $logger = $this->getLogger();
+
+            $logger->error($this->sql . '.' . json_encode($this->params) . PHP_EOL . throwable($throwable));
+            return $logger->failure($throwable->getMessage(), 'mysql');
         } finally {
             $this->connection->release($client);
         }
