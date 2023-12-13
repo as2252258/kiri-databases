@@ -167,7 +167,7 @@ class SqlBuilder extends Component
     {
         $keys = [];
         foreach ($attributes as $key => $value) {
-            if ($isInsert !== true) {
+            if ($isInsert === true) {
                 $keys[] = '?';
                 $this->query->pushParam($value);
             } else {
