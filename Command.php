@@ -41,21 +41,21 @@ class Command extends Component
 
 
     /**
-     * @return int|bool
+     * @return bool
      * @throws
      */
-    public function incrOrDecr(): int|bool
+    public function incrOrDecr(): bool
     {
-        return $this->_prepare();
+        return (bool)$this->_prepare();
     }
 
     /**
-     * @return int|bool
+     * @return bool
      * @throws
      */
-    public function save(): int|bool
+    public function save(): bool
     {
-        return $this->_prepare();
+        return (bool)$this->_prepare();
     }
 
 
@@ -69,10 +69,10 @@ class Command extends Component
     }
 
     /**
-     * @return bool|array|null
+     * @return array|bool|null
      * @throws
      */
-    public function one(): null|bool|array
+    public function one(): array|null|bool
     {
         return $this->search('fetch');
     }
@@ -84,6 +84,29 @@ class Command extends Component
     public function fetchColumn(): mixed
     {
         return $this->search('fetchColumn');
+    }
+
+    /**
+     * @return mixed
+     * @throws
+     */
+    public function rowCount(): mixed
+    {
+        return $this->search('rowCount');
+    }
+
+
+    /**
+     * @return bool
+     * @throws Exception
+     */
+    public function exists(): bool
+    {
+        $total = $this->search('rowCount');
+        if ($total === false) {
+            throw new Exception('Query data is has error.');
+        }
+        return $total > 0;
     }
 
 
@@ -101,13 +124,17 @@ class Command extends Component
             }
 
             $prepare->execute($this->params);
+            $prepare->closeCursor();
 
+            if ($method == 'rowCount') {
+                return $prepare->rowCount();
+            }
             return $prepare->{$method}(PDO::FETCH_ASSOC);
         } catch (Throwable $throwable) {
             if ($this->isRefresh($throwable)) {
                 return $this->search($method);
             }
-            return $this->error($throwable);
+            return $this->getLogger()->failure(throwable($throwable), 'mysql');
         } finally {
             $this->connection->release($client);
         }
@@ -115,20 +142,20 @@ class Command extends Component
 
 
     /**
-     * @return int|bool
+     * @return bool
      * @throws
      */
-    public function flush(): int|bool
+    public function flush(): bool
     {
-        return $this->_prepare();
+        return (bool)$this->_prepare();
     }
 
 
     /**
-     * @return PDOStatement|int
+     * @return int|bool
      * @throws
      */
-    private function _prepare(): bool|int
+    private function _prepare(): int|bool
     {
         $client = $this->connection->getConnection();
         try {
@@ -142,12 +169,12 @@ class Command extends Component
 
             $result = $client->lastInsertId();
 
-            return $result == 0 ? $prepare->rowCount() > 0 : (int)$result;
+            return $result == 0 ? $prepare->rowCount() : (int)$result;
         } catch (Throwable $throwable) {
             if ($this->isRefresh($throwable)) {
                 return $this->_prepare();
             }
-            return $this->error($throwable);
+            return $this->getLogger()->failure(throwable($throwable), 'mysql');
         } finally {
             $this->connection->release($client);
         }
@@ -174,27 +201,16 @@ class Command extends Component
 
 
     /**
-     * @param Throwable $throwable
      * @return bool
-     */
-    private function error(Throwable $throwable): bool
-    {
-        return trigger_print_error($this->sql . '.' . json_encode($this->params, JSON_UNESCAPED_UNICODE) . PHP_EOL . throwable($throwable), 'mysql');
-    }
-
-
-    /**
-     * @return int|bool
      * @throws
      */
-    public function delete(): int|bool
+    public function delete(): bool
     {
-        return $this->_prepare();
+        return (bool)$this->_prepare();
     }
 
     /**
      * @return int|bool
-     * @throws
      */
     public function exec(): int|bool
     {
@@ -210,17 +226,6 @@ class Command extends Component
         if (count($data) > 0) {
             $this->params = array_merge($this->params, $data);
         }
-        return $this;
-    }
-
-    /**
-     * @param $sql
-     * @return $this
-     * @throws
-     */
-    public function setSql($sql): static
-    {
-        $this->sql = $sql;
         return $this;
     }
 

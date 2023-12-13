@@ -3,6 +3,7 @@
 namespace Database\Base;
 
 use Closure;
+use Database\Collection;
 use Database\Traits\QueryTrait;
 
 interface ActiveQueryInterface
@@ -77,29 +78,29 @@ interface ActiveQueryInterface
     /**
      * @param string $tableName
      * @param string $alias
-     * @param string|array $onCondition
+     * @param array $onCondition
      * @param array $param
      * @return QueryTrait
      */
-    public function leftJoin(string $tableName, string $alias, string|array $onCondition, array $param = []): QueryTrait;
+    public function leftJoin(string $tableName, string $alias, array $onCondition, array $param = []): QueryTrait;
 
     /**
      * @param string $tableName
      * @param string $alias
-     * @param string|array $onCondition
+     * @param array $onCondition
      * @param array $param
      * @return QueryTrait
      */
-    public function rightJoin(string $tableName, string $alias, string|array $onCondition, array $param = []): QueryTrait;
+    public function rightJoin(string $tableName, string $alias, array $onCondition, array $param = []): QueryTrait;
 
     /**
      * @param string $tableName
      * @param string $alias
-     * @param string|array $onCondition
+     * @param array $onCondition
      * @param array $param
      * @return QueryTrait
      */
-    public function innerJoin(string $tableName, string $alias, string|array $onCondition, array $param = []): QueryTrait;
+    public function innerJoin(string $tableName, string $alias, array $onCondition, array $param = []): QueryTrait;
 
     /**
      * @param string $field
@@ -138,16 +139,16 @@ interface ActiveQueryInterface
     public function orderBy(string|array $column, string $sort = 'DESC'): QueryTrait;
 
     /**
-     * @param array|string $column
+     * @param array $column
      *
      * @return QueryTrait
      */
-    public function select(array|string $column = '*'): QueryTrait;
+    public function select(array $column = ['*']): QueryTrait;
 
     /**
      * @return QueryTrait
      */
-    public function orderRand(): QueryTrait;
+    public function rand(): QueryTrait;
 
     /**
      * @param array|Closure|string $conditionArray

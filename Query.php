@@ -19,25 +19,6 @@ use Database\Traits\QueryTrait;
 class Query extends QueryTrait implements ISqlBuilder
 {
 
-    /**
-     * @throws
-     */
-    public function __construct()
-    {
-        $this->builder = SqlBuilder::builder($this);
-
-        parent::__construct();
-    }
-
-    /**
-     * @return string
-     * @throws
-     */
-    public function getSql(): string
-    {
-        return $this->builder->get();
-    }
-
 
     /**
      * @return string

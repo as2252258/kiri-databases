@@ -102,14 +102,23 @@ class Model extends Base\Model
      */
     public static function findOrCreate(array $condition, array $attributes): bool|static
     {
-        return Db::Transaction(function ($condition, $attributes) {
+        $model      = static::instance();
+        $connection = $model->getConnection()->beginTransaction();
+        try {
             /** @var static $select */
-            $select = static::query()->where($condition)->first();
+            $select = $model::query()->where($condition)->first();
             if ($select === null) {
-                $select = static::populate(array_merge($condition, $attributes))->save();
+                $select = $model::populate(array_merge($condition, $attributes));
+                if (!$select->save()) {
+                    throw new Exception('保存失败: ' . $model->getLastError());
+                }
             }
+            $connection->commit();
             return $select;
-        }, $condition, $attributes);
+        } catch (\Throwable $throwable) {
+            $connection->rollback();
+            return \Kiri::getLogger()->failure($throwable);
+        }
     }
 
 
@@ -121,15 +130,24 @@ class Model extends Base\Model
      */
     public static function createOrUpdate(array $condition, array $attributes = []): bool|static
     {
-        return Db::Transaction(function ($condition, $attributes) {
+        $model      = static::instance();
+        $connection = $model->getConnection()->beginTransaction();
+        try {
             /** @var static $select */
             $select = static::query()->where($condition)->first();
             if (empty($select)) {
                 $select = static::populate($condition);
             }
             $select->attributes = $attributes;
-            return $select->save();
-        }, $condition, $attributes);
+            if (!$select->save()) {
+                throw new Exception('保存失败: ' . $model->getLastError());
+            }
+            $connection->commit();
+            return $select;
+        } catch (\Throwable $throwable) {
+            $connection->rollback();
+            return \Kiri::getLogger()->failure($throwable);
+        }
     }
 
 
@@ -157,14 +175,13 @@ class Model extends Base\Model
      */
     private function mathematics($columns, $action): int|bool|array|string|null
     {
-        $condition = [$this->getPrimary() => $this->getPrimaryValue()];
-
+        $condition   = [$this->getPrimary() => $this->getPrimaryValue()];
         $activeQuery = static::query()->where($condition);
         $create      = SqlBuilder::builder($activeQuery)->mathematics($columns, $action);
         if (is_bool($create)) {
             return false;
         }
-        return $this->getConnection()->createCommand($create, $activeQuery->attributes)->exec();
+        return $activeQuery->buildCommand($create)->exec();
     }
 
 
@@ -179,11 +196,16 @@ class Model extends Base\Model
             return FALSE;
         }
 
-        $condition = array_diff_assoc($this->_oldAttributes, $params);
-
-        $old = array_intersect_key($this->_oldAttributes, $params);
-
-        return $this->updateInternal($old, $condition, $params);
+        $condition = [];
+        $oldPrams  = [];
+        foreach ($this->_oldAttributes as $key => $attribute) {
+            if (!array_key_exists($key, $params) || $params[$key] == $attribute) {
+                $condition[$key] = $attribute;
+            } else {
+                $oldPrams[$key] = $this->_oldAttributes[$attribute];
+            }
+        }
+        return $this->updateInternal($oldPrams, $condition, $params);
     }
 
 
@@ -206,57 +228,15 @@ class Model extends Base\Model
      */
     public function delete(): bool
     {
-        if ($this->beforeDelete()) {
-            if ($this->hasPrimary()) {
-                $result = static::deleteByCondition("id = ?", [$this->getPrimaryValue()]);
-            } else {
-                $result = static::deleteByCondition($this->_attributes);
-            }
-            $this->optimize();
-            return $this->afterDelete($result);
+        if (!$this->beforeDelete()) {
+            return false;
         }
-        return false;
-    }
-
-
-    /**
-     * @param mixed $condition
-     * @param array $attributes
-     *
-     * @return bool
-     * @throws
-     */
-    public static function updateAll(mixed $condition, array $attributes = []): bool
-    {
-        return static::query()->where($condition)->update($attributes);
-    }
-
-
-    /**
-     * @param $condition
-     * @return array|Collection
-     * @throws
-     */
-    public static function get($condition): Collection|array
-    {
-        return static::query()->where($condition)->get();
-    }
-
-
-    /**
-     * @param       $condition
-     * @param array $attributes
-     *
-     * @return array|Collection
-     * @throws
-     */
-    public static function findAll($condition, array $attributes = []): array|Collection
-    {
-        $query = static::query()->where($condition);
-        if (!empty($attributes)) {
-            $query->bindParams($attributes);
+        if ($this->hasPrimary()) {
+            $result = static::deleteByCondition(['id' => $this->getPrimaryValue()]);
+        } else {
+            $result = static::deleteByCondition($this->_attributes);
         }
-        return $query->get();
+        return $this->afterDelete($result);
     }
 
 

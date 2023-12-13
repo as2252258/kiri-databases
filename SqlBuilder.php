@@ -1,12 +1,12 @@
-<?php
+<?php /** @noinspection ALL */
 
 declare(strict_types=1);
 
 namespace Database;
 
 
-use Database\Traits\Builder;
 use JetBrains\PhpStorm\Pure;
+use Kiri;
 use Kiri\Abstracts\Component;
 
 
@@ -16,9 +16,6 @@ use Kiri\Abstracts\Component;
  */
 class SqlBuilder extends Component
 {
-
-    use Builder;
-
 
     /**
      * @var ActiveQuery|Query|ISqlBuilder|null
@@ -54,7 +51,7 @@ class SqlBuilder extends Component
      */
     public function getCondition(): string
     {
-        return $this->conditionToString();
+        return $this->where($this->query->where);
     }
 
 
@@ -76,9 +73,9 @@ class SqlBuilder extends Component
      */
     public function update(array $attributes): bool|string
     {
-        $conditions              = $this->query->attributes;
-        $this->query->attributes = [];
-        $data                    = $this->__updateBuilder($this->builderParams($attributes));
+        $conditions          = $this->query->params;
+        $this->query->params = [];
+        $data                = $this->__updateBuilder($this->makeParams($attributes));
         foreach ($conditions as $condition) {
             $this->query->pushParam($condition);
         }
@@ -110,9 +107,9 @@ class SqlBuilder extends Component
     private function __updateBuilder(array $string): string|bool
     {
         if (empty($string)) {
-            return \Kiri::getLogger()->failure('None data update.');
+            return Kiri::getLogger()->failure('None data update.');
         }
-        return 'UPDATE ' . $this->query->from . ' SET ' . implode(',', $string) . $this->_prefix();
+        return 'UPDATE ' . $this->query->from . ' SET ' . implode(',', $string) . $this->make();
     }
 
 
@@ -130,15 +127,13 @@ class SqlBuilder extends Component
         }
         $update .= '(' . implode(',', $this->getFields($attributes)) . ') VALUES ';
 
-        $order = 0;
-        $keys  = [];
+        $keys = [];
         foreach ($attributes as $attribute) {
-            $_keys = $this->builderParams($attribute, true, $order);
+            $_keys = $this->makeParams($attribute, true);
 
             $keys[] = implode(',', $_keys);
-            $order++;
         }
-        return [$update . '(' . implode('),(', $keys) . ')', $this->query->attributes];
+        return [$update . '(' . implode('),(', $keys) . ')', $this->query->params];
     }
 
 
@@ -148,7 +143,7 @@ class SqlBuilder extends Component
      */
     public function delete(): string
     {
-        return 'DELETE FROM ' . $this->query->from . $this->_prefix();
+        return 'DELETE FROM ' . $this->query->from . $this->make();
     }
 
 
@@ -165,19 +160,18 @@ class SqlBuilder extends Component
     /**
      * @param array $attributes
      * @param bool $isInsert
-     * @param int $order
      * @return array[]
      * a=:b,
      */
-    private function builderParams(array $attributes, bool $isInsert = false, int $order = 0): array
+    private function makeParams(array $attributes, bool $isInsert = false): array
     {
         $keys = [];
         foreach ($attributes as $key => $value) {
-            if ($isInsert === true) {
+            if ($isInsert !== true) {
                 $keys[] = '?';
                 $this->query->pushParam($value);
             } else {
-                $keys = $this->resolveParams($key, $value, $order, $keys);
+                $keys = $this->resolveParams($key, $value, $keys);
             }
         }
         return $keys;
@@ -187,16 +181,15 @@ class SqlBuilder extends Component
     /**
      * @param string $key
      * @param mixed $value
-     * @param int $order
      * @param array $keys
      * @return array
      */
-    private function resolveParams(string $key, mixed $value, int $order, array $keys): array
+    private function resolveParams(string $key, mixed $value, array $keys): array
     {
         if (is_null($value)) {
             return $keys;
         }
-        if (is_string($value) && (str_starts_with($value, '+ ') || str_starts_with($value, '- '))) {
+        if (is_string($value) && $this->isMath($value)) {
             $keys[] = $key . '=' . $key . ' ' . $value;
         } else {
             $this->query->pushParam($value);
@@ -207,15 +200,22 @@ class SqlBuilder extends Component
 
 
     /**
+     * @param string $value
+     * @return bool
+     */
+    private function isMath(string $value): bool
+    {
+        return str_starts_with($value, '+ ') || str_starts_with($value, '- ');
+    }
+
+
+    /**
      * @return string
      * @throws
      */
     public function one(): string
     {
-        if (count($this->query->select) < 1) {
-            $this->query->select = ['*'];
-        }
-        return $this->_selectPrefix($this->query->select) . $this->_prefix() . $this->builderLimit($this->query);
+        return $this->makeSelect($this->query->select) . $this->make() . $this->makeLimit($this->query->limit(1));
     }
 
 
@@ -225,10 +225,7 @@ class SqlBuilder extends Component
      */
     public function all(): string
     {
-        if (count($this->query->select) < 1) {
-            $this->query->select = ['*'];
-        }
-        return $this->_selectPrefix($this->query->select) . $this->_prefix() . $this->builderLimit($this->query);
+        return $this->makeSelect($this->query->select) . $this->make() . $this->makeLimit($this->query);
     }
 
 
@@ -238,7 +235,7 @@ class SqlBuilder extends Component
      */
     public function count(): string
     {
-        return $this->_selectPrefix(['COUNT(*) as row_count']) . $this->_prefix();
+        return $this->_selectPrefix(['COUNT(*)']) . $this->make();
     }
 
 
@@ -256,18 +253,11 @@ class SqlBuilder extends Component
      * @return string
      * @throws
      */
-    private function _prefix(): string
+    private function make(): string
     {
-        $select = '';
-        if (($condition = $this->conditionToString()) != '') {
-            $select .= " WHERE $condition";
-        }
-        if ($this->query->group != "") {
-            $select .= ' GROUP BY ' . $this->query->group;
-        }
-        if (count($this->query->order) > 0) {
-            $select .= ' ORDER BY ' . implode(',', $this->query->order);
-        }
+        $select = $this->makeCondition();
+        $select .= $this->makeGroup();
+        $select .= $this->makeOrder();
         return $select;
     }
 
@@ -275,7 +265,7 @@ class SqlBuilder extends Component
      * @param array $select
      * @return string
      */
-    private function _selectPrefix(array $select = ['*']): string
+    private function makeSelect(array $select = ['*']): string
     {
         $select = "SELECT " . implode(',', $select) . " FROM " . $this->query->from;
         if ($this->query->alias != "") {
@@ -285,6 +275,43 @@ class SqlBuilder extends Component
             $select .= ' ' . implode(' ', $this->query->join);
         }
         return $select;
+    }
+
+
+    /**
+     * @return string
+     */
+    private function makeGroup(): string
+    {
+        if ($this->query->group != "") {
+            return ' GROUP BY ' . $this->query->group;
+        }
+        return '';
+    }
+
+
+    /**
+     * @return string
+     */
+    private function makeOrder(): string
+    {
+        if (count($this->query->order) > 0) {
+            return ' ORDER BY ' . implode(',', $this->query->order);
+        }
+        return '';
+    }
+
+
+    /**
+     * @return string
+     */
+    private function makeCondition(): string
+    {
+        $condition = $this->where($this->query->where);
+        if (empty($condition)) {
+            return '';
+        }
+        return ' WHERE ' . $condition;
     }
 
 
@@ -313,12 +340,53 @@ class SqlBuilder extends Component
 
 
     /**
+     * @param array $where
      * @return string
-     * @throws
      */
-    private function conditionToString(): string
+    private function where(array $where): string
     {
-        return $this->where($this->query->where);
+        if (count($where) < 1) {
+            return '';
+        }
+        $_tmp = [];
+        foreach ($where as $key => $value) {
+            $_tmp[] = $this->resolveCondition($key, $value);
+        }
+        return implode(' AND ', $_tmp);
     }
+
+
+    /**
+     * @param $field
+     * @param $condition
+     * @return string
+     */
+    private function resolveCondition($field, $condition): string
+    {
+        if (is_string($field)) {
+            $this->query->pushParam($condition);
+            return $field . ' = ?';
+        } else if (is_string($condition)) {
+            return $condition;
+        } else {
+            return implode(' AND ', $this->_hashMap($condition));
+        }
+    }
+
+
+    /**
+     * @param $condition
+     * @return array
+     */
+    private function _hashMap($condition): array
+    {
+        $_array = [];
+        foreach ($condition as $key => $value) {
+            $this->query->pushParam($value);
+            $_array[] = $key . '= ?';
+        }
+        return $_array;
+    }
+
 
 }

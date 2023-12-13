@@ -11,8 +11,8 @@ namespace Database\Traits;
 
 
 use Closure;
-use Database\ActiveQuery;
 use Database\Base\ActiveQueryInterface;
+use Database\Command;
 use Database\ISqlBuilder;
 use Database\ModelInterface;
 use Database\Query;
@@ -25,20 +25,22 @@ use Kiri\Abstracts\Component;
  * Trait QueryTrait
  * @package Database\Traits
  */
-class QueryTrait extends Component implements ActiveQueryInterface, ISqlBuilder
+abstract class QueryTrait extends Component implements ActiveQueryInterface, ISqlBuilder
 {
-    protected array      $where  = [];
-    protected array      $select = [];
-    protected array      $join   = [];
-    protected array      $order  = [];
-    protected int        $offset = 0;
-    protected int        $limit  = 0;
-    protected string     $group  = '';
-    protected string     $from   = '';
-    protected string     $alias  = 't1';
+    public array         $where  = [];
+    public array         $select = ['*'];
+    public array         $join   = [];
+    public array         $order  = [];
+    public int           $offset = 0;
+    public int           $limit  = 0;
+    public string        $group  = '';
+    public string        $from   = '';
+    public string        $alias  = 't1';
     protected array      $filter = [];
     protected bool       $lock   = false;
     protected SqlBuilder $builder;
+    public array         $params = [];
+    private array        $_alias = ['t1'];
 
 
     /**
@@ -46,21 +48,18 @@ class QueryTrait extends Component implements ActiveQueryInterface, ISqlBuilder
      */
     protected ModelInterface|string|null $modelClass;
 
+
     /**
-     * clear
+     * Comply constructor.
+     * @throws
      */
-    public function clear(): void
+    public function __construct($model = null)
     {
-        $this->where  = [];
-        $this->select = [];
-        $this->join   = [];
-        $this->order  = [];
-        $this->offset = 0;
-        $this->limit  = 500;
-        $this->group  = '';
-        $this->from   = '';
-        $this->alias  = 't1';
-        $this->filter = [];
+        if (!is_null($model)) {
+            $this->modelClass = $model;
+        }
+        $this->builder = SqlBuilder::builder($this);
+        parent::__construct();
     }
 
 
@@ -178,7 +177,8 @@ class QueryTrait extends Component implements ActiveQueryInterface, ISqlBuilder
      */
     public function alias(string $alias = 't1'): static
     {
-        $this->alias = $alias;
+        $this->alias  = $alias;
+        $this->_alias = [$alias];
         return $this;
     }
 
@@ -190,7 +190,7 @@ class QueryTrait extends Component implements ActiveQueryInterface, ISqlBuilder
     public function from(string|Closure $tableName): static
     {
         if ($tableName instanceof Closure) {
-            $tableName = call_user_func($tableName, $this->makeNewSqlGenerate());
+            $tableName = call_user_func($tableName, $this->queryInstance());
         }
         $this->from = $tableName;
         return $this;
@@ -199,64 +199,90 @@ class QueryTrait extends Component implements ActiveQueryInterface, ISqlBuilder
     /**
      * @param string $tableName
      * @param string $alias
-     * @param null $on
-     * @param array|null $param
+     * @param array $on
+     * @param array $param
      * @return $this
      * $query->join([$tableName, ['userId'=>'uuvOd']], $param)
      * $query->join([$tableName, ['userId'=>'uuvOd'], $param])
      * $query->join($tableName, ['userId'=>'uuvOd',$param])
      */
-    private function join(string $tableName, string $alias, $on = NULL, array $param = NULL): static
+    private function join(string $tableName, string $alias, array $on, array $param = []): static
     {
         if (empty($on)) {
             return $this;
         }
+
+        $this->_alias[] = $alias;
+
         $join[] = $tableName . ' AS ' . $alias;
-        $join[] = 'ON ' . $this->onCondition($alias, $on);
+        $join[] = 'ON ' . $this->onCondition($on);
         if (empty($join)) {
             return $this;
         }
 
         $this->join[] = implode(' ', $join);
         if (!empty($param)) {
-            $this->addParams($param);
+            $this->bindParams($param);
         }
 
         return $this;
     }
 
+
     /**
-     * @param $alias
-     * @param $on
+     * @param array $params
+     * @return void
+     */
+    public function bindParams(array $params): void
+    {
+        foreach ($params as $param) {
+            $this->pushParam($param);
+        }
+    }
+
+
+    /**
+     * @param array $condition
      * @return string
      */
-    private function onCondition($alias, $on): string
+    private function onCondition(array $condition): string
     {
         $array = [];
-        foreach ($on as $key => $item) {
-            if (!str_contains($item, '.')) {
-                $this->addParam($key, $item);
+        foreach ($condition as $key => $item) {
+            if (is_numeric($item) || !$this->isAliasField($item)) {
+                $array[] = $key . '= ?';
+                $this->pushParam($item);
             } else {
-                $explode = explode('.', $item);
-                if (isset($explode[1]) && ($explode[0] == $alias || $this->alias == $explode[0])) {
-                    $array[] = $key . '=' . $item;
-                } else {
-                    $this->addParam($key, $item);
-                }
+                $array[] = $key . '=' . $item;
             }
         }
         return implode(' AND ', $array);
     }
 
+
+    /**
+     * @param string $value
+     * @return bool
+     */
+    private function isAliasField(string $value): bool
+    {
+        foreach ($this->_alias as $alias) {
+            if (str_starts_with($value, $alias . '.')) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * @param string $tableName
      * @param string $alias
-     * @param $onCondition
-     * @param null $param
+     * @param array $onCondition
+     * @param array $param
      * @return $this
-     * @throws
+     * @throws Exception
      */
-    public function leftJoin(string $tableName, string $alias, $onCondition, $param = NULL): static
+    public function leftJoin(string $tableName, string $alias, array $onCondition, array $param = []): static
     {
         if (class_exists($tableName)) {
             $model = Kiri::getDi()->get($tableName);
@@ -269,14 +295,14 @@ class QueryTrait extends Component implements ActiveQueryInterface, ISqlBuilder
     }
 
     /**
-     * @param $tableName
-     * @param $alias
-     * @param $onCondition
-     * @param null $param
+     * @param string $tableName
+     * @param string $alias
+     * @param array $onCondition
+     * @param array $param
      * @return $this
-     * @throws
+     * @throws Exception
      */
-    public function rightJoin($tableName, $alias, $onCondition, $param = NULL): static
+    public function rightJoin(string $tableName, string $alias, array $onCondition, array $param = []): static
     {
         if (class_exists($tableName)) {
             $model = Kiri::getDi()->get($tableName);
@@ -289,14 +315,14 @@ class QueryTrait extends Component implements ActiveQueryInterface, ISqlBuilder
     }
 
     /**
-     * @param $tableName
-     * @param $alias
-     * @param $onCondition
-     * @param null $param
+     * @param string $tableName
+     * @param string $alias
+     * @param array $onCondition
+     * @param array $param
      * @return $this
-     * @throws
+     * @throws Exception
      */
-    public function innerJoin($tableName, $alias, $onCondition, $param = NULL): static
+    public function innerJoin(string $tableName, string $alias, array $onCondition, array $param = []): static
     {
         if (class_exists($tableName)) {
             $model = Kiri::getDi()->get($tableName);
@@ -332,8 +358,8 @@ class QueryTrait extends Component implements ActiveQueryInterface, ISqlBuilder
     /**
      * @param string $lngField
      * @param string $latField
-     * @param int $lng1
-     * @param int $lat1
+     * @param int|float $lng1
+     * @param int|float $lat1
      *
      * @return $this
      */
@@ -389,29 +415,20 @@ class QueryTrait extends Component implements ActiveQueryInterface, ISqlBuilder
     }
 
     /**
-     * @param array|string $column
+     * @param array $column
      *
      * @return $this
      */
-    public function select(array|string $column = '*'): static
+    public function select(array $column = ['*']): static
     {
-        if ($column == '*') {
-            $this->select = [$column];
-        } else {
-            if (!is_array($column)) {
-                $column = explode(',', $column);
-            }
-            foreach ($column as $val) {
-                $this->select[] = $val;
-            }
-        }
+        $this->select = $column;
         return $this;
     }
 
     /**
      * @return $this
      */
-    public function orderRand(): static
+    public function rand(): static
     {
         $this->order[] = 'RAND()';
         return $this;
@@ -511,28 +528,12 @@ class QueryTrait extends Component implements ActiveQueryInterface, ISqlBuilder
 
 
     /**
-     * @param $value
-     * @return ActiveQuery
-     * @throws
-     */
-    public function makeNewQuery($value): ActiveQuery
-    {
-        $activeQuery = new ActiveQuery($this->modelClass);
-        call_user_func($value, $activeQuery);
-        if (empty($activeQuery->from)) {
-            $activeQuery->from($activeQuery->modelClass->getTable());
-        }
-        return $activeQuery;
-    }
-
-
-    /**
      * @return Query
      * @throws
      */
-    public function makeNewSqlGenerate(): Query
+    public function queryInstance(): Query
     {
-        return Kiri::createObject(['class' => Query::class]);
+        return new Query();
     }
 
 
@@ -589,42 +590,12 @@ class QueryTrait extends Component implements ActiveQueryInterface, ISqlBuilder
     }
 
     /**
-     * @param array|null $params
-     *
-     * @return $this
-     */
-    public function bindParams(?array $params = []): static
-    {
-        if ($params === null) {
-            return $this;
-        }
-        foreach ($params as $param) {
-            $this->attributes[] = $param;
-        }
-        return $this;
-    }
-
-    /**
-     * @param string $key
-     * @param mixed $value
-     * @return $this
-     */
-    public function bindParam(string $key, mixed $value): static
-    {
-        if (is_string($value)) {
-            $value = addslashes($value);
-        }
-        $this->attributes[$key] = $value;
-        return $this;
-    }
-
-    /**
      * @param mixed $value
      * @return $this
      */
     public function pushParam(mixed $value): static
     {
-        $this->attributes[] = $value;
+        $this->params[] = $value;
         return $this;
     }
 
@@ -670,13 +641,13 @@ class QueryTrait extends Component implements ActiveQueryInterface, ISqlBuilder
      */
     public function makeClosureFunction(Closure|array $closure): string
     {
-        $generate = $this->makeNewSqlGenerate();
+        $generate = $this->queryInstance();
         if ($closure instanceof Closure) {
             call_user_func($closure, $generate);
         } else {
             $generate->addArray($closure);
         }
-        return $generate->getSql();
+        return $generate->build();
     }
 
 
@@ -766,12 +737,28 @@ class QueryTrait extends Component implements ActiveQueryInterface, ISqlBuilder
 
 
     /**
-     * @return $this
+     * @param string $querySql
+     * @param array $params
+     * @return Command
      */
-    public function oneLimit(): static
+    public function buildCommand(string $querySql, array $params = []): Command
     {
-        $this->limit = 1;
-        return $this;
+        $connection = $this->modelClass->getConnection();
+        if (count($params) > 0) {
+            $this->bindParams($params);
+        }
+        return $connection->createCommand($querySql, $this->params);
     }
+
+
+    /**
+     * @return string
+     * @throws
+     */
+    public function build(): string
+    {
+        return $this->builder->get();
+    }
+
 
 }

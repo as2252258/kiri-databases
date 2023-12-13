@@ -15,6 +15,7 @@ use Database\Affair\Commit;
 use Database\Affair\Rollback;
 use Database\Traits\QueryTrait;
 use Exception;
+use Kiri;
 use Throwable;
 
 /**
@@ -42,9 +43,10 @@ class Db extends QueryTrait implements ISqlBuilder
     {
         $db = new Db();
         if (is_string($dbname)) {
-            $dbname = \Kiri::getDi()->get(DatabasesProviders::class)->get($dbname);
+            $db->connection = Kiri::getDi()->get(DatabasesProviders::class)->get($dbname);
+        } else {
+            $db->connection = $dbname;
         }
-        $db->connection = $dbname;
         return $db;
     }
 
@@ -55,30 +57,6 @@ class Db extends QueryTrait implements ISqlBuilder
     public static function beginTransaction(): void
     {
         fire(new BeginTransaction());
-    }
-
-
-    /**
-     * @param Closure $closure
-     * @param mixed ...$params
-     * @return mixed
-     * @throws
-     */
-    public static function Transaction(Closure $closure, ...$params): mixed
-    {
-        static::beginTransaction();
-        try {
-            $result = call_user_func($closure, ...$params);
-        } catch (Throwable $throwable) {
-            $result = trigger_print_error($throwable->getMessage(), 'mysql');
-        } finally {
-            if ($result === false) {
-                static::rollback();
-            } else {
-                static::commit();
-            }
-            return $result;
-        }
     }
 
 
@@ -149,21 +127,21 @@ class Db extends QueryTrait implements ISqlBuilder
     }
 
     /**
-     * @return bool|int
-     * @throws
+     * @return int
      */
-    public function count(): bool|int
+    public function count(): int
     {
-        return $this->connection->createCommand(SqlBuilder::builder($this)->count())->one()['row_count'];
+        $count = $this->connection->createCommand(SqlBuilder::builder($this)->count())->one();
+        return current($count);
     }
 
     /**
-     * @return bool|int
-     * @throws
+     * @return bool
      */
-    public function exists(): bool|int
+    public function exists(): bool
     {
-        return $this->connection->createCommand(SqlBuilder::builder($this)->one())->fetchColumn();
+        $fetchColumn = $this->connection->createCommand(SqlBuilder::builder($this)->one())->fetchColumn();
+        return !empty($fetchColumn);
     }
 
     /**
@@ -180,20 +158,18 @@ class Db extends QueryTrait implements ISqlBuilder
     /**
      * @param string $sql
      * @param array $attributes
-     * @return array|bool|int|string|null
-     * @throws
+     * @return array|null
      */
-    public function one(string $sql, array $attributes = []): int|bool|array|string|null
+    public function one(string $sql, array $attributes = []): ?array
     {
         return $this->connection->createCommand($sql, $attributes)->one();
     }
 
 
     /**
-     * @return bool|int
-     * @throws
+     * @return bool
      */
-    public function delete(): bool|int
+    public function delete(): bool
     {
         return $this->connection->createCommand(SqlBuilder::builder($this)->delete())->delete();
     }
@@ -215,7 +191,7 @@ class Db extends QueryTrait implements ISqlBuilder
             ->select('*')
             ->from('INFORMATION_SCHEMA.KEY_COLUMN_USAGE')
             ->where(['REFERENCED_TABLE_NAME' => $table])
-            ->getSql())->one();
+            ->build())->one();
     }
 
 
@@ -248,7 +224,7 @@ class Db extends QueryTrait implements ISqlBuilder
             return $connection;
         }
         $databases = \config('databases.connections', []);
-        $providers = \Kiri::getDi()->get(DatabasesProviders::class);
+        $providers = Kiri::getDi()->get(DatabasesProviders::class);
         if (empty($databases) || !is_array($databases)) {
             throw new Exception('Please configure the database link.');
         }

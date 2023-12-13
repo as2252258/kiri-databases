@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection ALL */
 /**
  * Created by PhpStorm.
  * User: whwyy
@@ -178,7 +178,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
      */
     public function getLastError(): string
     {
-        return Kiri::getLogger()->getLastError('mysql');
+        return $this->getLogger()->getLastError('mysql');
     }
 
 
@@ -237,16 +237,18 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
      */
     public static function findOne(int|string|array $param, $db = NULL): ?static
     {
-        $model = new ActiveQuery(static::makeNewInstance());
-        $model->from($model->getTable())->alias('t1');
+        $model = static::instance();
+
+        $query = new ActiveQuery($model);
+        $query->from($model->getTable())->alias('t1');
         if (is_numeric($param)) {
-            $model->where([$model->modelClass->getPrimary() => $param]);
+            $query->where([$model->getPrimary() => $param]);
         } else if (is_array($param)) {
-            $model->where($param);
+            $query->where($param);
         } else {
-            $model->whereRaw($param);
+            $query->whereRaw($param);
         }
-        return $model->first();
+        return $query->first();
     }
 
 
@@ -258,27 +260,27 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
      */
     public static function primary(int $param, $db = NULL): ?static
     {
-        $model = new ActiveQuery(static::makeNewInstance());
-        $model->from($model->getTable())->alias('t1');
-        $model->where([$model->modelClass->getPrimary() => $param]);
-        return $model->first();
+        $model = static::instance();
+        $query = new ActiveQuery($model);
+        $query->from($model->getTable())->alias('t1')->where([$model->getPrimary() => $param]);
+        return $query->first();
     }
 
 
     /**
-     * @return mixed
-     * @throws
+     * @return bool|int
+     * @throws Exception
      */
-    public function optimize(): mixed
+    public function optimize(): bool|int
     {
-        return static::query()->execute('OPTIMIZE TABLE ' . $this->getTable())->exec();
+        return static::query()->execute('OPTIMIZE TABLE ' . $this->getTable());
     }
 
 
     /**
      * @return static
      */
-    private static function makeNewInstance(): static
+    protected static function instance(): static
     {
         return new static();
     }
@@ -302,7 +304,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
      */
     public static function all(string|array $condition): Collection
     {
-        $model = new ActiveQuery(static::makeNewInstance());
+        $model = new ActiveQuery(static::instance());
         $model->from($model->getTable())->alias('t1');
         if (is_array($condition)) {
             $model->where($condition);
@@ -319,7 +321,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
      */
     public static function query(): ActiveQuery
     {
-        $model = new ActiveQuery(static::makeNewInstance());
+        $model = new ActiveQuery(static::instance());
         $model->from($model->getTable())->alias('t1');
         return $model;
     }
@@ -336,21 +338,21 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
 
 
     /**
-     * @param array|string|null $condition
+     * @param array|string $condition
      * @param array $attributes
      *
      * @return bool
-     * @throws
      */
-    protected static function deleteByCondition(array|string|null $condition = NULL, array $attributes = []): bool
+    protected static function deleteByCondition(array|string $condition = [], array $attributes = []): bool
     {
-        $model = static::query()->bindParams($attributes);
-        if (is_array($condition)) {
-            $model->where($condition);
-        } else if (is_string($condition)) {
+        $model = static::query();
+        $model->bindParams($attributes);
+        if (is_string($condition)) {
             $model->whereRaw($condition);
+        } else {
+            $model->where($condition);
         }
-        return (bool)$model->delete();
+        return $model->delete();
     }
 
 

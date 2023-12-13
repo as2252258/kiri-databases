@@ -9,8 +9,10 @@ declare(strict_types=1);
 
 namespace Database;
 
+use Closure;
 use Database\Traits\QueryTrait;
-use JetBrains\PhpStorm\ArrayShape;
+use Kiri\Di\Context;
+use Swoole\Coroutine;
 
 /**
  * Class ActiveQuery
@@ -20,62 +22,8 @@ class ActiveQuery extends QueryTrait implements ISqlBuilder
 {
 
 
-    public bool        $asArray    = FALSE;
-    public ?Connection $db         = NULL;
-    public array       $attributes = [];
-    protected mixed    $_mock      = null;
-
-
-    /**
-     * Comply constructor.
-     * @param $model
-     * @throws
-     */
-    public function __construct($model)
-    {
-        $this->modelClass = $model;
-        $this->builder    = SqlBuilder::builder($this);
-        parent::__construct();
-    }
-
-
-    /**
-     * @param string $key
-     * @param mixed $value
-     * @return $this
-     */
-    public function addParam(string $key, mixed $value): static
-    {
-        $this->attributes[$key] = $value;
-        return $this;
-    }
-
-
-    /**
-     * @param int $size
-     * @param int $page
-     * @return array
-     * @throws
-     */
-    #[ArrayShape([])]
-    public function pagination(int $size = 20, int $page = 1): array
-    {
-        $page   = max(1, $page);
-        $size   = max(1, $size);
-        $offset = ($page - 1) * $size;
-        $count  = $this->count();
-        $lists  = $this->offset($offset)->limit($size)->get()->toArray();
-        return [
-            'code'    => 0,
-            'message' => 'ok',
-            'size'    => $size,
-            'page'    => $page,
-            'count'   => $count,
-            'next'    => max($page + 1, 1),
-            'prev'    => max($page - 1, 1),
-            'param'   => $lists,
-        ];
-    }
+    public bool     $asArray = FALSE;
+    protected mixed $_mock   = null;
 
 
     /**
@@ -85,19 +33,6 @@ class ActiveQuery extends QueryTrait implements ISqlBuilder
     public function asArray(bool $asArray = true): static
     {
         $this->asArray = $asArray;
-        return $this;
-    }
-
-
-    /**
-     * @param array $values
-     * @return $this
-     */
-    public function addParams(array $values): static
-    {
-        foreach ($values as $key => $val) {
-            $this->addParam($key, $val);
-        }
         return $this;
     }
 
@@ -113,90 +48,67 @@ class ActiveQuery extends QueryTrait implements ISqlBuilder
 
 
     /**
-     * @param $sql
-     * @param array $params
-     * @return mixed
+     * @return ModelInterface|array|null|bool
      * @throws
      */
-    public function execute($sql, array $params = []): Command
+    public function first(): ModelInterface|null|array|bool
     {
-        return $this->modelClass->getConnection()->createCommand($sql, $params);
-    }
-
-
-    /**
-     * @return ModelInterface|array|null
-     * @throws
-     */
-    public function first(): ModelInterface|null|array
-    {
-        $data = $this->limit(1)->execute($this->builder->one(), $this->attributes)->one();
+        $data = $this->buildCommand($this->builder->one())->one();
         if (is_array($data)) {
             return $this->populate($data);
-        } else {
-            return NULL;
         }
+        return $data;
     }
 
-
     /**
-     * @return string
-     * @throws
+     * @return bool|Collection
      */
-    public function toSql(): string
+    public function get(): bool|Collection
     {
-        return $this->builder->get();
-    }
-
-
-    /**
-     * @return Collection
-     * @throws
-     */
-    public function get(): Collection
-    {
-        $data = $this->execute($this->builder->all(), $this->attributes)->all();
-        if ($data !== false) {
-            return new Collection($this, $data, $this->modelClass);
-        } else {
-            return new Collection($this, [], $this->modelClass);
+        $data = $this->buildCommand($this->builder->all())->all();
+        if (is_array($data)) {
+            return new Collection($this, $this->modelClass, $data);
         }
+        return false;
     }
 
 
     /**
      * @throws
      */
-    public function flush(): array|bool|int|string|null
+    public function flush(): bool
     {
-        return $this->execute($this->builder->truncate())->exec();
+        return (bool)$this->buildCommand($this->builder->truncate())->exec();
     }
 
 
     /**
      * @param int $size
-     * @param callable $callback
-     * @param int $offset
-     * @return Pagination
-     * @throws
+     * @param Closure $closure
+     * @return void
      */
-    public function page(int $size, callable $callback, int $offset = 0): Pagination
+    public function chunk(int $size, Closure $closure): void
     {
-        $pagination = new Pagination($this);
-        $pagination->setOffset($offset);
-        $pagination->setLimit($size);
-        $pagination->setCallback($callback);
-        return $pagination;
+        $data = $this->offset($this->offset)->limit($size)->get();
+        if (!$data || $data->isEmpty()) {
+            return;
+        }
+        if (Context::inCoroutine()) {
+            Coroutine::create(fn() => $closure($data));
+        } else {
+            call_user_func($closure, $data);
+        }
+        $this->offset += $size;
+        $this->chunk($size, $closure);
     }
 
     /**
      * @param string $field
-     * @param string $setKey
+     * @param string|null $setKey
      *
      * @return array|null
-     * @throws
      */
-    public function column(string $field, string $setKey = ''): ?array
+    public function column(string $field, ?string $setKey = null): ?array
     {
         return $this->get()->column($field, $setKey);
     }
@@ -241,7 +153,7 @@ class ActiveQuery extends QueryTrait implements ISqlBuilder
      */
     public function count(): int
     {
-        return $this->execute($this->builder->count(), $this->attributes)->one()['row_count'] ?? 0;
+        return $this->buildCommand($this->builder->count())->rowCount();
     }
 
 
@@ -257,7 +169,7 @@ class ActiveQuery extends QueryTrait implements ISqlBuilder
         }
         $generate = $this->builder->update($data);
         if (!is_bool($generate)) {
-            return (bool)$this->execute($generate, $this->attributes)->exec();
+            return (bool)$this->buildCommand($generate)->exec();
         } else {
             return $generate;
         }
@@ -272,16 +184,16 @@ class ActiveQuery extends QueryTrait implements ISqlBuilder
     {
         [$sql, $params] = $this->builder->insert($data, TRUE);
 
-        return (bool)$this->execute($sql, $params)->exec();
+        return (bool)$this->buildCommand($sql, $params)->exec();
     }
 
     /**
      * @param $filed
      *
-     * @return null
+     * @return mixed
      * @throws
      */
-    public function value($filed)
+    public function value($filed): mixed
     {
         return $this->first()[$filed] ?? NULL;
     }
@@ -292,22 +204,26 @@ class ActiveQuery extends QueryTrait implements ISqlBuilder
      */
     public function exists(): bool
     {
-        return !empty($this->execute($this->builder->one(), $this->attributes)->fetchColumn());
+        return $this->buildCommand($this->builder->one())->rowCount() > 0;
     }
 
 
     /**
-     * @param bool $getSql
-     * @return bool|string
-     * @throws
+     * @param string $sql
+     * @param array $params
+     * @return int|bool
      */
-    public function delete(bool $getSql = FALSE): bool|string
+    public function execute(string $sql, array $params = []): int|bool
     {
-        $sql = $this->builder->delete();
-        if ($getSql === FALSE) {
-            return (bool)$this->execute($sql, $this->attributes)->delete();
-        } else {
-            return $sql;
-        }
+        return $this->buildCommand($sql, $params)->exec();
+    }
+
+
+    /**
+     * @return bool
+     */
+    public function delete(): bool
+    {
+        return $this->buildCommand($this->builder->delete())->delete();
     }
 }
