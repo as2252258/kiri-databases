@@ -467,7 +467,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
         if ($generate === false) {
             return false;
         }
-        if (!$this->getConnection()->createCommand($generate, $query->attributes)->save()) {
+        if (!$this->getConnection()->createCommand($generate, $query->params)->save()) {
             return FALSE;
         }
         return $this->refresh()->afterSave($old, $change);
