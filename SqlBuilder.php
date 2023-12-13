@@ -315,6 +315,12 @@ class SqlBuilder extends Component
     }
 
 
+    private function makeLimit(): string
+    {
+        return ' LIMIT ' . $this->query->offset . ',' . $this->query->limit;
+    }
+
+
     /**
      * @param false $isCount
      * @return string
