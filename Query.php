@@ -16,10 +16,14 @@ use Database\Traits\QueryTrait;
  * Class Query
  * @package Database
  */
-class Query implements ISqlBuilder
+class Query extends QueryTrait implements ISqlBuilder
 {
 
-    use QueryTrait;
+
+    /**
+     * @var SqlBuilder
+     */
+    protected SqlBuilder $builder;
 
 
     /**
@@ -28,6 +32,8 @@ class Query implements ISqlBuilder
     public function __construct()
     {
         $this->builder = SqlBuilder::builder($this);
+
+        parent::__construct();
     }
 
     /**

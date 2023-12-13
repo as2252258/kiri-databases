@@ -21,10 +21,8 @@ use Throwable;
  * Class Db
  * @package Database
  */
-class Db implements ISqlBuilder
+class Db extends QueryTrait implements ISqlBuilder
 {
-    use QueryTrait;
-
 
     private static bool $_inTransaction = false;
 

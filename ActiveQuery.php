@@ -10,18 +10,15 @@ declare(strict_types=1);
 namespace Database;
 
 use Database\Traits\QueryTrait;
-use Exception;
 use JetBrains\PhpStorm\ArrayShape;
-use Kiri\Abstracts\Component;
 
 /**
  * Class ActiveQuery
  * @package Database
  */
-class ActiveQuery extends Component implements ISqlBuilder
+class ActiveQuery extends QueryTrait implements ISqlBuilder
 {
 
-    use QueryTrait;
 
     /** @var bool */
     public bool $asArray = FALSE;

@@ -12,39 +12,37 @@ namespace Database\Traits;
 
 use Closure;
 use Database\ActiveQuery;
+use Database\Base\ActiveQueryInterface;
+use Database\ISqlBuilder;
 use Database\ModelInterface;
 use Database\Query;
-use Database\SqlBuilder;
 use Exception;
 use Kiri;
+use Kiri\Abstracts\Component;
 
 /**
  * Trait QueryTrait
  * @package Database\Traits
  */
-trait QueryTrait
+class QueryTrait extends Component implements ActiveQueryInterface, ISqlBuilder
 {
-    public array  $where  = [];
-    public array  $select = [];
-    public array  $join   = [];
-    public array  $order  = [];
-    public int    $offset = 0;
-    public int    $limit  = 0;
-    public string $group  = '';
-    public string $from   = '';
-    public string $alias  = 't1';
-    public array  $filter = [];
+    protected array  $where  = [];
+    protected array  $select = [];
+    protected array  $join   = [];
+    protected array  $order  = [];
+    protected int    $offset = 0;
+    protected int    $limit  = 0;
+    protected string $group  = '';
+    protected string $from   = '';
+    protected string $alias  = 't1';
+    protected array  $filter = [];
+    protected bool   $lock   = false;
 
-
-    public bool $lock = false;
-
-
-    private SqlBuilder $builder;
 
     /**
      * @var ModelInterface|string|null
      */
-    public ModelInterface|string|null $modelClass;
+    protected ModelInterface|string|null $modelClass;
 
     /**
      * clear
@@ -337,7 +335,7 @@ trait QueryTrait
      *
      * @return $this
      */
-    public function distance(string $lngField, string $latField, int $lng1, int $lat1): static
+    public function distance(string $lngField, string $latField, int|float $lng1, int|float $lat1): static
     {
         $sql            = "ROUND(6378.138 * 2 * ASIN(SQRT(POW(SIN(($lat1 * PI() / 180 - $lat1 * PI() / 180) / 2),2) + COS($lat1 * PI() / 180) * COS($latField * PI() / 180) * POW(SIN(($lng1 * PI() / 180 - $lngField * PI() / 180) / 2),2))) * 1000) AS distance";
         $this->select[] = $sql;
@@ -552,11 +550,11 @@ trait QueryTrait
 
     /**
      * @param string $column
-     * @param int $start
-     * @param int $end
+     * @param int|float $start
+     * @param int|float $end
      * @return $this
      */
-    public function whereBetween(string $column, int $start, int $end): static
+    public function whereBetween(string $column, int|float $start, int|float $end): static
     {
         if (empty($column) || empty($start) || empty($end)) {
             return $this;
@@ -571,11 +569,11 @@ trait QueryTrait
 
     /**
      * @param string $column
-     * @param int $start
-     * @param int $end
+     * @param int|float $start
+     * @param int|float $end
      * @return $this
      */
-    public function whereNotBetween(string $column, int $start, int $end): static
+    public function whereNotBetween(string $column, int|float $start, int|float $end): static
     {
         if (empty($column) || empty($start) || empty($end)) {
             return $this;
