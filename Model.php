@@ -195,17 +195,7 @@ class Model extends Base\Model
         if (!$this->validator($this->rules()) || !$this->beforeSave($this)) {
             return FALSE;
         }
-
-        $condition = [];
-        $oldPrams  = [];
-        foreach ($this->_oldAttributes as $key => $attribute) {
-            if (!array_key_exists($key, $params) || $params[$key] == $attribute) {
-                $condition[$key] = $attribute;
-            } else {
-                $oldPrams[$key] = $this->_oldAttributes[$attribute];
-            }
-        }
-        return $this->updateInternal($oldPrams, $condition, $params);
+        return $this->updateInternal(...$this->arrayIntersect($params));
     }
 
 

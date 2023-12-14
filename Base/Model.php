@@ -483,9 +483,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
             return FALSE;
         }
         if (!$this->isNewExample) {
-            [$changes, $condition] = $this->diff();
-
-            return $this->updateInternal($condition, $condition, $changes);
+            return $this->updateInternal(...$this->arrayIntersect($this->_attributes));
         } else {
             return $this->insert();
         }
@@ -493,18 +491,22 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
 
 
     /**
-     * @return array<array, array>
+     * @return array<array, array, array>
      * @throws
      */
-    private function diff(): array
+    protected function arrayIntersect(array $params): array
     {
-        $changes = \array_diff_assoc($this->_attributes, $this->_oldAttributes);
-        if ($this->hasPrimary()) {
-            $condition = [$this->primary => $this->_oldAttributes[$this->primary]];
-        } else {
-            $condition = \array_intersect_assoc($this->_oldAttributes, $this->_attributes);
+        $condition = [];
+        $oldPrams  = [];
+        foreach ($this->_oldAttributes as $key => $attribute) {
+            if (!array_key_exists($key, $params) || $params[$key] == $attribute) {
+                $condition[$key] = $attribute;
+                unset($params[$key]);
+            } else {
+                $oldPrams[$key] = $this->_oldAttributes[$attribute];
+            }
         }
-        return [$changes, $condition];
+        return [$oldPrams, $condition, $params];
     }
 
 
