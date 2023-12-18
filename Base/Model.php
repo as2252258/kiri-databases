@@ -828,4 +828,15 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
         return (new static())->{$name}(...$arguments);
     }
 
+
+    /**
+     * @param string $field
+     * @return array
+     */
+    public function getOldAttribute(string $field): array
+    {
+        // TODO: Implement getOldAttribute() method.
+        return $this->_oldAttributes;
+    }
+
 }
