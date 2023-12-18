@@ -47,13 +47,13 @@ abstract class HasBase implements \Database\Traits\Relation
     {
     }
 
+
     /**
-     * @param $name
-     * @param $arguments
-     * @return static
-     * @throws
+     * @param string $name
+     * @param array $arguments
+     * @return $this|mixed
      */
-    public function __call($name, $arguments)
+    public function __call(string $name, array $arguments)
     {
         if ($name !== 'get') {
             $relation = Kiri::getDi()->get(Relation::class);
@@ -66,10 +66,10 @@ abstract class HasBase implements \Database\Traits\Relation
 
 
     /**
-     * @param $name
+     * @param string $name
      * @return mixed
      */
-    public function __get($name): mixed
+    public function __get(string $name): mixed
     {
         if ($this->data === null) {
             $this->data = $this->get();

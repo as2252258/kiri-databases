@@ -41,33 +41,33 @@ class DatabasesProviders extends Providers
 
 
     /**
-     * @param $name
+     * @param string $name
      * @return Connection
      * @throws Exception
      */
-    public function get($name): Connection
+    public function get(string $name): Connection
     {
         return $this->connections[$name];
     }
 
 
     /**
-     * @param $key
+     * @param string $key
      * @param array $connection
      * @return void
      * @throws Exception
      */
-    protected function set($key, array $connection): void
+    protected function set(string $key, array $connection): void
     {
         $this->connections[$key] = Kiri::createObject($connection);
     }
 
 
     /**
-     * @param $database
+     * @param array $database
      * @return array
      */
-    private function _settings($database): array
+    private function _settings(array $database): array
     {
         $clientPool = $database['pool'] ?? ['min' => 1, 'max' => 5, 'tick' => 60];
         return [

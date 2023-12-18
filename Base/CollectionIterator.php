@@ -6,7 +6,6 @@ namespace Database\Base;
 
 
 use Database\ModelInterface;
-use Exception;
 
 
 /**
@@ -16,6 +15,10 @@ use Exception;
 class CollectionIterator extends \ArrayIterator
 {
 
+
+    /**
+     * @var ModelInterface|string
+     */
     private ModelInterface|string $model;
 
 

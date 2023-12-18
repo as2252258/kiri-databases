@@ -19,7 +19,6 @@ use Database\Collection;
 use Database\Connection;
 use Database\DatabasesProviders;
 use Database\ModelInterface;
-use Database\Mysql\Columns;
 use Database\Relation;
 use Database\SqlBuilder;
 use Exception;
@@ -790,16 +789,6 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
     public function unset(string ...$params): array
     {
         return array_diff_assoc($params, $this->_attributes);
-    }
-
-
-    /**
-     * @return Columns
-     * @throws
-     */
-    public function getColumns(): Columns
-    {
-        return $this->getConnection()->getSchema()->getColumns()->table($this->getTable());
     }
 
 

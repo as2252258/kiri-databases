@@ -13,7 +13,6 @@ namespace Database;
 use Exception;
 use Kiri\Abstracts\Component;
 use Kiri\Di\Container;
-use Kiri\Error\StdoutLogger;
 use PDO;
 use Throwable;
 

@@ -151,7 +151,7 @@ class SqlBuilder extends Component
      * @param $attributes
      * @return array
      */
-    #[Pure] private function getFields($attributes): array
+    #[Pure] private function getFields(array $attributes): array
     {
         return array_keys(current($attributes));
     }
@@ -240,10 +240,10 @@ class SqlBuilder extends Component
 
 
     /**
-     * @param $table
+     * @param string $table
      * @return string
      */
-    public function columns($table): string
+    public function columns(string $table): string
     {
         return 'SHOW FULL FIELDS FROM ' . $table;
     }
@@ -366,11 +366,11 @@ class SqlBuilder extends Component
 
 
     /**
-     * @param $field
-     * @param $condition
+     * @param string $field
+     * @param mixed $condition
      * @return string
      */
-    private function resolveCondition($field, $condition): string
+    private function resolveCondition(string $field, mixed $condition): string
     {
         if (is_string($field)) {
             $this->query->pushParam($condition);
@@ -387,7 +387,7 @@ class SqlBuilder extends Component
      * @param $condition
      * @return array
      */
-    private function _hashMap($condition): array
+    private function _hashMap(array $condition): array
     {
         $_array = [];
         foreach ($condition as $key => $value) {

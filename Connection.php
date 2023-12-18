@@ -14,7 +14,6 @@ namespace Database;
 use Database\Affair\BeginTransaction;
 use Database\Affair\Commit;
 use Database\Affair\Rollback;
-use Database\Mysql\Schema;
 use Exception;
 use Kiri;
 use Kiri\Server\Events\OnWorkerExit;
@@ -56,7 +55,6 @@ class Connection extends Component
     public bool     $enableCache = false;
     public string   $cacheDriver = 'redis';
     public array    $attributes  = [];
-    private ?Schema $_schema     = null;
 
 
     /**
@@ -139,19 +137,6 @@ class Connection extends Component
             throw new Exception($client->errorInfo()[1]);
         }
         return $client;
-    }
-
-
-    /**
-     * @return mixed
-     * @throws
-     */
-    public function getSchema(): Schema
-    {
-        if ($this->_schema === null) {
-            $this->_schema = Kiri::createObject(['class' => Schema::class, 'db' => $this]);
-        }
-        return $this->_schema;
     }
 
 
@@ -283,12 +268,12 @@ class Connection extends Component
 
 
     /**
-     * @param null $sql
+     * @param string $sql
      * @param array $attributes
      * @return Command
      * @throws
      */
-    public function createCommand($sql = null, array $attributes = []): Command
+    public function createCommand(string $sql, array $attributes = []): Command
     {
         return (new Command(['connection' => $this, 'sql' => $sql]))->bindValues($attributes);
     }

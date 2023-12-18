@@ -191,12 +191,11 @@ class Collection extends AbstractCollection
 
 
     /**
-     * @param $value
-     * @param $condition
+     * @param array|ModelInterface $value
+     * @param array $condition
      * @return bool
-     * @throws
      */
-    private function filterCheck($value, $condition): bool
+    private function filterCheck(array|ModelInterface $value, array $condition): bool
     {
         $_value = $value;
         if ($_value instanceof ModelInterface) {
@@ -211,11 +210,11 @@ class Collection extends AbstractCollection
 
 
     /**
-     * @param $key
-     * @param $value
+     * @param string $key
+     * @param mixed $value
      * @return mixed
      */
-    public function exists($key, $value): mixed
+    public function exists(string $key, mixed $value): mixed
     {
         foreach ($this as $item) {
             if ($item->$key === $value) {

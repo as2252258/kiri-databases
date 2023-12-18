@@ -135,11 +135,11 @@ class ActiveQuery extends QueryTrait implements ISqlBuilder
 
 
     /**
-     * @param $data
+     * @param array $data
      * @return ModelInterface|array
      * @throws
      */
-    public function populate($data): ModelInterface|array
+    public function populate(array $data): ModelInterface|array
     {
         $model = $this->modelClass->populates($data);
 
@@ -187,12 +187,12 @@ class ActiveQuery extends QueryTrait implements ISqlBuilder
     }
 
     /**
-     * @param $filed
+     * @param string $filed
      *
      * @return mixed
      * @throws
      */
-    public function value($filed): mixed
+    public function value(string $filed): mixed
     {
         return $this->first()[$filed] ?? NULL;
     }
