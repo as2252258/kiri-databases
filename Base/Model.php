@@ -837,7 +837,6 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
      */
     public function getOldAttribute(string $field): mixed
     {
-        // TODO: Implement getOldAttribute() method.
         return $this->_oldAttributes[$field] ?? null;
     }
 
