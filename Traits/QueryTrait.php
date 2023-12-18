@@ -717,7 +717,7 @@ abstract class QueryTrait extends Component implements ActiveQueryInterface, ISq
             if ($value === null) {
                 continue;
             }
-            $this->where[] = $this->sprintf($key, $value);
+            $this->where[] = is_numeric($key) ? $value : $this->sprintf($key, $value);
         }
         return $this;
     }
