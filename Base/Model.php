@@ -435,8 +435,9 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
      */
     private function insert(): bool|static
     {
-        [$sql, $param] = SqlBuilder::builder(static::query())->insert($this->_attributes);
-        $lastId = $this->getConnection()->createCommand($sql, $param)->save();
+        $query = static::query();
+        $sql    = SqlBuilder::builder($query)->insert($this->_attributes);
+        $lastId = $this->getConnection()->createCommand($sql, $query->params)->save();
         if ($lastId === false) {
             return false;
         }
