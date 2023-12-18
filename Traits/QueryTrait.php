@@ -725,11 +725,11 @@ abstract class QueryTrait extends Component implements ActiveQueryInterface, ISq
 
     /**
      * @param string $column
-     * @param string $value
+     * @param mixed $value
      * @param string $opera
      * @return string
      */
-    private function sprintf(string $column, string $value, string $opera = '='): string
+    private function sprintf(string $column, mixed $value, string $opera = '='): string
     {
         $this->pushParam($value);
         return $column . ' ' . $opera . ' ?';
