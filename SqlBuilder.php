@@ -370,7 +370,7 @@ class SqlBuilder extends Component
      * @param mixed $condition
      * @return string
      */
-    private function resolveCondition(string $field, mixed $condition): string
+    private function resolveCondition(string|int $field, mixed $condition): string
     {
         if (is_string($field)) {
             $this->query->pushParam($condition);
