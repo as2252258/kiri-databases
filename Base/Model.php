@@ -366,7 +366,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
      */
     public function getAttributes(): array
     {
-        return $this->toArray();
+        return $this->_attributes;
     }
 
     /**

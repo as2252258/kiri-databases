@@ -100,6 +100,17 @@ interface ModelInterface
     /**
      * @return array
      */
+    public function getOldAttributes(): array;
+
+    /**
+     * @return array
+     */
+    public function getAttributes(): array;
+
+
+    /**
+     * @return array
+     */
     public function getChanges(): array;
 
 }
