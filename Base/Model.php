@@ -572,6 +572,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
         return $validate;
     }
 
+
     /**
      * @param string $name
      * @return null
@@ -602,6 +603,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
     {
         return true;
     }
+
 
     /**ƒ
      * @return string
