@@ -17,12 +17,12 @@ namespace Database;
 interface ModelInterface
 {
 
-	/**
-	 * @param array|string|int $param
-	 * @param null $db
-	 * @return ModelInterface|null
-	 */
-	public static function findOne(array|string|int $param, $db = NULL): ?static;
+    /**
+     * @param array|string|int $param
+     * @param null $db
+     * @return ModelInterface|null
+     */
+    public static function findOne(array|string|int $param, $db = NULL): ?static;
 
 
     /**
@@ -31,44 +31,75 @@ interface ModelInterface
     public function optimize(): mixed;
 
 
-	/**
-	 * @param int $param
-	 * @param null $db
-	 * @return ModelInterface|null
-	 */
-	public static function primary(int $param, $db = NULL): ?static;
+    /**
+     * @param int $param
+     * @param null $db
+     * @return ModelInterface|null
+     */
+    public static function primary(int $param, $db = NULL): ?static;
 
 
-	/**
-	 * @param array $data
-	 * @return static
-	 */
-	public static function populate(array $data): static;
+    /**
+     * @param array $data
+     * @return static
+     */
+    public static function populate(array $data): static;
 
 
-	/**
-	 * @return ActiveQuery
-	 * return a sql queryBuilder
-	 */
-	public static function query(): ActiveQuery;
+    /**
+     * @return ActiveQuery
+     * return a sql queryBuilder
+     */
+    public static function query(): ActiveQuery;
 
 
-	/**
-	 * @return ?string
-	 */
-	public function getPrimary(): ?string;
+    /**
+     * @return ?string
+     */
+    public function getPrimary(): ?string;
 
 
-	/**
-	 * @return string
-	 */
-	public function getTable(): string;
+    /**
+     * @return string
+     */
+    public function getTable(): string;
 
 
-	/**
-	 * @return Connection
-	 */
-	public function getConnection(): Connection;
+    /**
+     * @return Connection
+     */
+    public function getConnection(): Connection;
 
+
+    /**
+     * @param string $field
+     * @return mixed
+     */
+    public function getAttribute(string $field): mixed;
+
+    /**
+     * @param string $field
+     * @return mixed
+     */
+    public function getOldAttribute(string $field): mixed;
+
+
+    /**
+     * @param string $field
+     * @return mixed
+     */
+    public function setAttribute(string $field): mixed;
+
+    /**
+     * @param string $field
+     * @return mixed
+     */
+    public function setOldAttribute(string $field): mixed;
+
+
+    /**
+     * @return array
+     */
+    public function getChanges(): array;
 
 }

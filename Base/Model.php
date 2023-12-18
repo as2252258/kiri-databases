@@ -511,6 +511,18 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
 
 
     /**
+     * @return array
+     */
+    public function getChanges(): array
+    {
+        if (!$this->isNewExample) {
+            return \array_uintersect_assoc($this->_oldAttributes, $this->_attributes);
+        }
+        return $this->_attributes;
+    }
+
+
+    /**
      * @param $value
      * @return $this
      */
@@ -534,7 +546,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
             return TRUE;
         }
         $validate = $this->resolve($rule);
-        if (!$validate->validation()) {
+        if (!$validate->validation($this)) {
             return \Kiri::getLogger()->failure($validate->getError(), 'mysql');
         } else {
             return TRUE;
@@ -548,11 +560,14 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
      */
     private function resolve($rule): Validator
     {
-        $validate = Validator::instance($this->_attributes, $this);
+        $validate = new Validator();
         foreach ($rule as $val) {
             $field = array_shift($val);
-
-            $validate->make($field, $val);
+            if (is_string($field)) {
+                $validate->make($this, [$field], $val);
+            } else {
+                $validate->make($this, $field, $val);
+            }
         }
         return $validate;
     }
