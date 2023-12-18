@@ -231,11 +231,10 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
 
     /**
      * @param int|string|array $param
-     * @param null $db
      * @return Model|null
      * @throws
      */
-    public static function findOne(int|string|array $param, $db = NULL): ?static
+    public static function findOne(int|string|array $param): ?static
     {
         $model = static::instance();
 
@@ -258,11 +257,10 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
 
     /**
      * @param int $param
-     * @param null $db
      * @return Model|null
      * @throws
      */
-    public static function primary(int $param, $db = NULL): ?static
+    public static function primary(int $param): ?static
     {
         $model = static::instance();
         $query = new ActiveQuery($model);
@@ -523,10 +521,10 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
 
 
     /**
-     * @param $value
+     * @param array $value
      * @return $this
      */
-    public function populates($value): static
+    public function populates(array $value): static
     {
         $this->_attributes    = $value;
         $this->_oldAttributes = $value;
@@ -555,11 +553,11 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
 
 
     /**
-     * @param $rule
+     * @param array $rule
      * @return Validator
      * @throws
      */
-    private function resolve($rule): Validator
+    private function resolve(array $rule): Validator
     {
         $validate = new Validator();
         foreach ($rule as $val) {
@@ -596,11 +594,11 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
 
 
     /**
-     * @param $attribute
+     * @param string $attribute
      * @return bool
      * @throws
      */
-    public function has($attribute): bool
+    public function has(string $attribute): bool
     {
         return true;
     }
@@ -626,11 +624,11 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
 
 
     /**
-     * @param $oldAttributes
-     * @param $changeAttributes
+     * @param array $oldAttributes
+     * @param array $changeAttributes
      * @return bool
      */
-    public function afterSave($oldAttributes, $changeAttributes): bool
+    public function afterSave(array $oldAttributes, array $changeAttributes): bool
     {
         return TRUE;
     }
@@ -656,12 +654,13 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
         return $this;
     }
 
+
     /**
-     * @param $name
-     * @param $value
-     * @throws
+     * @param string $name
+     * @param mixed $value
+     * @return void
      */
-    public function __set($name, $value): void
+    public function __set(string $name, mixed $value): void
     {
         if ($this->hasRelateMethod($name, 'set')) {
             $this->{'set' . ucfirst($name)}($value);
@@ -676,11 +675,10 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
 
 
     /**
-     * @param $name
+     * @param string $name
      * @return mixed
-     * @throws
      */
-    public function __get($name): mixed
+    public function __get(string $name): mixed
     {
         $value = $this->_attributes[$name] ?? null;
         if (!$this->hasRelateMethod($name)) {
@@ -692,12 +690,11 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
 
 
     /**
-     * @param $name
-     * @param null $value
+     * @param string $name
+     * @param mixed|null $value
      * @return mixed
-     * @throws
      */
-    protected function withPropertyOverride($name, $value = null): mixed
+    protected function withPropertyOverride(string $name, mixed $value = null): mixed
     {
         $method = 'get' . ucfirst($name) . 'Attribute';
         if (method_exists($this, $method)) {
@@ -720,10 +717,10 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
 
 
     /**
-     * @param $name
-     * @return mixed|null
+     * @param string $name
+     * @return mixed
      */
-    protected function withRelate($name): mixed
+    protected function withRelate(string $name): mixed
     {
         $response = $this->{'get' . ucfirst($name)}();
         if ($response instanceof \Database\Traits\Relation) {
@@ -737,7 +734,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
      * @param $name
      * @return bool
      */
-    public function __isset($name): bool
+    public function __isset(string $name): bool
     {
         return isset($this->_attributes[$name]);
     }

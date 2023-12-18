@@ -168,12 +168,11 @@ class Model extends Base\Model
 
 
     /**
-     * @param $columns
-     * @param $action
+     * @param array $columns
+     * @param string $action
      * @return array|bool|int|string|null
-     * @throws
      */
-    private function mathematics($columns, $action): int|bool|array|string|null
+    private function mathematics(array $columns, string $action): int|bool|array|string|null
     {
         $condition   = [$this->getPrimary() => $this->getPrimaryValue()];
         $activeQuery = static::query()->where($condition);
@@ -249,10 +248,10 @@ class Model extends Base\Model
 
 
     /**
-     * @param $data
+     * @param array $data
      * @return array
      */
-    private function withs($data): array
+    private function withs(array $data): array
     {
         $with = $this->getWith();
         foreach ($with as $value) {
@@ -268,12 +267,12 @@ class Model extends Base\Model
 
     /**
      * @param ModelInterface|string $modelName
-     * @param $foreignKey
-     * @param $localKey
+     * @param string $foreignKey
+     * @param string $localKey
      * @return string
-     * @throws
+     * @throws Exception
      */
-    private function _hasBase(ModelInterface|string $modelName, $foreignKey, $localKey): string
+    private function _hasBase(ModelInterface|string $modelName, string $foreignKey, string $localKey): string
     {
         if (($value = $this->{$localKey}) === null) {
             throw new Exception("Need join table primary key.");
@@ -291,12 +290,12 @@ class Model extends Base\Model
 
     /**
      * @param ModelInterface|string $modelName
-     * @param $foreignKey
-     * @param $localKey
+     * @param string $foreignKey
+     * @param string $localKey
      * @return HasOne|ActiveQuery
-     * @throws
+     * @throws Exception
      */
-    public function hasOne(ModelInterface|string $modelName, $foreignKey, $localKey): HasOne|ActiveQuery
+    public function hasOne(ModelInterface|string $modelName, string $foreignKey, string $localKey): HasOne|ActiveQuery
     {
         return new HasOne($this->_hasBase($modelName, $foreignKey, $localKey));
     }
@@ -304,12 +303,12 @@ class Model extends Base\Model
 
     /**
      * @param ModelInterface|string $modelName
-     * @param $foreignKey
-     * @param $localKey
+     * @param string $foreignKey
+     * @param string $localKey
      * @return ActiveQuery|HasCount
-     * @throws
+     * @throws Exception
      */
-    public function hasCount(ModelInterface|string $modelName, $foreignKey, $localKey): ActiveQuery|HasCount
+    public function hasCount(ModelInterface|string $modelName, string $foreignKey, string $localKey): ActiveQuery|HasCount
     {
         return new HasCount($this->_hasBase($modelName, $foreignKey, $localKey));
     }
@@ -317,24 +316,24 @@ class Model extends Base\Model
 
     /**
      * @param ModelInterface|string $modelName
-     * @param $foreignKey
-     * @param $localKey
+     * @param string $foreignKey
+     * @param string $localKey
      * @return ActiveQuery|HasMany
-     * @throws
+     * @throws Exception
      */
-    public function hasMany(ModelInterface|string $modelName, $foreignKey, $localKey): ActiveQuery|HasMany
+    public function hasMany(ModelInterface|string $modelName, string $foreignKey, string $localKey): ActiveQuery|HasMany
     {
         return new HasMany($this->_hasBase($modelName, $foreignKey, $localKey));
     }
 
     /**
      * @param ModelInterface|string $modelName
-     * @param $foreignKey
-     * @param $localKey
+     * @param string $foreignKey
+     * @param string $localKey
      * @return ActiveQuery|HasMany
-     * @throws
+     * @throws Exception
      */
-    public function hasIn(ModelInterface|string $modelName, $foreignKey, $localKey): ActiveQuery|HasMany
+    public function hasIn(ModelInterface|string $modelName, string $foreignKey, string $localKey): ActiveQuery|HasMany
     {
         if (($value = $this->{$localKey}) === null) {
             throw new Exception("Need join table primary key.");
