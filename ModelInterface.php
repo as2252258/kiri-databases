@@ -86,15 +86,17 @@ interface ModelInterface
 
     /**
      * @param string $field
+     * @param mixed $value
      * @return mixed
      */
-    public function setAttribute(string $field): mixed;
+    public function setAttribute(string $field, mixed $value): mixed;
 
     /**
      * @param string $field
+     * @param mixed $value
      * @return mixed
      */
-    public function setOldAttribute(string $field): mixed;
+    public function setOldAttribute(string $field, mixed $value): mixed;
 
 
     /**
