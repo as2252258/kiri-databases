@@ -19,10 +19,9 @@ interface ModelInterface
 
     /**
      * @param array|string|int $param
-     * @param null $db
      * @return ModelInterface|null
      */
-    public static function findOne(array|string|int $param, $db = NULL): ?static;
+    public static function findOne(array|string|int $param): ?static;
 
 
     /**
@@ -33,10 +32,9 @@ interface ModelInterface
 
     /**
      * @param int $param
-     * @param null $db
      * @return ModelInterface|null
      */
-    public static function primary(int $param, $db = NULL): ?static;
+    public static function primary(int $param): ?static;
 
 
     /**
