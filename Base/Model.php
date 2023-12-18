@@ -577,7 +577,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
      * @return null
      * @throws
      */
-    public function getAttribute(string $name)
+    public function getAttribute(string $name): mixed
     {
         return $this->_attributes[$name] ?? NULL;
     }
@@ -833,10 +833,10 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
      * @param string $field
      * @return array
      */
-    public function getOldAttribute(string $field): array
+    public function getOldAttribute(string $field): mixed
     {
         // TODO: Implement getOldAttribute() method.
-        return $this->_oldAttributes;
+        return $this->_oldAttributes[$field] ?? null;
     }
 
 }
