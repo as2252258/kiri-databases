@@ -208,6 +208,7 @@ class Command extends Component
         return (bool)$this->_prepare();
     }
 
+
     /**
      * @return int|bool
      */
