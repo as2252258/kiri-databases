@@ -513,7 +513,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
     public function getChanges(): array
     {
         if (!$this->isNewExample) {
-            return \array_uintersect_assoc($this->_oldAttributes, $this->_attributes);
+            return \array_intersect_assoc($this->_oldAttributes, $this->_attributes);
         }
         return $this->_attributes;
     }
