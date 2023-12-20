@@ -500,7 +500,7 @@ abstract class Model extends Component implements ModelInterface, ArrayAccess, \
                 $condition[$key] = $attribute;
                 unset($params[$key]);
             } else {
-                $oldPrams[$key] = $this->_oldAttributes[$attribute];
+                $oldPrams[$key] = $this->_oldAttributes[$key];
             }
         }
         return [$oldPrams, $condition, $params];
